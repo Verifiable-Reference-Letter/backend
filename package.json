@@ -9,6 +9,7 @@
     "prestart": "npm run build",
     "tsc": "tsc",
     "postinstall": "npm run build",
+    "heroku-postbuild": "npm run start",
     "start": "node .",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
