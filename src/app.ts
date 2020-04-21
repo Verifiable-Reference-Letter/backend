@@ -2,7 +2,7 @@ import express from "express";
 import cors from 'cors';
 import path from 'path';
 const app = express();
-const port = 8080; // default port to listen
+const port = process.env.PORT || 8080; // default port to listen
 // Serve static files from the React app
 app.use(express.static(path.join(__dirname, '../build')));
 import { router as testAPIRouter } from './routes/testApi';
@@ -24,7 +24,7 @@ app.use("/testAPI", testAPIRouter);
 
 // start the Express server
 app.listen( port, () => {
-    console.log( `server started at http://localhost:${ port }` );
+    console.log( `server listening on port:${ port }` );
 } );
 
 module.exports = app;
