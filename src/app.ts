@@ -3,7 +3,8 @@ import cors from 'cors';
 import path from 'path';
 const app = express();
 const port = process.env.PORT || 8080; // default port to listen
-console.log("Process env: " + process.env);
+console.log("Process env: ");
+console.dir(process.env);
 console.log("Dynamic port: " + process.env.PORT);
 console.log("Port chosen: " + port);
 // Serve static files from the React app

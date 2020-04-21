@@ -5,10 +5,10 @@
   "main": "dist/app.js",
   "scripts": {
     "lint": "tslint -c tslint.json -p tsconfig.json --fix",
-    "build": "npm run build-ts && npm run lint",
+    "local-build": "npm run build-ts && npm run lint",
     "build-ts": "tsc",
     "postinstall": "npm run build-ts",
-    "heroku-postbuild": "npm run start",
+    "heroku-postbuild": "npm run build-ts",
     "start": "node dist/app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
