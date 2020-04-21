@@ -8,7 +8,7 @@
     "build": "npm run tsc && npm run lint",
     "prestart": "npm run build",
     "tsc": "tsc",
-    "heroku-postbuild": "npm run build",
+    "postinstall": "npm run build",
     "start": "node .",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
