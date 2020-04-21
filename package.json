@@ -9,7 +9,7 @@
     "build-ts": "tsc",
     "postinstall": "npm run build-ts",
     "heroku-postbuild": "npm run start",
-    "start": "node .",
+    "start": "node dist/app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
