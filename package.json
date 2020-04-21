@@ -4,8 +4,8 @@
   "private": true,
   "main": "dist/app.js",
   "scripts": {
-    "prebuild": "tslint -c tslint.json -p tsconfig.json --fix",
-    "build": "tsc",
+    "lint": "tslint -c tslint.json -p tsconfig.json --fix",
+    "build": "tsc && npm run lint",
     "prestart": "npm run build",
     "heroku-postbuild": "npm run build",
     "start": "node .",
