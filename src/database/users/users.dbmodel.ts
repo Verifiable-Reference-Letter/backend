@@ -32,6 +32,7 @@ export class User {
             user_id: this.userId,
             name: this.username,
             public_key: this.publicAddress,
+            creation_timestamp: this.creationTimestamp
         };
     }
 
