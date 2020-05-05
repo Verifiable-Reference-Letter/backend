@@ -7,9 +7,8 @@ const router = express.Router();
 const sentLettersDbService: SentLetterDbService = new SentLetterDbService();
 
 router.get('/:userId', async (req, res, next) => {
-    const sentLetterModel: SentLetter = await sentLettersDbService.selectOneRowById(req.params.userId);
-    const jsonModel: string = JSON.stringify(sentLetterModel);
-    res.send(jsonModel);
+    const sentLetterModels: SentLetter[] = await sentLettersDbService.selectAllSentLettersByRecipientId(req.params.userId);
+    res.send(sentLetterModels);
 });
 
 export { router };

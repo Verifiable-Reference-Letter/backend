@@ -8,14 +8,12 @@ const usersDbService: UsersDbService = new UsersDbService();
 // Get all users
 router.get('/', async (req, res, next) => {
     const userModels: User[] = await usersDbService.selectAll();
-    const jsonUserModels: string = JSON.stringify(userModels.map((value) => value.convertToClientModel()));
-    res.send(jsonUserModels);
+    res.send(userModels);
 });
 
 router.get('/:userId', async (req, res, next) => {
-    const userModel: User = await usersDbService.selectOneRowById(req.params.userId);
-    const jsonUserModel: string = JSON.stringify(userModel.convertToClientModel());
-    res.send(jsonUserModel);
+    const userModel: User = await usersDbService.selectOneRowByPrimaryId(req.params.userId);
+    res.send(userModel);
 });
 
 export { router }

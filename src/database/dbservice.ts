@@ -3,7 +3,7 @@ import { Client } from 'pg';
 export abstract class DatabaseService<DatabaseModel> {
 
     protected client: Client;
-    private clientCredentials = {};
+    protected clientCredentials = {};
     private dbModels: DatabaseModel[] = [];
 
     constructor() {
@@ -13,16 +13,6 @@ export abstract class DatabaseService<DatabaseModel> {
             ssl: true,
         }
     }
-
-    // async disconnectPgClient() {
-    //     try {
-    //         await this.client.end();
-    //     } catch (err) {
-    //         console.log(err.stack);
-    //     } finally {
-    //         console.log("...pg client has been disconnected");
-    //     }
-    // }
 
     async selectAll(): Promise<DatabaseModel[]> {
         this.dbModels = [];
@@ -50,7 +40,7 @@ export abstract class DatabaseService<DatabaseModel> {
     }
 
 
-    async selectOneRowById(id: string): Promise<DatabaseModel> {
+    async selectOneRowByPrimaryId(id: string): Promise<DatabaseModel> {
         const values = [id];
         this.client = new Client(this.clientCredentials);
         this.client.connect();
