@@ -1,5 +1,5 @@
 import { DatabaseService } from "../dbservice";
-import { User } from "./users.dbmodel";
+import { User } from "./User.dbmodel";
 
 const userTableName: string = "users";
 
@@ -13,6 +13,9 @@ export class UsersDbService extends DatabaseService<User> {
     private initializePreparedQueries(): void {
         this.selectAllQuery = {
             text: "SELECT * from " + userTableName
+        }
+        this.selectOneRowByIdQuery = {
+            text: 'SELECT * from ' + userTableName + ' WHERE user_id = $1'
         }
     }
 

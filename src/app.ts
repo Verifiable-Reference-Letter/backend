@@ -9,7 +9,8 @@ console.log("Dynamic port: " + process.env.PORT);
 console.log("Port chosen: " + port);
 // Serve static files from the React app
 import { router as testAPIRouter } from './routes/testApi';
-import { router as usersRouter } from './controllers/users.controllers';
+import { router as usersRouter } from './controllers/Users.controllers';
+import { router as sentLettersRouter } from './controllers/SentLetter.controllers';
 
 app.use(express.static(path.join(__dirname, '../build')));
 app.use(cors());
@@ -27,6 +28,7 @@ app.get( "/bye", (req, res) => {
 
 app.use("/testAPI", testAPIRouter);
 app.use("/users", usersRouter);
+app.use("/sentLetters", sentLettersRouter);
 
 // start the Express server
 app.listen( port, () => {

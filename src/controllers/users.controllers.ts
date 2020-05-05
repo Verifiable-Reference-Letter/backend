@@ -1,6 +1,6 @@
 import express from "express";
-import { UsersDbService } from "../database/users/users.dbservice";
-import { User } from "../database/users/users.dbmodel";
+import { UsersDbService } from "../database/users/User.dbservice";
+import { User } from "../database/users/User.dbmodel";
 const router = express.Router();
 
 const usersDbService: UsersDbService = new UsersDbService();
@@ -12,4 +12,10 @@ router.get('/', async (req, res, next) => {
     res.send(jsonUserModels);
 });
 
-export { router };
+router.get('/:userId', async (req, res, next) => {
+    const userModel: User = await usersDbService.selectOneRowById(req.params.userId);
+    const jsonUserModel: string = JSON.stringify(userModel.convertToClientModel());
+    res.send(jsonUserModel);
+});
+
+export { router }

@@ -3,18 +3,30 @@ import { Client } from 'pg';
 export abstract class DatabaseService<DatabaseModel> {
 
     protected client: Client;
+    private clientCredentials = {};
     private dbModels: DatabaseModel[] = [];
 
     constructor() {
         // Temporary for testing until we implement running in development and production modes
-        this.client = new Client({
+        this.clientCredentials = {
             connectionString: process.env.DATABASE_URL || "postgres://plrnqvkoieossi:6e67d9a93ad03361124f172fa865b56e16966f7edd112dc0d4be24e303399d00@ec2-52-86-73-86.compute-1.amazonaws.com:5432/d4ur44i35a17si",
             ssl: true,
-        });
+        }
     }
+
+    // async disconnectPgClient() {
+    //     try {
+    //         await this.client.end();
+    //     } catch (err) {
+    //         console.log(err.stack);
+    //     } finally {
+    //         console.log("...pg client has been disconnected");
+    //     }
+    // }
 
     async selectAll(): Promise<DatabaseModel[]> {
         this.dbModels = [];
+        this.client = new Client(this.clientCredentials);
         this.client.connect();
         try {
             const res = await this.client.query(this.selectAllQuery);
@@ -38,26 +50,30 @@ export abstract class DatabaseService<DatabaseModel> {
     }
 
 
-    // protected selectOneRowById(id: string): DatabaseModel {
-    //     var dbModel: DatabaseModel;
+    async selectOneRowById(id: string): Promise<DatabaseModel> {
+        const values = [id];
+        this.client = new Client(this.clientCredentials);
+        this.client.connect();
+        try {
+            const res = await this.client.query(this.selectOneRowByIdQuery, values);
+            let jsonRow;
+            jsonRow = JSON.stringify(res.rows[0]);
+            console.log(jsonRow);
+            const dbModel: DatabaseModel = this.dbRowToDbModel(res.rows[0]);
 
-    //     const text = 'SELECT * from users WHERE user_id = $1';
-    //     const values = [id];
-    //     this.client.query(text, values, (err, res) => {
-    //         if (err) {
-    //             console.log(err.stack);
-    //         }
-    //         else {
-    //             dbModel = this.dbRowToDbModel(res.rows[0]);
-    //         }
-    //     });
-    //     return dbModel;
-    // }
+            console.dir(dbModel);
+            return dbModel;
+        } catch (err) {
+            console.log(err.stack);
+        } finally {
+            this.client.end().then(() => console.log("client has disconnected"));
+        }
+    }
 
     protected abstract dbRowToDbModel(dbRow: any): DatabaseModel;
 
     protected selectAllQuery: any;
 
-    // protected selectOneRowByIdQuery: Object;
+    protected selectOneRowByIdQuery: any;
 
 }
