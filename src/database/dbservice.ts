@@ -16,10 +16,10 @@ export abstract class DatabaseService<DatabaseModel> {
 
     async selectAll(): Promise<DatabaseModel[]> {
         this.dbModels = [];
-        this.client = new Client(this.clientCredentials);
-        this.client.connect();
+        const client = new Client(this.clientCredentials);
+        client.connect();
         try {
-            const res = await this.client.query(this.selectAllQuery);
+            const res = await client.query(this.selectAllQuery);
             let jsonRow;
                 for (const row of res.rows) {
                     jsonRow = JSON.stringify(row);
@@ -35,17 +35,17 @@ export abstract class DatabaseService<DatabaseModel> {
         } catch (err) {
             console.log(err.stack);
         } finally {
-            this.client.end().then(() => console.log("client has disconnected"));
+            client.end().then(() => console.log("client has disconnected"));
         }
     }
 
 
     async selectOneRowByPrimaryId(id: string): Promise<DatabaseModel> {
         const values = [id];
-        this.client = new Client(this.clientCredentials);
-        this.client.connect();
+        const client = new Client(this.clientCredentials);
+        client.connect();
         try {
-            const res = await this.client.query(this.selectOneRowByIdQuery, values);
+            const res = await client.query(this.selectOneRowByIdQuery, values);
             let jsonRow;
             jsonRow = JSON.stringify(res.rows[0]);
             console.log(jsonRow);
@@ -56,7 +56,7 @@ export abstract class DatabaseService<DatabaseModel> {
         } catch (err) {
             console.log(err.stack);
         } finally {
-            this.client.end().then(() => console.log("client has disconnected"));
+            client.end().then(() => console.log("client has disconnected"));
         }
     }
 

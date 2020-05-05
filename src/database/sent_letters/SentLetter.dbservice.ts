@@ -23,11 +23,11 @@ export class SentLetterDbService extends DatabaseService<SentLetter> {
 
     async selectAllSentLettersByRecipientId(id: string): Promise<SentLetter[]> {
         const dbModels: SentLetter[] = [];
-        this.client = new Client(this.clientCredentials);
-        this.client.connect();
+        const client = new Client(this.clientCredentials);
+        client.connect();
         const values = [id];
         try {
-            const res = await this.client.query(this.selectAllSentLettersByRecipientQuery, values);
+            const res = await client.query(this.selectAllSentLettersByRecipientQuery, values);
             let jsonRow;
                 for (const row of res.rows) {
                     jsonRow = JSON.stringify(row);
@@ -43,7 +43,7 @@ export class SentLetterDbService extends DatabaseService<SentLetter> {
         } catch (err) {
             console.log(err.stack);
         } finally {
-            this.client.end().then(() => console.log("client has disconnected"));
+            client.end().then(() => console.log("client has disconnected"));
         }
     }
 

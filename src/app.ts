@@ -10,7 +10,7 @@ console.log("Port chosen: " + port);
 // Serve static files from the React app
 import { router as testAPIRouter } from './routes/testApi';
 import { router as usersRouter } from './controllers/Users.controllers';
-import { router as sentLettersRouter } from './controllers/SentLetter.controllers';
+import { router as lettersRouter } from './controllers/Letters.controllers';
 
 app.use(express.static(path.join(__dirname, '../build')));
 app.use(cors());
@@ -28,7 +28,7 @@ app.get( "/bye", (req, res) => {
 
 app.use("/testAPI", testAPIRouter);
 app.use("/users", usersRouter);
-app.use("/sentLetters", sentLettersRouter);
+app.use("/letters", lettersRouter);
 
 // start the Express server
 app.listen( port, () => {
