@@ -60,6 +60,31 @@ export abstract class DatabaseService<DatabaseModel> {
         }
     }
 
+    protected async runParameterizedQueryWithValuesArray(queryText: any, values: any[]): Promise<DatabaseModel[]> {
+        const dbModels: DatabaseModel[] = [];
+        const client = new Client(this.clientCredentials);
+        client.connect();
+        try {
+            const res = await client.query(queryText, values);
+            let jsonRow;
+                for (const row of res.rows) {
+                    jsonRow = JSON.stringify(row);
+                    console.log(jsonRow);
+                    dbModels.push(this.dbRowToDbModel(row));
+                }
+                dbModels.filter((value: any) => Object.keys(value).length !== 0);
+                dbModels.map((value, index) => {
+                console.log("Db Model " + index + ": ");
+                console.dir(value);
+                });
+            return dbModels;
+        } catch (err) {
+            console.log(err.stack);
+        } finally {
+            client.end().then(() => console.log("client has disconnected"));
+        }
+    }
+
     protected abstract dbRowToDbModel(dbRow: any): DatabaseModel;
 
     protected selectAllQuery: any;

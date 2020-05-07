@@ -5,18 +5,18 @@ export class LetterDetails {
     letterId: string;
     letterWriter: User;
     letterRequestor: User;
-    letterRecipient: User;
+    letterRecipients: User[];
 
     constructor(
         letterId: string,
         letterWriter: User,
         letterRequestor: User,
-        letterRecipient: User
+        letterRecipients: User[]
     ) {
         this.letterId = letterId;
         this.letterWriter = letterWriter;
         this.letterRequestor = letterRequestor;
-        this.letterRecipient = letterRecipient;
+        this.letterRecipients = letterRecipients;
     }
 
 }
