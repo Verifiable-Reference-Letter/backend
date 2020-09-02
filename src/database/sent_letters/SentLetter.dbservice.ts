@@ -22,29 +22,17 @@ export class SentLetterDbService extends DatabaseService<SentLetter> {
     }
 
     async selectAllSentLettersByRecipientId(id: string): Promise<SentLetter[]> {
-        const dbModels: SentLetter[] = [];
-        const client = new Client(this.clientCredentials);
-        client.connect();
         const values = [id];
-        try {
-            const res = await client.query(this.selectAllSentLettersByRecipientQuery, values);
-            let jsonRow;
-                for (const row of res.rows) {
-                    jsonRow = JSON.stringify(row);
-                    console.log(jsonRow);
-                    dbModels.push(this.dbRowToDbModel(row));
-                }
-                dbModels.filter((value: any) => Object.keys(value).length !== 0);
-                dbModels.map((value, index) => {
-                console.log("Db Model " + index + ": ");
-                console.dir(value);
-                });
-            return dbModels;
-        } catch (err) {
-            console.log(err.stack);
-        } finally {
-            client.end().then(() => console.log("client has disconnected"));
-        }
+        return super.runParameterizedQueryWithValuesArray(this.selectAllSentLettersByRecipientQuery, values);
+    }
+
+    async selectAllSentLettersByLetterId(id: string): Promise<SentLetter[]> {
+        const values = [id];
+        return super.runParameterizedQueryWithValuesArray(this.selectAllSentLettersByLetterIdQuery, values);
+    }
+
+    private selectAllSentLettersByLetterIdQuery = {
+        text: 'SELECT * from ' + sentLetterTableName + ' WHERE letter_id = $1'
     }
 
     protected dbRowToDbModel(dbRow: any): SentLetter {
