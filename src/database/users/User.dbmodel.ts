@@ -1,27 +1,28 @@
 export class User {
 
-    userId: string;
-    username: string;
     publicAddress: string;
+    name: string;
     creationTimestamp: Date;
+    nonce: Number;
 
     constructor(
-        userId: string,
-        username: string,
         publicAddress: string,
-        creationTimestamp: Date) {
-            this.userId = userId;
-            this.username = username;
+        name: string,
+        creationTimestamp: Date,
+        nonce: Number
+    ) {
             this.publicAddress = publicAddress;
+            this.name = name;
             this.creationTimestamp = creationTimestamp;
+            this.nonce = nonce;
     }
 
     static dbRowToDbModel(dbRow: any) {
         const newUser = new User(
-            dbRow.user_id,
-            dbRow.name,
             dbRow.public_address,
-            dbRow.creation_timestamp
+            dbRow.name,
+            dbRow.creation_timestamp,
+            dbRow.nonce
         );
         console.dir(newUser);
         return newUser;
@@ -29,10 +30,10 @@ export class User {
 
     convertToClientModel() {
         return {
-            user_id: this.userId,
-            name: this.username,
-            public_key: this.publicAddress,
-            creation_timestamp: this.creationTimestamp
+            public_address: this.publicAddress,
+            name: this.name,
+            creation_timestamp: this.creationTimestamp,
+            nonce: this.nonce
         };
     }
 

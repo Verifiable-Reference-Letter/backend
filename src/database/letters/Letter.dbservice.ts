@@ -13,9 +13,9 @@ export class LetterDbService extends DatabaseService<Letter> {
         super();
     }
 
-    async selectAllLettersByUserIdAndRole(id: string, userRole: UserRole): Promise<Letter[]> {
+    async selectAllLettersByAddressAndRole(address: string, userRole: UserRole): Promise<Letter[]> {
         const queryText = this.getQueryTextByUserRole(userRole);
-        const values = [id];
+        const values = [address];
         return super.runParameterizedQueryWithValuesArray(queryText, values);
     }
 
@@ -32,7 +32,7 @@ export class LetterDbService extends DatabaseService<Letter> {
     }
 
     private selectAllLettersByRecipientIdQuery = {
-        text: 'select letter_id, letter_writer_id, letter_requestor from ' + letterTableName + ' natural left join ' + sentLetterTableName + ' where user_id = $1;'
+        text: 'select letter_id, letter_writer, letter_requestor from ' + letterTableName + ' natural left join ' + sentLetterTableName + ' where public_address = $1;'
     }
 
     private selectAllLettersByRequestorIdQuery = {
@@ -40,7 +40,7 @@ export class LetterDbService extends DatabaseService<Letter> {
     }
 
     private selectAllLettersByWriterIdQuery = {
-        text: 'select * from ' + letterTableName + ' where letter_writer_id = $1;'
+        text: 'select * from ' + letterTableName + ' where letter_writer = $1;'
     }
 
     protected dbRowToDbModel(dbRow: any): Letter {
