@@ -15,13 +15,13 @@ router.get('/', async (req, res, next) => {
 router.post('/create', async (req, res, next) => {
     console.log("Creating user");
     const userModel: User = await usersDbService.createUser(req.body.public_address, req.body.name)
-    res.send(userModel);
+    res.send([userModel]);
 });
 
 router.get('/:publicAddress', async (req, res, next) => {
     console.log("Got into users GET for single address");
     const userModel: User = await usersDbService.selectOneRowByPrimaryId(req.params.publicAddress);
-    res.send(userModel);
+    res.send([userModel]);
 });
 
 export { router }
