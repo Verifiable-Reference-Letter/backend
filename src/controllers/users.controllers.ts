@@ -11,9 +11,13 @@ router.get('/', async (req, res, next) => {
     res.send(userModels);
 });
 
-router.get('/:userId', async (req, res, next) => {
-    const userModel: User = await usersDbService.selectOneRowByPrimaryId(req.params.userId);
+router.get('/:publicAddress', async (req, res, next) => {
+    const userModel: User = await usersDbService.selectOneRowByPrimaryId(req.params.publicAddress);
     res.send(userModel);
+});
+
+router.post('/create', async (req, res, next) => {
+    const userModel: User = await usersDbService.createUser(req.body.public_address, req.body.name)
 });
 
 export { router }

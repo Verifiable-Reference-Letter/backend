@@ -1,18 +1,18 @@
 export class User {
 
     publicAddress: string;
-    username: string;
+    name: string;
     creationTimestamp: Date;
     nonce: Number;
 
     constructor(
         publicAddress: string,
-        username: string,
+        name: string,
         creationTimestamp: Date,
         nonce: Number
     ) {
             this.publicAddress = publicAddress;
-            this.username = username;
+            this.name = name;
             this.creationTimestamp = creationTimestamp;
             this.nonce = nonce;
     }
@@ -31,7 +31,7 @@ export class User {
     convertToClientModel() {
         return {
             public_address: this.publicAddress,
-            name: this.username,
+            name: this.name,
             creation_timestamp: this.creationTimestamp,
             nonce: this.nonce
         };
