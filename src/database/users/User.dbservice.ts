@@ -15,7 +15,7 @@ export class UsersDbService extends DatabaseService<User> {
             text: "SELECT * from " + userTableName
         }
         this.selectOneRowByIdQuery = {
-            text: 'SELECT * from ' + userTableName + ' WHERE user_id = $1'
+            text: 'SELECT * from ' + userTableName + ' WHERE public_address = $1'
         }
     }
 

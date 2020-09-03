@@ -17,11 +17,11 @@ export class SentLetterDbService extends DatabaseService<SentLetter> {
             text: "SELECT * from " + sentLetterTableName
         }
         this.selectOneRowByIdQuery = {
-            text: 'SELECT * from ' + sentLetterTableName + ' WHERE user_id = $1'
+            text: 'SELECT * from ' + sentLetterTableName + ' WHERE public_address = $1'
         }
     }
 
-    async selectAllSentLettersByRecipientId(id: string): Promise<SentLetter[]> {
+    async selectAllSentLettersByRecipientAddress(id: string): Promise<SentLetter[]> {
         const values = [id];
         return super.runParameterizedQueryWithValuesArray(this.selectAllSentLettersByRecipientQuery, values);
     }
@@ -40,7 +40,7 @@ export class SentLetterDbService extends DatabaseService<SentLetter> {
     }
 
     private selectAllSentLettersByRecipientQuery = {
-        text: 'SELECT * from ' + sentLetterTableName + ' WHERE user_id = $1'
+        text: 'SELECT * from ' + sentLetterTableName + ' WHERE public_address = $1'
     }
 
 }

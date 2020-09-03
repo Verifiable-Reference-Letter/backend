@@ -20,19 +20,19 @@ export class LetterModule {
     }
 
     // Change to use altered ReceivedLetterDetails model that excludes recipients list
-    async selectAllSentLetterDetailsByRecipientId(userId: string): Promise<LetterDetails[]> {
-        const sentLetterModels: Letter[] = await this.letterDbService.selectAllLettersByUserIdAndRole(userId, UserRole.Recipient);
-        return this.transformLetterRowToLetterDetails(sentLetterModels, userId, UserRole.Recipient);
+    async selectAllSentLetterDetailsByRecipientAddress(address: string): Promise<LetterDetails[]> {
+        const sentLetterModels: Letter[] = await this.letterDbService.selectAllLettersByAddressAndRole(address, UserRole.Recipient);
+        return this.transformLetterRowToLetterDetails(sentLetterModels, address, UserRole.Recipient);
     }
 
-    async selectAllSentLetterDetailsByWriterId(userId: string): Promise<LetterDetails[]> {
-        const sentLetterModels: Letter[] = await this.letterDbService.selectAllLettersByUserIdAndRole(userId, UserRole.Writer);
-        return this.transformLetterRowToLetterDetails(sentLetterModels, userId, UserRole.Writer);
+    async selectAllSentLetterDetailsByWriterAddress(address: string): Promise<LetterDetails[]> {
+        const sentLetterModels: Letter[] = await this.letterDbService.selectAllLettersByAddressAndRole(address, UserRole.Writer);
+        return this.transformLetterRowToLetterDetails(sentLetterModels, address, UserRole.Writer);
     }
 
-    async selectAllSentLetterDetailsByRequestorId(userId: string): Promise<LetterDetails[]> {
-        const sentLetterModels: Letter[] = await this.letterDbService.selectAllLettersByUserIdAndRole(userId, UserRole.Requestor);
-        return this.transformLetterRowToLetterDetails(sentLetterModels, userId, UserRole.Requestor);
+    async selectAllSentLetterDetailsByRequestorAddress(address: string): Promise<LetterDetails[]> {
+        const sentLetterModels: Letter[] = await this.letterDbService.selectAllLettersByAddressAndRole(address, UserRole.Requestor);
+        return this.transformLetterRowToLetterDetails(sentLetterModels, address, UserRole.Requestor);
     }
 
     private async transformLetterRowToLetterDetails(
