@@ -1,6 +1,7 @@
 import express from "express";
 import cors from 'cors';
 import path from 'path';
+import bodyParser from 'body-parser';
 const app = express();
 const port = process.env.PORT || 8080; // default port to listen
 console.log("Process env: ");
@@ -12,6 +13,7 @@ import { router as testAPIRouter } from './routes/testApi';
 import { router as usersRouter } from './controllers/Users.controllers';
 import { router as lettersRouter } from './controllers/Letters.controllers';
 
+app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, '../build')));
 app.use(cors());
 

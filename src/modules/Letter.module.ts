@@ -42,8 +42,8 @@ export class LetterModule {
     ): Promise<LetterDetails[]> {
         const letterDetailsModels = letterModels.map(async (letter) => {
             try {
-                const letterWriter: User = await this.usersDbService.selectOneRowByPrimaryId(letter.letterWriterId);
-                const letterRequestor: User = await this.usersDbService.selectOneRowByPrimaryId(letter.letterRequestorId);
+                const letterWriter: User = await this.usersDbService.selectOneRowByPrimaryId(letter.letterWriter);
+                const letterRequestor: User = await this.usersDbService.selectOneRowByPrimaryId(letter.letterRequestor);
 
                 const sentLetters: SentLetter[] = await this.sentLetterDbService.selectAllSentLettersByLetterId(letter.letterId);
                 const letterRecipients: User[] = await this.transformSentLettersToLetterRecipients(sentLetters);
@@ -68,7 +68,7 @@ export class LetterModule {
 
     private async transformSentLettersToLetterRecipients(sentLetters: SentLetter[]): Promise<User[]> {
         const letterRecipientsPromise: Promise<User[]> = Promise.all(sentLetters.map(async (sentLetter) => {
-            return await this.usersDbService.selectOneRowByPrimaryId(sentLetter.recipientId);
+            return await this.usersDbService.selectOneRowByPrimaryId(sentLetter.recipientAddress);
         }));
         return letterRecipientsPromise;
     }

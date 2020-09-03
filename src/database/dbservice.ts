@@ -23,6 +23,7 @@ export abstract class DatabaseService<DatabaseModel> {
             let jsonRow;
                 for (const row of res.rows) {
                     jsonRow = JSON.stringify(row);
+                    console.log("got to json row");
                     console.log(jsonRow);
                     this.dbModels.push(this.dbRowToDbModel(row));
                 }
