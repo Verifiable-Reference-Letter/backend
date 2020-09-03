@@ -10,7 +10,7 @@ console.log("Dynamic port: " + process.env.PORT);
 console.log("Port chosen: " + port);
 // Serve static files from the React app
 import { router as testAPIRouter } from './routes/testApi';
-import { router as usersRouter } from './controllers/Users.controllers';
+import { router as usersRouter } from './controllers/users.controllers';
 import { router as lettersRouter } from './controllers/Letters.controllers';
 
 app.use(bodyParser.json());
