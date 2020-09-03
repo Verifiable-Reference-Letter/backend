@@ -13,9 +13,9 @@ router.get('/', async (req, res, next) => {
 });
 
 router.post('/create', async (req, res, next) => {
-    // const userModel: User = await usersDbService.createUser(req.body.public_address, req.body.name)
-    // res.send(userModel);
-    console.log("word")
+    console.log("Creating user");
+    const userModel: User = await usersDbService.createUser(req.body.public_address, req.body.name)
+    res.send(userModel);
 });
 
 router.get('/:publicAddress', async (req, res, next) => {

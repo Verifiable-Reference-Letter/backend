@@ -1,7 +1,5 @@
 import { DatabaseService } from "../dbservice";
 import { SentLetter } from "./SentLetter.dbmodel";
-import { Client } from "pg";
-
 
 const sentLetterTableName = "sent_letters";
 
