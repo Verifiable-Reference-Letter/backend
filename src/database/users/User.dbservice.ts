@@ -1,5 +1,6 @@
 import { DatabaseService } from "../dbservice";
 import { User } from "./User.dbmodel";
+import { uuid } from "uuid";
 
 const userTableName: string = "users";
 
@@ -23,14 +24,18 @@ export class UsersDbService extends DatabaseService<User> {
         return User.dbRowToDbModel(dbRow);
     }
 
-    async createUser(address: string, name: string): Promise<User> {
-        const values = [address, name];
+    async createUser(address: string, name: string): Promise<User> | null {
+        let nonce = uuid.v4();
+        const values = [address, name, nonce];
         let users: User[] = await super.runParameterizedQueryWithValuesArray(this.createUserQuery, values);
+        if (users == []) {
+            return null;
+        }
         return users[0];
     }
 
     private createUserQuery = {
-        text: 'insert into users values ($1, $2, current_timestamp, 0) returning *;'
+        text: 'insert into users values ($1, $2, current_timestamp, $3) returning *;'
     }
 
 }

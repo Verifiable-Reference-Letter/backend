@@ -12,9 +12,14 @@ router.get('/', async (req, res, next) => {
     res.send(userModels);
 });
 
-router.post('/create', async (req, res, next) => {
+router.post('/', async (req, res, next) => {
     console.log("Creating user");
-    const userModel: User = await usersDbService.createUser(req.body.public_address, req.body.name)
+    // Check if the user is already created
+    let userModel: User = await usersDbService.selectOneRowByPrimaryId(req.params.publicAddress);
+    if (userModel == null) {
+        // If not, create the user and send back to frontend
+        userModel = await usersDbService.createUser(req.body.publicAddress, req.body.inputName);
+    }
     res.send([userModel]);
 });
 

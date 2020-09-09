@@ -14,24 +14,24 @@ export abstract class DatabaseService<DatabaseModel> {
         }
     }
 
-    async selectAll(): Promise<DatabaseModel[]> {
+    async selectAll(): Promise<DatabaseModel[]>{
         this.dbModels = [];
         const client = new Client(this.clientCredentials);
         client.connect();
         try {
             const res = await client.query(this.selectAllQuery);
             let jsonRow;
-                for (const row of res.rows) {
-                    jsonRow = JSON.stringify(row);
-                    console.log("got to json row");
-                    console.log(jsonRow);
-                    this.dbModels.push(this.dbRowToDbModel(row));
-                }
-                this.dbModels.filter((value: any) => Object.keys(value).length !== 0);
-                this.dbModels.map((value, index) => {
+            for (const row of res.rows) {
+                jsonRow = JSON.stringify(row);
+                console.log("got to json row");
+                console.log(jsonRow);
+                this.dbModels.push(this.dbRowToDbModel(row));
+            }
+            this.dbModels.filter((value: any) => Object.keys(value).length !== 0);
+            this.dbModels.map((value, index) => {
                 console.log("Db Model " + index + ": ");
                 console.dir(value);
-                });
+            });
             return this.dbModels;
         } catch (err) {
             console.log(err.stack);
@@ -41,12 +41,15 @@ export abstract class DatabaseService<DatabaseModel> {
     }
 
 
-    async selectOneRowByPrimaryId(id: string): Promise<DatabaseModel> {
+    async selectOneRowByPrimaryId(id: string): Promise<DatabaseModel> | null {
         const values = [id];
         const client = new Client(this.clientCredentials);
         client.connect();
         try {
             const res = await client.query(this.selectOneRowByIdQuery, values);
+            if (res.rows.length === 0) {
+                return null;
+            }
             let jsonRow;
             jsonRow = JSON.stringify(res.rows[0]);
             console.log(jsonRow);
