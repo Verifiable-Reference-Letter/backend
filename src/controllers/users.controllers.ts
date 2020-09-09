@@ -14,6 +14,7 @@ router.get('/', async (req, res, next) => {
 
 router.post('/', async (req, res, next) => {
     console.log("Creating user");
+    console.log(req.params.publicAddress);
     // Check if the user is already created
     let userModel: User = await usersDbService.selectOneRowByPrimaryId(req.params.publicAddress);
     if (userModel == null) {

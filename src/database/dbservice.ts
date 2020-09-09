@@ -64,7 +64,7 @@ export abstract class DatabaseService<DatabaseModel> {
         }
     }
 
-    protected async runParameterizedQueryWithValuesArray(queryText: any, values: any[]): Promise<DatabaseModel[]> {
+    protected async runParameterizedQueryWithValuesArray(queryText: any, values: any[]): Promise<DatabaseModel[]>{
         const dbModels: DatabaseModel[] = [];
         const client = new Client(this.clientCredentials);
         client.connect();
