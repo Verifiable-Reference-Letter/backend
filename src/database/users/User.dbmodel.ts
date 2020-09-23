@@ -3,13 +3,13 @@ export class User {
     publicAddress: string;
     name: string;
     creationTimestamp: Date;
-    nonce: Number;
+    nonce: string;
 
     constructor(
         publicAddress: string,
         name: string,
         creationTimestamp: Date,
-        nonce: Number
+        nonce: string
     ) {
             this.publicAddress = publicAddress;
             this.name = name;
@@ -27,14 +27,4 @@ export class User {
         console.dir(newUser);
         return newUser;
     }
-
-    convertToClientModel() {
-        return {
-            public_address: this.publicAddress,
-            name: this.name,
-            creation_timestamp: this.creationTimestamp,
-            nonce: this.nonce
-        };
-    }
-
 }
