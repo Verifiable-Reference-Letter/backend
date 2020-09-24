@@ -9,7 +9,7 @@ const authModule: AuthModule = new AuthModule();
 // TODO: change this to be hidden
 const jwtKey: string = "my private key";
 
-router.get('/', async (req, res, next) => {
+router.post('/', async (req, res, next) => {
     console.log("Getting all users");
     // TODO: check with frontend what is being passed 
     const publicAddress: string = req.body.publicAddress;
