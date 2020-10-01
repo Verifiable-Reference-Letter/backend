@@ -19,7 +19,8 @@ exports.router = router;
 const emailsModule = new Emails_module_1.EmailsModule();
 router.get('/sendEmail', (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     console.log('sending email');
+    // console.log({ key: process.env.SENDGRID_API_KEY });
     yield emailsModule.sendMail();
-    res.send(Emails_module_1.EmailsModule);
+    res.send("hello");
 }));
 //# sourceMappingURL=Emails.controllers.js.map
