@@ -17,7 +17,7 @@ router.post('/', async (req, res, next) => {
     const authResult = await authModule.authorizeUser(req.body.signature, publicAddress);
 
     let jwtToken;
-    if (authResult === false /*true*/) { // TODO: currently verification is broken
+    if (authResult === true) { // TODO: currently verification is broken
         console.log("verified success");
         jwtToken = jwt.sign({ publicAddress }, jwtKey, {
             algorithm: "HS256",
