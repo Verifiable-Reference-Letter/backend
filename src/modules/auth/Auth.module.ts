@@ -1,6 +1,7 @@
 import { UsersDbService } from "../../database/users/User.dbservice";
 import { Keccak } from "sha3";
 import { KJUR, utf8tohex } from "jsrsasign";
+import * as E from "cryptojs"
 //import  * as jwt from "jsonwebtoken";
 import * as EthUtil from "ethereumjs-util";
 import * as EthTx from "ethereumjs-tx";
@@ -15,8 +16,8 @@ export class AuthModule {
     this.sessionMap = new Map();
   }
 
-  async authorizeUser(signature: string, address: string) {
-    let userModel = await this.usersDbService.selectOneRowByPrimaryId(address);
+  async authorizeUser(signature: string, publicAddress: string) {
+    let userModel = await this.usersDbService.selectOneRowByPrimaryId(publicAddress);
     const sig = signature.slice(2, signature.length);
     // const offset = 2;
     // const r = signature.slice(0 + offset, 64 + offset);
@@ -31,11 +32,13 @@ export class AuthModule {
     console.log("sig", sig);
 
     const nonce = userModel.nonce;
-    const messageHash = new Keccak(256);
-    messageHash.update(userModel.nonce);
-    const hash = messageHash.digest().toString("hex");
+    // const messageHash = new Keccak(256);
+    // messageHash.update(userModel.nonce);
+    const messageHash = EthUtil.hashPersonalMessage(Buffer.from(nonce));
+
+    const hash = messageHash.toString("hex");
     const hash2 = utf8tohex(hash);
-    console.log("publicAddress", address);
+    console.log("publicAddress", publicAddress);
     console.log("nonce", userModel.nonce);
     console.log("hash", hash);
     console.log("hash2", hash2);
@@ -57,20 +60,29 @@ export class AuthModule {
         sg.s,
     );
     const pubAddress = EthUtil.bufferToHex(EthUtil.pubToAddress(pub));
-
+    // EthUtil.toChecksumAddress //
     console.log("sg.v", sg.v);
     console.log("sg.r", sg.r.toString("hex"));
     console.log("sg.s", sg.s.toString("hex"));
     console.log("pub", pub.toString("hex"));
     console.log("pubAddress", pubAddress);
 
-    let ec2 = new KJUR.crypto.ECDSA({ curve: "secp256r1" });
-    let result = ec2.verifyHex(
-      messageHash.digest("hex"),
-      sig,
-      pub.toString("hex")
-    );
-    console.log(result);
+    return EthUtil.toChecksumAddress(pubAddress) === EthUtil.toChecksumAddress(publicAddress);
+
+    // let ec2 = new KJUR.crypto.ECDSA({ curve: "secp256k1" });
+    // let result = ec2.verifyHex(
+    //   messageHash.toString("hex"),
+    //   sig,
+    //   pub.toString("hex")
+    // );
+
+    // let result2 = ec2.verifyHex(
+    //   "0x" + messageHash.toString("hex"),
+    //   signature,
+    //   "0x" + pub.toString("hex")
+    // )
+    // console.log(result);
+    // console.log(result2);
 
     // const pk = EthUtil.ecrecover(
     //   messageHash.digest(),
@@ -91,7 +103,5 @@ export class AuthModule {
     //   signature,
     //   "0x" + publicKey
     // );
-
-    return result;
   }
 }
