@@ -30,6 +30,7 @@ export class LetterModule {
       publicAddress,
       UserRole.Writer
     );
+    console.log(letterIdsOnlyModels);
     return this.transformLetterIdsOnlyToLetters(letterIdsOnlyModels);
   }
 
@@ -40,6 +41,7 @@ export class LetterModule {
       publicAddress,
       UserRole.Requestor
     );
+    console.log(letterIdsOnlyModels);
     return this.transformLetterIdsOnlyToLetters(letterIdsOnlyModels);
   }
 
@@ -76,6 +78,9 @@ export class LetterModule {
   private async transformLetterIdsOnlyToLetters(
     letterIdsOnly: LetterIdsOnly[]
   ): Promise<Letter[]> {
+    console.log("transform");
+    console.log(letterIdsOnly.length);
+    console.log(letterIdsOnly);
     let letters: Letter[] = [];
     if (letterIdsOnly.length === 0) return letters;
     try {
@@ -85,8 +90,10 @@ export class LetterModule {
       const letterWriter: User = await this.userDbService.selectOneRowByPrimaryId(
         letterIdsOnly[0].letterWriterId
       );
-      for (let i = 0; i < LetterIdsOnly.length; i++) {
+      for (let i = 0; i < letterIdsOnly.length; i++) {
         const l: LetterIdsOnly = letterIdsOnly[i];
+        console.log(i);
+        console.log(l);
         const newLetter = new Letter(
           l.letterId,
           letterRequestor,
@@ -96,10 +103,12 @@ export class LetterModule {
         );
         letters.push(newLetter);
       }
+      console.log(letters);
+      return letters;
     } catch (err) {
       console.log(err.stack);
+      return letters;
     }
-    return letters;
   }
 
   /**
@@ -159,7 +168,7 @@ export class LetterModule {
       );
       for (let i = 0; i < LetterHistoryIdsOnly.length; i++) {
         const letterRecipient: User = await this.userDbService.selectOneRowByPrimaryId(
-          letterHistoryIdsOnly[0].letterRecipientId
+          letterHistoryIdsOnly[i].letterRecipientId
         );
         const l: LetterHistoryIdsOnly = letterHistoryIdsOnly[i];
         const newLetterHistory = new LetterHistory(

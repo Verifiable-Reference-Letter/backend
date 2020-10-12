@@ -30,7 +30,6 @@ router.post('/', async (req, res, next) => {
         })
         console.log(jwtToken);
         res.send(JSON.stringify({
-            // auth: { jwtToken: jwtToken, publicAddress: publicAddress},
             data: { jwtToken: jwtToken, publicAddress: publicAddress},
         }));
     }
@@ -40,10 +39,10 @@ router.post('/users/create', async (req, res, next) => {
     console.log("Creating user");
     console.log(req.body["publicAddress"]);
     console.log(req.body["name"]);
-    // Check if the user is already created
+    // check if the user is already created
     let userModel: User = await userAuthDbService.selectOneRowByPrimaryId(req.body.publicAddress);
     if (userModel == null) {
-        // If not, create the user and send back to frontend
+        // if not, create the user and send back to frontend
         console.log("user doesn't exist, creating user");
         userModel = await userAuthDbService.createUser(req.body.publicAddress, req.body.name);
     }

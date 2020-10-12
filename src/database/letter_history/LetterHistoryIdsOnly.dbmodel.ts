@@ -32,9 +32,9 @@ export class LetterHistoryIdsOnly {
             dbRow.letter_writer,
             dbRow.letter_requestor,
             dbRow.requested_at,
-            dbRow.uploaded_at,
+            dbRow.uploaded_at ? new Date(dbRow.uploaded_at) : dbRow.uploaded_at,
             dbRow.letter_recipient,
-            dbRow.sent_at,
+            dbRow.sent_at ? new Date(dbRow.sent_at) : dbRow.sent_at,
         );
         return newDbModel;
     }

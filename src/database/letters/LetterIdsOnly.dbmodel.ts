@@ -1,21 +1,21 @@
 export class LetterIdsOnly {
 
   letterId: string;
-  letterWriterId: string;
   letterRequestorId: string;
+  letterWriterId: string;
   requestedAt: Date;
   uploadedAt: Date | null;
 
   constructor(
       letterId: string,
-      letterWriterId: string,
       letterRequestorId: string,
+      letterWriterId: string,
       requestedAt: Date,
       uploadedAt: Date | null,
   ) {
       this.letterId = letterId;
-      this.letterWriterId = letterWriterId;
       this.letterRequestorId = letterRequestorId;
+      this.letterWriterId = letterWriterId;
       this.requestedAt = requestedAt;
       this.uploadedAt = uploadedAt;
   }
@@ -23,10 +23,10 @@ export class LetterIdsOnly {
   static dbRowToDbModel(dbRow: any) {
       const newDbModel = new LetterIdsOnly(
           dbRow.letter_id,
-          dbRow.letter_writer,
           dbRow.letter_requestor,
-          dbRow.requestedAt,
-          dbRow.uploadedAt,
+          dbRow.letter_writer,
+          new Date(dbRow.requested_at),
+          dbRow.uploaded_at ? new Date(dbRow.uploaded_at) : dbRow.uploaded_at,
       );
       return newDbModel;
   }
