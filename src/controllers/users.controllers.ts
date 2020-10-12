@@ -15,7 +15,7 @@ router.post('/', async (req, res, next) => {
     console.log("Getting all users");
     const userModels: User[] = await userDbService.selectAll();
     console.log(userModels);
-    res.send({data: []});
+    res.send({data: userModels});
 });
 
 /**
@@ -26,7 +26,7 @@ router.post('/:publicAddress', async (req, res, next) => {
     const userModel: User[] = await userDbService.selectUserByPublicAddress(req.params.publicAddress);
     console.log(userModel);
     if (userModel.length !== 0) {
-        res.send([userModel]);
+        res.send({data: userModel});
     } else {
         res.status(400);
         res.send({data: []});
@@ -41,7 +41,7 @@ router.post('/:publicAddress/profile', async (req, res, next) => {
     const userProfileModel: UserProfile[] = await userProfileDbService.selectUserByPublicAddress(req.params.publicAddress);
     console.log(userProfileModel);
     if (userProfileModel.length !== 0) {
-        res.send([userProfileModel]);
+        res.send({data: userProfileModel});
     } else {
         res.status(400);
         res.send({data: []});
