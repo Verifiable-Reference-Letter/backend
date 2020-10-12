@@ -3,14 +3,14 @@ export class LetterIdsOnly {
   letterId: string;
   letterWriterId: string;
   letterRequestorId: string;
-  requestedAt: Date | null;
+  requestedAt: Date;
   uploadedAt: Date | null;
 
   constructor(
       letterId: string,
       letterWriterId: string,
       letterRequestorId: string,
-      requestedAt: Date | null,
+      requestedAt: Date,
       uploadedAt: Date | null,
   ) {
       this.letterId = letterId;

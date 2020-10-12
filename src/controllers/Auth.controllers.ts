@@ -30,8 +30,8 @@ router.post('/', async (req, res, next) => {
         })
         console.log(jwtToken);
         res.send(JSON.stringify({
-            auth: { jwtToken: jwtToken, publicAddress: publicAddress},
-            data: []
+            // auth: { jwtToken: jwtToken, publicAddress: publicAddress},
+            data: { jwtToken: jwtToken, publicAddress: publicAddress},
         }));
     }
 });

@@ -5,7 +5,7 @@ export class LetterHistory {
     letterId: string;
     letterRequestor: User;
     letterWriter: User;
-    requestedAt: Date | null;
+    requestedAt: Date;
     uploadedAt: Date | null;
     letterRecipient: User;
     sentAt: Date | null;
@@ -14,7 +14,7 @@ export class LetterHistory {
         letterId: string,
         letterRequestor: User,
         letterWriter: User,
-        requestedAt: Date | null,
+        requestedAt: Date,
         uploadedAt: Date | null,
         letterRecipient: User,
         sentAt: Date | null,

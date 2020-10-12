@@ -1,13 +1,13 @@
 export class UserProfile {
   publicAddress: string;
   name: string;
-  profileImage: Buffer;
+  profileImage: Buffer | null;
   createdAt: Date;
 
   constructor(
     publicAddress: string,
     name: string,
-    profileImage: Buffer,
+    profileImage: Buffer | null,
     createdAt: Date
   ) {
     this.publicAddress = publicAddress;

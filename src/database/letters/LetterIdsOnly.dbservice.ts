@@ -27,9 +27,6 @@ export class LetterIdsOnlyDbService extends DatabaseService<LetterIdsOnly> {
         else if (userRole.valueOf() === UserRole.Writer.valueOf()) {
             return this.selectAllLettersByWriterIdQuery;
         }
-        // else if (userRole.valueOf() === UserRole.Recipient.valueOf()) {
-        //     return this.selectAllLettersByRecipientIdQuery;
-        // }
     }
 
     private selectAllLettersByRequestorIdQuery = {
@@ -39,10 +36,6 @@ export class LetterIdsOnlyDbService extends DatabaseService<LetterIdsOnly> {
     private selectAllLettersByWriterIdQuery = {
         text: 'select letter_id, letter_requestor, letter_writer, requested_at, uploaded_at from ' + letterTableName + ' where letter_writer = $1;'
     }
-
-    // private selectAllLettersByRecipientIdQuery = {
-    //     text: 'select letter_id, letter_requestor, letter_writer, requested_at, uploaded_at, letter_recipient, sent_at from ' + letterTableName + ' join ' + sentLetterTableName + ' where letter_recipient = $1;'
-    // }
 
     protected dbRowToDbModel(dbRow: any): LetterIdsOnly {
         return LetterIdsOnly.dbRowToDbModel(dbRow);

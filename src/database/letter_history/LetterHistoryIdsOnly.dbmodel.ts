@@ -3,7 +3,7 @@ export class LetterHistoryIdsOnly {
     letterId: string;
     letterRequestorId: string;
     letterWriterId: string;
-    requestedAt: Date | null;
+    requestedAt: Date;
     uploadedAt: Date | null;
     letterRecipientId: string;
     sentAt: Date | null;
@@ -12,7 +12,7 @@ export class LetterHistoryIdsOnly {
         letterId: string,
         letterRequestorId: string,
         letterWriterId: string,
-        requestedAt: Date | null,
+        requestedAt: Date,
         uploadedAt: Date | null,
         letterRecipientId: string,
         sentAt: Date | null,
