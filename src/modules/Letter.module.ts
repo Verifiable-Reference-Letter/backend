@@ -84,13 +84,13 @@ export class LetterModule {
     let letters: Letter[] = [];
     if (letterIdsOnly.length === 0) return letters;
     try {
-      const letterRequestor: User = await this.userDbService.selectOneRowByPrimaryId(
-        letterIdsOnly[0].letterRequestorId
-      );
-      const letterWriter: User = await this.userDbService.selectOneRowByPrimaryId(
-        letterIdsOnly[0].letterWriterId
-      );
       for (let i = 0; i < letterIdsOnly.length; i++) {
+        const letterRequestor: User = await this.userDbService.selectOneRowByPrimaryId(
+          letterIdsOnly[i].letterRequestorId
+        );
+        const letterWriter: User = await this.userDbService.selectOneRowByPrimaryId(
+          letterIdsOnly[i].letterWriterId
+        );
         const l: LetterIdsOnly = letterIdsOnly[i];
         console.log(i);
         console.log(l);
