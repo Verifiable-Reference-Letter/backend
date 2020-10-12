@@ -23,19 +23,4 @@ export class UserDbService extends DatabaseService<User> {
     protected dbRowToDbModel(dbRow: any): User {
         return User.dbRowToDbModel(dbRow);
     }
-
-    async createUser(address: string, name: string): Promise<User> | null {
-        let nonce = uuid();
-        const values = [address, name, nonce];
-        let users: User[] = await super.runParameterizedQueryWithValuesArray(this.createUserQuery, values);
-        if (users === []) {
-            return null;
-        }
-        return users[0];
-    }
-
-    private createUserQuery = {
-        text: 'insert into users values ($1, $2, current_timestamp, $3) returning *;'
-    }
-
 }
