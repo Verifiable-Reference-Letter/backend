@@ -1,5 +1,5 @@
 import { LetterIdsOnlyDbService } from "../database/letters/LetterIdsOnly.dbservice";
-import { UsersDbService } from "../database/users/User.dbservice";
+import { UserDbService } from "../database/users/User.dbservice";
 import { LetterHistory } from "../database/letter_history/LetterHistory.dbmodel";
 import { Letter } from "../database/letters/Letter.dbmodel";
 import { User } from "../database/users/User.dbmodel";
@@ -11,13 +11,13 @@ import { LetterHistoryIdsOnlyDbService } from "../database/letter_history/Letter
 import { LetterIdsOnly } from "../database/letters/LetterIdsOnly.dbmodel";
 
 export class LetterModule {
-  private usersDbService: UsersDbService;
+  private userDbService: UserDbService;
   private LetterIdsOnlyDbService: LetterIdsOnlyDbService;
   private sentLetterDbService: SentLetterDbService;
   private letterHistoryIdsOnlyDbService: LetterHistoryIdsOnlyDbService;
 
   constructor() {
-    this.usersDbService = new UsersDbService();
+    this.userDbService = new UserDbService();
     this.LetterIdsOnlyDbService = new LetterIdsOnlyDbService();
     this.sentLetterDbService = new SentLetterDbService();
     this.letterHistoryIdsOnlyDbService = new LetterHistoryIdsOnlyDbService();
@@ -79,10 +79,10 @@ export class LetterModule {
     let letters: Letter[] = [];
     if (letterIdsOnly.length === 0) return letters;
     try {
-      const letterRequestor: User = await this.usersDbService.selectOneRowByPrimaryId(
+      const letterRequestor: User = await this.userDbService.selectOneRowByPrimaryId(
         letterIdsOnly[0].letterRequestorId
       );
-      const letterWriter: User = await this.usersDbService.selectOneRowByPrimaryId(
+      const letterWriter: User = await this.userDbService.selectOneRowByPrimaryId(
         letterIdsOnly[0].letterWriterId
       );
       for (let i = 0; i < LetterIdsOnly.length; i++) {
@@ -113,14 +113,14 @@ export class LetterModule {
     if (letterHistoryIdsOnly.length === 0) return letterHistory;
 
     try {
-      const letterRecipient: User = await this.usersDbService.selectOneRowByPrimaryId(
+      const letterRecipient: User = await this.userDbService.selectOneRowByPrimaryId(
         letterHistoryIdsOnly[0].letterRecipientId
       );
       for (let i = 0; i < LetterHistoryIdsOnly.length; i++) {
-        const letterRequestor: User = await this.usersDbService.selectOneRowByPrimaryId(
+        const letterRequestor: User = await this.userDbService.selectOneRowByPrimaryId(
           letterHistoryIdsOnly[i].letterRequestorId
         );
-        const letterWriter: User = await this.usersDbService.selectOneRowByPrimaryId(
+        const letterWriter: User = await this.userDbService.selectOneRowByPrimaryId(
           letterHistoryIdsOnly[i].letterWriterId
         );
         const l: LetterHistoryIdsOnly = letterHistoryIdsOnly[i];
@@ -151,14 +151,14 @@ export class LetterModule {
     let letterHistory: LetterHistory[] = [];
     if (letterHistoryIdsOnly.length === 0) return letterHistory;
     try {
-      const letterRequestor: User = await this.usersDbService.selectOneRowByPrimaryId(
+      const letterRequestor: User = await this.userDbService.selectOneRowByPrimaryId(
         letterHistoryIdsOnly[0].letterRequestorId
       );
-      const letterWriter: User = await this.usersDbService.selectOneRowByPrimaryId(
+      const letterWriter: User = await this.userDbService.selectOneRowByPrimaryId(
         letterHistoryIdsOnly[0].letterWriterId
       );
       for (let i = 0; i < LetterHistoryIdsOnly.length; i++) {
-        const letterRecipient: User = await this.usersDbService.selectOneRowByPrimaryId(
+        const letterRecipient: User = await this.userDbService.selectOneRowByPrimaryId(
           letterHistoryIdsOnly[0].letterRecipientId
         );
         const l: LetterHistoryIdsOnly = letterHistoryIdsOnly[i];

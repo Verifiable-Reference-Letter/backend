@@ -1,4 +1,4 @@
-import { UsersDbService } from "../database/users/User.dbservice";
+import { UserDbService } from "../database/users/User.dbservice";
 import { Keccak } from "sha3";
 import { KJUR, utf8tohex } from "jsrsasign";
 // import * as E from "cryptojs"
@@ -7,17 +7,17 @@ import * as EthUtil from "ethereumjs-util";
 import * as EthTx from "ethereumjs-tx";
 
 export class AuthModule {
-  private usersDbService: UsersDbService;
+  private userDbService: UserDbService;
   private sessionMap: Map<string, Date>;
   private jwtKey: string;
 
   constructor() {
-    this.usersDbService = new UsersDbService();
+    this.userDbService = new UserDbService();
     this.sessionMap = new Map();
   }
 
   async authorizeUser(signature: string, publicAddress: string) {
-    let userModel = await this.usersDbService.selectOneRowByPrimaryId(publicAddress);
+    let userModel = await this.userDbService.selectOneRowByPrimaryId(publicAddress);
     const sig = signature.slice(2, signature.length);
     // const offset = 2;
     // const r = signature.slice(0 + offset, 64 + offset);
