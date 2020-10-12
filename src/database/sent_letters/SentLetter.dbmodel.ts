@@ -2,15 +2,16 @@ export class SentLetter {
 
     recipientAddress: string;
     letterId: string;
-    sentAt: Date;
+    sentAt: Date | null;
 
     constructor(
         recipientAddress: string,
         letterId: string,
-        sentAt: Date,
+        sentAt: Date | null,
     ) {
         this.recipientAddress = recipientAddress;
         this.letterId = letterId;
+        this.sentAt = sentAt;
     }
 
     static dbRowToDbModel(dbRow: any): SentLetter {

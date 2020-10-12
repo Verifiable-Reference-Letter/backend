@@ -4,7 +4,7 @@ import { User } from "./User.dbmodel";
 
 const userTableName: string = "users";
 
-export class UsersDbService extends DatabaseService<User> {
+export class UserDbService extends DatabaseService<User> {
 
     constructor() {
         super();

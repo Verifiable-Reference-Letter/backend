@@ -1,20 +1,23 @@
 import express from "express";
 import { AuthModule } from "../modules/Auth.module";
-import { UsersDbService } from "../database/users/User.dbservice";
+import { UserDbService } from "../database/users/User.dbservice";
+import { UserAuthDbService } from "../database/users/UserAuth.dbservice";
 import { User } from "../database/users/User.dbmodel";
+import { UserAuth } from "../database/users/UserAuth.dbmodel";
+
 import  * as jwt from "jsonwebtoken";
 
 const router = express.Router();
 
 const authModule: AuthModule = new AuthModule();
-const usersDbService: UsersDbService = new UsersDbService();
+const usersDbService: UserDbService = new UserDbService();
+const userAuthDbService: UserAuthDbService = new UserAuthDbService();
 
 // TODO: change this to be hidden
 const jwtKey: string = "my private key";
 
 router.post('/', async (req, res, next) => {
     console.log("Authenticating");
-    // TODO: check with frontend what is being passed 
     const publicAddress: string = req.body.publicAddress;
     const authResult = await authModule.authorizeUser(req.body.signature, publicAddress);
 
@@ -33,7 +36,7 @@ router.post('/', async (req, res, next) => {
     }
 });
 
-router.post('/users', async (req, res, next) => {
+router.post('/users/create', async (req, res, next) => {
     console.log("Creating user");
     console.log(req.body["publicAddress"]);
     console.log(req.body["name"]);
@@ -51,7 +54,7 @@ router.post('/users', async (req, res, next) => {
 
 router.get('/users/:publicAddress', async (req, res, next) => {
     console.log("Got into users GET for single address");
-    const userModel: User = await usersDbService.selectOneRowByPrimaryId(req.params.publicAddress);
+    const userModel: UserAuth = await userAuthDbService.getUserAuth(req.params.publicAddress);
     res.send([userModel]);
 });
 

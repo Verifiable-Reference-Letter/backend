@@ -3,15 +3,15 @@ export class LetterIdsOnly {
   letterId: string;
   letterWriterId: string;
   letterRequestorId: string;
-  requestedAt: Date;
-  uploadedAt: Date;
+  requestedAt: Date | null;
+  uploadedAt: Date | null;
 
   constructor(
       letterId: string,
       letterWriterId: string,
       letterRequestorId: string,
-      requestedAt: Date,
-      uploadedAt: Date,
+      requestedAt: Date | null,
+      uploadedAt: Date | null,
   ) {
       this.letterId = letterId;
       this.letterWriterId = letterWriterId;

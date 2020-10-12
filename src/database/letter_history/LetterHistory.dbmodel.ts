@@ -5,19 +5,19 @@ export class LetterHistory {
     letterId: string;
     letterRequestor: User;
     letterWriter: User;
-    requestedAt: Date;
-    uploadedAt: Date;
+    requestedAt: Date | null;
+    uploadedAt: Date | null;
     letterRecipient: User;
-    sentAt: Date;
+    sentAt: Date | null;
 
     constructor(
         letterId: string,
         letterRequestor: User,
         letterWriter: User,
-        requestedAt: Date,
-        uploadedAt: Date,
+        requestedAt: Date | null,
+        uploadedAt: Date | null,
         letterRecipient: User,
-        sentAt: Date,
+        sentAt: Date | null,
     ) {
         this.letterId = letterId;
         this.letterRequestor = letterRequestor;
