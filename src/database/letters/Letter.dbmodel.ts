@@ -1,15 +1,17 @@
+import { User } from "../users/User.dbmodel";
+
 export class Letter {
 
     letterId: string;
-    letterWriter: string;
-    letterRequestor: string;
+    letterWriter: User;
+    letterRequestor: User;
     requestedAt: Date;
     uploadedAt: Date;
 
     constructor(
         letterId: string,
-        letterWriter: string,
-        letterRequestor: string,
+        letterWriter: User,
+        letterRequestor: User,
         requestedAt: Date,
         uploadedAt: Date,
     ) {
@@ -25,8 +27,8 @@ export class Letter {
             dbRow.letter_id,
             dbRow.letter_writer,
             dbRow.letter_requestor,
-            dbRow.requestedAt,
-            dbRow.uploadedAt,
+            dbRow.requested_at,
+            dbRow.uploaded_at,
         );
         return newDbModel;
     }

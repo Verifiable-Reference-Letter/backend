@@ -2,8 +2,8 @@ import { DatabaseService } from "../dbservice";
 import { Client } from "pg";
 import { UserRole } from "../../modules/UserRole";
 import { User } from "../users/User.dbmodel";
-import { LetterHistoryIdsOnly } from "./LetterHistoryIdsOnly.model";
-import { LetterHistory } from "./LetterHistory.model";
+import { LetterHistoryIdsOnly } from "./LetterHistoryIdsOnly.dbmodel";
+import { LetterHistory } from "./LetterHistory.dbmodel";
 
 const sentLetterTableName = "sent_letters";
 const letterTableName = "letters";
@@ -13,6 +13,16 @@ export class LetterHistoryIdsOnlyDbService extends DatabaseService<LetterHistory
 
     constructor() {
         super();
+    }
+
+    /**
+     * 
+     * @param publicAddress of the letter_recipient
+     */
+    async selectAllLetterHistoryIdsOnlyByLetterRecipient(publicAddress: string): Promise<LetterHistoryIdsOnly[]> {
+        const queryText = this.selectAllLetterHistoryIdsOnlyByLetterRecipientQuery;
+        const values = [publicAddress];
+        return super.runParameterizedQueryWithValuesArray(queryText, values);
     }
 
     /**
@@ -42,10 +52,13 @@ export class LetterHistoryIdsOnlyDbService extends DatabaseService<LetterHistory
     //     }
     // }
 
+    private selectAllLetterHistoryIdsOnlyByLetterRecipientQuery = {
+        text: "select L.letter_id, letter_writer, letter_requestor, requested_at, uploaded_at, letter_recipient, sent_at from " + letterTableName + " as L inner join " + sentLetterTableName + " as S on L.letter_id = S.letter_id where S.letter_recipient = $1;"
+    }
+
     private selectAllLetterHistoryIdsOnlyByLetterIdQuery = {
         text: "select L.letter_id, letter_writer, letter_requestor, requested_at, uploaded_at, letter_recipient, sent_at from " + letterTableName + " as L inner join " + sentLetterTableName + " as S on L.letter_id = S.letter_id where L.letter_id = $1;"
     }
-
 
     protected dbRowToDbModel(dbRow: any): LetterHistoryIdsOnly {
         return LetterHistoryIdsOnly.dbRowToDbModel(dbRow);

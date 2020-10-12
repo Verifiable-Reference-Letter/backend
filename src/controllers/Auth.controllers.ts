@@ -1,5 +1,5 @@
 import express from "express";
-import { AuthModule } from "../modules/auth/Auth.module";
+import { AuthModule } from "../modules/Auth.module";
 import { UsersDbService } from "../database/users/User.dbservice";
 import { User } from "../database/users/User.dbmodel";
 import  * as jwt from "jsonwebtoken";
@@ -35,13 +35,17 @@ router.post('/', async (req, res, next) => {
 
 router.post('/users', async (req, res, next) => {
     console.log("Creating user");
-    console.log(req.params.publicAddress);
+    console.log(req.body["publicAddress"]);
+    console.log(req.body["name"]);
     // Check if the user is already created
-    let userModel: User = await usersDbService.selectOneRowByPrimaryId(req.params.publicAddress);
+    let userModel: User = await usersDbService.selectOneRowByPrimaryId(req.body.publicAddress);
     if (userModel == null) {
         // If not, create the user and send back to frontend
-        userModel = await usersDbService.createUser(req.body.publicAddress, req.body.inputName);
+        console.log("user doesn't exist, creating user");
+        userModel = await usersDbService.createUser(req.body.publicAddress, req.body.name);
     }
+    console.log("user exists, no need to create user"); // ADD SOME INDICATION IN RESPONSE
+    console.log(userModel);
     res.send([userModel]);
 });
 

@@ -1,7 +1,7 @@
-import { UsersDbService } from "../../database/users/User.dbservice";
+import { UsersDbService } from "../database/users/User.dbservice";
 import { Keccak } from "sha3";
 import { KJUR, utf8tohex } from "jsrsasign";
-import * as E from "cryptojs"
+// import * as E from "cryptojs"
 //import  * as jwt from "jsonwebtoken";
 import * as EthUtil from "ethereumjs-util";
 import * as EthTx from "ethereumjs-tx";
