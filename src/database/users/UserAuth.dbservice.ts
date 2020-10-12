@@ -29,13 +29,13 @@ export class UserAuthDbService extends DatabaseService<UserAuth> {
       this.getUserAuthQuery,
       values
     );
-    if (users === []) {
+    if (users === undefined) {
       return null;
     }
     return users[0];
   }
 
   private getUserAuthQuery = {
-    text: "select publicAddress, name, nonce from " + userTableName + "userTableName where publicAddress = $1",
+    text: "select public_address, name, nonce from " + userTableName + " where public_address = $1",
   };
 }
