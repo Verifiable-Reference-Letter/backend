@@ -26,6 +26,7 @@ export class LetterModule {
   async selectAllLettersByWriterAddress(
     publicAddress: string
   ): Promise<Letter[]> {
+    console.log("selectAllLettersByWriterAddress");
     const letterIdsOnlyModels: LetterIdsOnly[] = await this.LetterIdsOnlyDbService.selectAllLettersByAddressAndRole(
       publicAddress,
       UserRole.Writer
@@ -37,6 +38,7 @@ export class LetterModule {
   async selectAllLettersByRequestorAddress(
     publicAddress: string
   ): Promise<Letter[]> {
+    console.log("selectAllLettersByRequestorAddress");
     const letterIdsOnlyModels: LetterIdsOnly[] = await this.LetterIdsOnlyDbService.selectAllLettersByAddressAndRole(
       publicAddress,
       UserRole.Requestor
@@ -48,10 +50,11 @@ export class LetterModule {
   async selectAllLettersByRecipientAddress(
     publicAddress: string
   ): Promise<LetterHistory[]> {
+    console.log("selectAllLettersByRecipientAddress");
     const LetterHistoryIdsOnlyModels: LetterHistoryIdsOnly[] = await this.letterHistoryIdsOnlyDbService.selectAllLetterHistoryIdsOnlyByLetterRecipient(
       publicAddress
     );
-    return this.transformLetterHistoryIdsOnlyToLetterHistory(
+    return this.transformLetterHistoryIdsOnlyToLetterHistoryForRecipient(
       LetterHistoryIdsOnlyModels
     );
   }
@@ -63,11 +66,13 @@ export class LetterModule {
   async selectAllLetterHistoryByLetterId(
     letterId: string
   ): Promise<LetterHistory[]> {
-    const LetterHistoryIdsOnlyModels: LetterHistoryIdsOnly[] = await this.letterHistoryIdsOnlyDbService.selectAllLetterHistoryIdsOnlyByLetterId(
+    console.log("selectAllLetterHistoryByLetterId");
+    const letterHistoryIdsOnlyModels: LetterHistoryIdsOnly[] = await this.letterHistoryIdsOnlyDbService.selectAllLetterHistoryIdsOnlyByLetterId(
       letterId
     );
+    console.log(letterHistoryIdsOnlyModels);
     return this.transformLetterHistoryIdsOnlyToLetterHistory(
-      LetterHistoryIdsOnlyModels
+      letterHistoryIdsOnlyModels
     );
   }
 
@@ -78,7 +83,7 @@ export class LetterModule {
   private async transformLetterIdsOnlyToLetters(
     letterIdsOnly: LetterIdsOnly[]
   ): Promise<Letter[]> {
-    console.log("transform");
+    console.log("transformLetterIdsOnlyToLetters");
     console.log(letterIdsOnly.length);
     console.log(letterIdsOnly);
     let letters: Letter[] = [];
@@ -118,6 +123,10 @@ export class LetterModule {
   private async transformLetterHistoryIdsOnlyToLetterHistoryForRecipient(
     letterHistoryIdsOnly: LetterHistoryIdsOnly[]
   ): Promise<LetterHistory[]> {
+    console.log("transformLetterHistoryIdsOnlyToLetterHistoryForRecipient");
+    console.log(letterHistoryIdsOnly.length);
+    console.log(letterHistoryIdsOnly);
+
     let letterHistory: LetterHistory[] = [];
     if (letterHistoryIdsOnly.length === 0) return letterHistory;
 
@@ -125,14 +134,14 @@ export class LetterModule {
       const letterRecipient: User = await this.userDbService.selectOneRowByPrimaryId(
         letterHistoryIdsOnly[0].letterRecipientId
       );
-      for (let i = 0; i < LetterHistoryIdsOnly.length; i++) {
+      for (let i = 0; i < letterHistoryIdsOnly.length; i++) {
+        const l: LetterHistoryIdsOnly = letterHistoryIdsOnly[i];
         const letterRequestor: User = await this.userDbService.selectOneRowByPrimaryId(
-          letterHistoryIdsOnly[i].letterRequestorId
+          l.letterRequestorId
         );
         const letterWriter: User = await this.userDbService.selectOneRowByPrimaryId(
-          letterHistoryIdsOnly[i].letterWriterId
+          l.letterWriterId
         );
-        const l: LetterHistoryIdsOnly = letterHistoryIdsOnly[i];
         const newLetterHistory = new LetterHistory(
           l.letterId,
           letterRequestor,
@@ -144,10 +153,11 @@ export class LetterModule {
         );
         letterHistory.push(newLetterHistory);
       }
+      return letterHistory;
     } catch (err) {
       console.log(err.stack);
+      return letterHistory;
     }
-    return letterHistory;
   }
 
   /**
@@ -157,6 +167,8 @@ export class LetterModule {
   private async transformLetterHistoryIdsOnlyToLetterHistory(
     letterHistoryIdsOnly: LetterHistoryIdsOnly[]
   ): Promise<LetterHistory[]> {
+    console.log("transformLetterHistoryIdsOnlyToLetterHistory");
+    console.log(letterHistoryIdsOnly);
     let letterHistory: LetterHistory[] = [];
     if (letterHistoryIdsOnly.length === 0) return letterHistory;
     try {
@@ -182,10 +194,11 @@ export class LetterModule {
         );
         letterHistory.push(newLetterHistory);
       }
+      return letterHistory;
     } catch (err) {
       console.log(err.stack);
+      return letterHistory;
     }
-    return letterHistory;
   }
 
   // const LetterHistoryPromise: Promise<LetterHistory[]> = Promise.all(LetterHistoryModels).then((result) => {

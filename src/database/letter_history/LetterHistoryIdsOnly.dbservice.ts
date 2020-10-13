@@ -20,6 +20,7 @@ export class LetterHistoryIdsOnlyDbService extends DatabaseService<LetterHistory
      * @param publicAddress of the letter_recipient
      */
     async selectAllLetterHistoryIdsOnlyByLetterRecipient(publicAddress: string): Promise<LetterHistoryIdsOnly[]> {
+        console.log("selectAllLetterHistoryIdsOnlyByLetterRecipient");
         const queryText = this.selectAllLetterHistoryIdsOnlyByLetterRecipientQuery;
         const values = [publicAddress];
         return super.runParameterizedQueryWithValuesArray(queryText, values);
@@ -29,6 +30,7 @@ export class LetterHistoryIdsOnlyDbService extends DatabaseService<LetterHistory
      * @param letterId letter_id to get letter history for (ids only)
      */
     async selectAllLetterHistoryIdsOnlyByLetterId(letterId: string): Promise<LetterHistoryIdsOnly[]> {
+        console.log("selectAllLetterHistoryIdsOnlyByLetterId");
         const queryText = this.selectAllLetterHistoryIdsOnlyByLetterIdQuery;
         const values = [letterId];
         return super.runParameterizedQueryWithValuesArray(queryText, values);
