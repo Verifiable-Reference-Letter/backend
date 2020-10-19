@@ -129,6 +129,7 @@ export class LetterModule {
 
     let letterHistory: LetterHistory[] = [];
     if (letterHistoryIdsOnly.length === 0) return letterHistory;
+    if (!letterHistoryIdsOnly[0]) return letterHistory;
 
     try {
       const letterRecipient: User = await this.userDbService.selectOneRowByPrimaryId(

@@ -2,9 +2,11 @@ import express from "express";
 import { LetterModule } from "../modules/Letter.module";
 import { LetterHistory } from "../database/letter_history/LetterHistory.dbmodel";
 import { Letter } from "../database/letters/Letter.dbmodel";
+import { LetterHistoryIdsOnlyDbService } from "../database/letter_history/LetterHistoryIdsOnly.dbservice";
 const router = express.Router();
 
 const letterModule: LetterModule = new LetterModule();
+const letterHistoryIdsOnlyDbService: LetterHistoryIdsOnlyDbService = new LetterHistoryIdsOnlyDbService
 
 // TODO: change these to get the user id from a verified JWT token once we implement logging in functionality
 
@@ -15,10 +17,20 @@ router.post("/requested", async (req, res, next) => {
   const letterModels: Letter[] = await letterModule.selectAllLettersByRequestorAddress(
     req.body["auth"].publicAddress
   );
-  console.log("got letter models");
   console.log(letterModels);
+
+  console.log("get num recipients for each letter");
+  let numRecipients: Number[] = [];
+  for (let i = 0; i < letterModels.length; i++) {
+    const l = letterModels[i];
+    const num = await letterHistoryIdsOnlyDbService.countRecipientsByLetterId(l.letterId);
+    console.log(num);
+    numRecipients.push(num);
+  }
+  console.log(numRecipients);
+
   if (letterModels.length !== 0) {
-    res.json({ data: letterModels });
+    res.json({ data: { letters: letterModels, numRecipients: numRecipients }});
   } else {
     res.status(400);
   }
@@ -31,10 +43,20 @@ router.post("/written", async (req, res, next) => {
   const letterModels: Letter[] = await letterModule.selectAllLettersByWriterAddress(
     req.body["auth"].publicAddress
   );
-  console.log("got letter models");
   console.log(letterModels);
+
+  console.log("get num recipients for each letter");
+  let numRecipients: Number[] = [];
+  for (let i = 0; i < letterModels.length; i++) {
+    const l = letterModels[i];
+    const num = await letterHistoryIdsOnlyDbService.countRecipientsByLetterId(l.letterId);
+    console.log(num);
+    numRecipients.push(num);
+  }
+  console.log(numRecipients);
+
   if (letterModels.length !== 0) {
-    res.json({ data: letterModels });
+    res.json({ data: { letters: letterModels, numRecipients: numRecipients}});
   } else {
     res.status(400);
   }

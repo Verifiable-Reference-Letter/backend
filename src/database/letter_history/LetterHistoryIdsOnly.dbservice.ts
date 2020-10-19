@@ -36,6 +36,14 @@ export class LetterHistoryIdsOnlyDbService extends DatabaseService<LetterHistory
         return super.runParameterizedQueryWithValuesArray(queryText, values);
     }
 
+    async countRecipientsByLetterId(letterId: string): Promise<Number> {
+        console.log("countRecipientsByLetterId");
+        const queryText = this.countRecipientsByLetterIdQuery;
+        const values = [letterId];
+        return super.runParameterizedQueryWithValuesArrayCount(queryText, values);
+    }
+
+
     // async selectAllLettersByAddressAndRole(address: string, userRole: UserRole): Promise<Letter[]> {
     //     const queryText = this.getQueryTextByUserRole(userRole);
     //     const values = [address];
@@ -60,6 +68,10 @@ export class LetterHistoryIdsOnlyDbService extends DatabaseService<LetterHistory
 
     private selectAllLetterHistoryIdsOnlyByLetterIdQuery = {
         text: "select L.letter_id, letter_writer, letter_requestor, requested_at, uploaded_at, letter_recipient, sent_at from " + letterTableName + " as L inner join " + sentLetterTableName + " as S on L.letter_id = S.letter_id where L.letter_id = $1;"
+    }
+
+    private countRecipientsByLetterIdQuery = {
+        text: "select * from " + sentLetterTableName + " where letter_id = $1;"
     }
 
     protected dbRowToDbModel(dbRow: any): LetterHistoryIdsOnly {

@@ -89,6 +89,20 @@ export abstract class DatabaseService<DatabaseModel> {
         }
     }
 
+
+    protected async runParameterizedQueryWithValuesArrayCount(queryText: any, values: any[]): Promise<Number>{
+        const client = new Client(this.clientCredentials);
+        client.connect();
+        try {
+            const res = await client.query(queryText, values);
+            return res.rowCount;
+        } catch (err) {
+            console.log(err.stack);
+        } finally {
+            client.end().then(() => console.log("client has disconnected"));
+        }
+    }
+
     protected abstract dbRowToDbModel(dbRow: any): DatabaseModel;
 
     protected selectAllQuery: any;
