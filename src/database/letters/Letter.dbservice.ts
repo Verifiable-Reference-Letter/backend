@@ -29,11 +29,11 @@ export class LetterDbService extends DatabaseService<Letter> {
     }
 
     private selectAllLettersByRequestorIdQuery = {
-        text: "select L.letter_id, L.letter_requestor, U.name as letter_requestor_name, L.letter_writer, V.name as letter_writer_name, L.requested_at, L.uploaded_at from " + letterTableName + " as L inner join " + sentLetterTableName + " as S on L.letter_id = S.letter_id join " + userTableName + " as U on L.letter_requestor = U.public_address join " + userTableName + " as V on L.letter_writer = V.public_address where letter_requestor = $1;"
+        text: "select distinct L.letter_id, L.letter_requestor, U.name as letter_requestor_name, L.letter_writer, V.name as letter_writer_name, L.requested_at, L.uploaded_at from " + letterTableName + " as L inner join " + userTableName + " as U on L.letter_requestor = U.public_address join " + userTableName + " as V on L.letter_writer = V.public_address where letter_requestor = $1;"
     }
 
     private selectAllLettersByWriterIdQuery = {
-        text: "select L.letter_id, L.letter_requestor, U.name as letter_requestor_name, L.letter_writer, V.name as letter_writer_name, L.requested_at, L.uploaded_at from " + letterTableName + " as L inner join " + sentLetterTableName + " as S on L.letter_id = S.letter_id join " + userTableName + " as U on L.letter_requestor = U.public_address join " + userTableName + " as V on L.letter_writer = V.public_address where letter_writer = $1;"
+        text: "select distinct L.letter_id, L.letter_requestor, U.name as letter_requestor_name, L.letter_writer, V.name as letter_writer_name, L.requested_at, L.uploaded_at from " + letterTableName + " as L inner join " + userTableName + " as U on L.letter_requestor = U.public_address join " + userTableName + " as V on L.letter_writer = V.public_address where letter_writer = $1;"
 
     }
 

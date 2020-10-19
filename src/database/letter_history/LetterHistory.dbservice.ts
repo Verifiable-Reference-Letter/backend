@@ -1,5 +1,6 @@
 import { DatabaseService } from "../dbservice";
 import { LetterHistory } from "./LetterHistory.dbmodel";
+import { User } from "../users/User.dbmodel";
 
 const sentLetterTableName = "sent_letters";
 const letterTableName = "letters";
@@ -59,6 +60,16 @@ export class LetterHistoryDbService extends DatabaseService<LetterHistory> {
     return super.runParameterizedQueryWithValuesArray(queryText, values);
   }
 
+  /**
+   * @param letterId letter_id to get letter history for (ids only)
+   */
+  async selectAllUnsentRecipientsByLetterId(letterId: string): Promise<User[]> {
+    console.log("selectAllLetterHistoryByLetterId");
+    const queryText = this.selectAllUnsentRecipientsByLetterIdQuery;
+    const values = [letterId];
+    return super.runParameterizedQueryWithValuesArrayUser(queryText, values);
+  }
+
   async countRecipientsByLetterId(letterId: string): Promise<Number> {
     console.log("countRecipientsByLetterId");
     const queryText = this.countRecipientsByLetterIdQuery;
@@ -94,7 +105,7 @@ export class LetterHistoryDbService extends DatabaseService<LetterHistory> {
 
   private selectAllLetterHistoryByLetterRecipientQuery = {
     text:
-      "select L.letter_id, L.letter_requestor, U.name as letter_requestor_name, L.letter_writer, V.name as letter_writer_name, L.requested_at, L.uploaded_at, S.letter_recipient, W.name as letter_recipient_name, S.sent_at from " +
+      "select distinct L.letter_id, L.letter_requestor, U.name as letter_requestor_name, L.letter_writer, V.name as letter_writer_name, L.requested_at, L.uploaded_at, S.letter_recipient, W.name as letter_recipient_name, S.sent_at from " +
       letterTableName +
       " as L inner join " +
       sentLetterTableName +
@@ -109,7 +120,7 @@ export class LetterHistoryDbService extends DatabaseService<LetterHistory> {
 
   private selectAllLetterHistoryByLetterIdQuery = {
     text:
-      "select L.letter_id, L.letter_requestor, U.name as letter_requestor_name, L.letter_writer, V.name as letter_writer_name, L.requested_at, L.uploaded_at, S.letter_recipient, W.name as letter_recipient_name, S.sent_at from " +
+      "select distinct L.letter_id, L.letter_requestor, U.name as letter_requestor_name, L.letter_writer, V.name as letter_writer_name, L.requested_at, L.uploaded_at, S.letter_recipient, W.name as letter_recipient_name, S.sent_at from " +
       letterTableName +
       " as L inner join " +
       sentLetterTableName +
@@ -124,7 +135,7 @@ export class LetterHistoryDbService extends DatabaseService<LetterHistory> {
 
   private selectAllSentLetterHistoryByLetterIdQuery = {
     text:
-      "select L.letter_id, L.letter_requestor, U.name as letter_requestor_name, L.letter_writer, V.name as letter_writer_name, L.requested_at, L.uploaded_at, S.letter_recipient, W.name as letter_recipient_name, S.sent_at from " +
+      "select distinct L.letter_id, L.letter_requestor, U.name as letter_requestor_name, L.letter_writer, V.name as letter_writer_name, L.requested_at, L.uploaded_at, S.letter_recipient, W.name as letter_recipient_name, S.sent_at from " +
       letterTableName +
       " as L inner join " +
       sentLetterTableName +
@@ -139,7 +150,7 @@ export class LetterHistoryDbService extends DatabaseService<LetterHistory> {
 
   private selectAllUnsentLetterHistoryByLetterIdQuery = {
     text:
-      "select L.letter_id, L.letter_requestor, U.name as letter_requestor_name, L.letter_writer, V.name as letter_writer_name, L.requested_at, L.uploaded_at, S.letter_recipient, W.name as letter_recipient_name, S.sent_at from " +
+      "select distinct L.letter_id, L.letter_requestor, U.name as letter_requestor_name, L.letter_writer, V.name as letter_writer_name, L.requested_at, L.uploaded_at, S.letter_recipient, W.name as letter_recipient_name, S.sent_at from " +
       letterTableName +
       " as L inner join " +
       sentLetterTableName +
@@ -148,6 +159,17 @@ export class LetterHistoryDbService extends DatabaseService<LetterHistory> {
       " as U on L.letter_requestor = U.public_address join " +
       userTableName +
       " as V on L.letter_writer = V.public_address join " +
+      userTableName +
+      " as W on S.letter_recipient = W.public_address where L.letter_id = $1 and S.sent_at is NULL;",
+  };
+
+  private selectAllUnsentRecipientsByLetterIdQuery = {
+    text:
+      "select distinct W.public_address, W.name from " +
+      letterTableName +
+      " as L inner join " +
+      sentLetterTableName +
+      " as S on L.letter_id = S.letter_id join " +
       userTableName +
       " as W on S.letter_recipient = W.public_address where L.letter_id = $1 and S.sent_at is NULL;",
   };
