@@ -1,7 +1,7 @@
 import { DatabaseService } from "../dbservice";
 import { Letter } from "./Letter.dbmodel";
 import { Client } from "pg";
-import { UserRole } from "../../modules/UserRole";
+import { UserRole } from "../users/UserRole";
 
 const sentLetterTableName = "sent_letters";
 const letterTableName = "letters";

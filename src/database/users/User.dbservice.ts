@@ -31,12 +31,22 @@ export class UserDbService extends DatabaseService<User> {
         return super.runParameterizedQueryWithValuesArray(queryText, values); 
     }
 
+    async selectAllUsersExceptSelf(publicAddress: string): Promise<User[]> {
+        const queryText = this.selectAllUsersExceptSelfQuery;
+        const values: string[] = [publicAddress];
+        return super.runParameterizedQueryWithValuesArray(queryText, values); 
+    }
+
     private selectUserByPublicAddressQuery = {
         text: 'SELECT public_address, name from ' + userTableName + ' WHERE public_address = $1'
     }
 
     private selectAllUsersQuery = {
         text: 'SELECT public_address, name from ' + userTableName
+    }
+
+    private selectAllUsersExceptSelfQuery = {
+        text: 'SELECT public_address, name from ' + userTableName + ' WHERE public_address != $1'
     }
 
     protected dbRowToDbModel(dbRow: any): User {

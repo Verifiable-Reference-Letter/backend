@@ -27,9 +27,8 @@ export class AuthModule {
     // console.log("r", r);
     // console.log("s", s);
     // console.log("v", v);
-
-    console.log("signature", signature);
-    console.log("sig", sig);
+    // console.log("signature", signature);
+    // console.log("sig", sig);
 
     const nonce = userModel.nonce;
     // const messageHash = new Keccak(256);
@@ -38,10 +37,10 @@ export class AuthModule {
 
     const hash = messageHash.toString("hex");
     const hash2 = utf8tohex(hash);
-    console.log("publicAddress", publicAddress);
-    console.log("nonce", userModel.nonce);
-    console.log("hash", hash);
-    console.log("hash2", hash2);
+    // console.log("publicAddress", publicAddress);
+    // console.log("nonce", userModel.nonce);
+    // console.log("hash", hash);
+    // console.log("hash2", hash2);
     const sg = EthUtil.fromRpcSig(signature); // YES
  
     // const prefix = "\x19Ethereum Signed Message:\n" + nonce.length;
@@ -60,12 +59,11 @@ export class AuthModule {
         sg.s,
     );
     const pubAddress = EthUtil.bufferToHex(EthUtil.pubToAddress(pub));
-    // EthUtil.toChecksumAddress //
-    console.log("sg.v", sg.v);
-    console.log("sg.r", sg.r.toString("hex"));
-    console.log("sg.s", sg.s.toString("hex"));
-    console.log("pub", pub.toString("hex"));
-    console.log("pubAddress", pubAddress);
+    // console.log("sg.v", sg.v);
+    // console.log("sg.r", sg.r.toString("hex"));
+    // console.log("sg.s", sg.s.toString("hex"));
+    // console.log("pub", pub.toString("hex"));
+    // console.log("pubAddress", pubAddress);
 
     return EthUtil.toChecksumAddress(pubAddress) === EthUtil.toChecksumAddress(publicAddress);
 
