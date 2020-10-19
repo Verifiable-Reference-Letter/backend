@@ -13,7 +13,7 @@ const userProfileDbService: UserProfileDbService = new UserProfileDbService();
  */
 router.post('/', async (req, res, next) => {
     console.log("Getting all users");
-    const userModels: User[] = await userDbService.selectAll();
+    const userModels: User[] = await userDbService.selectAll(); // TODO: change to subtract user self
     console.log(userModels);
     res.send({data: userModels});
 });

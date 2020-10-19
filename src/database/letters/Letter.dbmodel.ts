@@ -10,14 +10,16 @@ export class Letter {
 
     constructor(
         letterId: string,
-        letterRequestor: User,
-        letterWriter: User,
+        letterRequestorId: string,
+        letterRequestorName: string,
+        letterWriterId: string,
+        letterWriterName: string,
         requestedAt: Date,
         uploadedAt: Date,
     ) {
         this.letterId = letterId;
-        this.letterRequestor = letterRequestor;
-        this.letterWriter = letterWriter;
+        this.letterRequestor = new User(letterRequestorId, letterRequestorName);
+        this.letterWriter = new User(letterWriterId, letterWriterName);
         this.requestedAt = requestedAt;
         this.uploadedAt = uploadedAt;
     }
@@ -26,7 +28,9 @@ export class Letter {
         const newDbModel = new Letter(
             dbRow.letter_id,
             dbRow.letter_requestor,
+            dbRow.letter_requestor_name,
             dbRow.letter_writer,
+            dbRow.letter_writer_name,
             dbRow.requested_at,
             dbRow.uploaded_at ? new Date(dbRow.uploaded_at) : dbRow.uploaded_at,
         );

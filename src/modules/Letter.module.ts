@@ -1,62 +1,58 @@
-import { LetterIdsOnlyDbService } from "../database/letters/LetterIdsOnly.dbservice";
+import { LetterDbService } from "../database/letters/Letter.dbservice";
 import { UserDbService } from "../database/users/User.dbservice";
-import { LetterHistory } from "../database/letter_history/LetterHistory.dbmodel";
-import { Letter } from "../database/letters/Letter.dbmodel";
 import { User } from "../database/users/User.dbmodel";
 import { UserRole } from "./UserRole";
 import { SentLetterDbService } from "../database/sent_letters/SentLetter.dbservice";
 import { SentLetter } from "../database/sent_letters/SentLetter.dbmodel";
-import { LetterHistoryIdsOnly } from "../database/letter_history/LetterHistoryIdsOnly.dbmodel";
-import { LetterHistoryIdsOnlyDbService } from "../database/letter_history/LetterHistoryIdsOnly.dbservice";
-import { LetterIdsOnly } from "../database/letters/LetterIdsOnly.dbmodel";
+import { LetterHistory } from "../database/letter_history/LetterHistory.dbmodel";
+import { LetterHistoryDbService } from "../database/letter_history/LetterHistory.dbservice";
+import { Letter } from "../database/letters/Letter.dbmodel";
 
 export class LetterModule {
   private userDbService: UserDbService;
-  private LetterIdsOnlyDbService: LetterIdsOnlyDbService;
+  private LetterDbService: LetterDbService;
   private sentLetterDbService: SentLetterDbService;
-  private letterHistoryIdsOnlyDbService: LetterHistoryIdsOnlyDbService;
+  private letterHistoryDbService: LetterHistoryDbService;
 
   constructor() {
     this.userDbService = new UserDbService();
-    this.LetterIdsOnlyDbService = new LetterIdsOnlyDbService();
+    this.LetterDbService = new LetterDbService();
     this.sentLetterDbService = new SentLetterDbService();
-    this.letterHistoryIdsOnlyDbService = new LetterHistoryIdsOnlyDbService();
+    this.letterHistoryDbService = new LetterHistoryDbService();
   }
 
   async selectAllLettersByWriterAddress(
     publicAddress: string
   ): Promise<Letter[]> {
     console.log("selectAllLettersByWriterAddress");
-    const letterIdsOnlyModels: LetterIdsOnly[] = await this.LetterIdsOnlyDbService.selectAllLettersByAddressAndRole(
+    const letterModels: Letter[] = await this.LetterDbService.selectAllLettersByAddressAndRole(
       publicAddress,
       UserRole.Writer
     );
-    console.log(letterIdsOnlyModels);
-    return this.transformLetterIdsOnlyToLetters(letterIdsOnlyModels);
+    console.log(letterModels);
+    return letterModels;
   }
 
   async selectAllLettersByRequestorAddress(
     publicAddress: string
   ): Promise<Letter[]> {
     console.log("selectAllLettersByRequestorAddress");
-    const letterIdsOnlyModels: LetterIdsOnly[] = await this.LetterIdsOnlyDbService.selectAllLettersByAddressAndRole(
+    const letterModels: Letter[] = await this.LetterDbService.selectAllLettersByAddressAndRole(
       publicAddress,
       UserRole.Requestor
     );
-    console.log(letterIdsOnlyModels);
-    return this.transformLetterIdsOnlyToLetters(letterIdsOnlyModels);
+    console.log(letterModels);
+    return letterModels;
   }
 
   async selectAllLettersByRecipientAddress(
     publicAddress: string
   ): Promise<LetterHistory[]> {
     console.log("selectAllLettersByRecipientAddress");
-    const LetterHistoryIdsOnlyModels: LetterHistoryIdsOnly[] = await this.letterHistoryIdsOnlyDbService.selectAllLetterHistoryIdsOnlyByLetterRecipient(
+    const letterHistoryModels: LetterHistory[] = await this.letterHistoryDbService.selectAllLetterHistoryByLetterRecipient(
       publicAddress
     );
-    return this.transformLetterHistoryIdsOnlyToLetterHistoryForRecipient(
-      LetterHistoryIdsOnlyModels
-    );
+    return letterHistoryModels;
   }
 
   /**
@@ -67,140 +63,138 @@ export class LetterModule {
     letterId: string
   ): Promise<LetterHistory[]> {
     console.log("selectAllLetterHistoryByLetterId");
-    const letterHistoryIdsOnlyModels: LetterHistoryIdsOnly[] = await this.letterHistoryIdsOnlyDbService.selectAllLetterHistoryIdsOnlyByLetterId(
+    const letterHistoryModels: LetterHistory[] = await this.letterHistoryDbService.selectAllLetterHistoryByLetterId(
       letterId
     );
-    console.log(letterHistoryIdsOnlyModels);
-    return this.transformLetterHistoryIdsOnlyToLetterHistory(
-      letterHistoryIdsOnlyModels
-    );
+    console.log(letterHistoryModels);
+    return letterHistoryModels;
   }
 
-  /**
-   * Replace user_ids with User objects
-   * @param letterIdsOnly to be transformed into Letter[]
-   */
-  private async transformLetterIdsOnlyToLetters(
-    letterIdsOnly: LetterIdsOnly[]
-  ): Promise<Letter[]> {
-    console.log("transformLetterIdsOnlyToLetters");
-    console.log(letterIdsOnly.length);
-    console.log(letterIdsOnly);
-    let letters: Letter[] = [];
-    if (letterIdsOnly.length === 0) return letters;
-    try {
-      for (let i = 0; i < letterIdsOnly.length; i++) {
-        const letterRequestor: User = await this.userDbService.selectOneRowByPrimaryId(
-          letterIdsOnly[i].letterRequestorId
-        );
-        const letterWriter: User = await this.userDbService.selectOneRowByPrimaryId(
-          letterIdsOnly[i].letterWriterId
-        );
-        const l: LetterIdsOnly = letterIdsOnly[i];
-        console.log(i);
-        console.log(l);
-        const newLetter = new Letter(
-          l.letterId,
-          letterRequestor,
-          letterWriter,
-          l.requestedAt,
-          l.uploadedAt
-        );
-        letters.push(newLetter);
-      }
-      console.log(letters);
-      return letters;
-    } catch (err) {
-      console.log(err.stack);
-      return letters;
-    }
-  }
+  // /**
+  //  * Replace user_ids with User objects
+  //  * @param letter to be transformed into Letter[]
+  //  */
+  // private async transformLetterToLetters(
+  //   letter: Letter[]
+  // ): Promise<Letter[]> {
+  //   console.log("transformLetterToLetters");
+  //   console.log(letter.length);
+  //   console.log(letter);
+  //   let letters: Letter[] = [];
+  //   if (letter.length === 0) return letters;
+  //   try {
+  //     for (let i = 0; i < letter.length; i++) {
+  //       const letterRequestor: User = await this.userDbService.selectOneRowByPrimaryId(
+  //         letter[i].letterRequestorId
+  //       );
+  //       const letterWriter: User = await this.userDbService.selectOneRowByPrimaryId(
+  //         letter[i].letterWriterId
+  //       );
+  //       const l: Letter = letter[i];
+  //       console.log(i);
+  //       console.log(l);
+  //       const newLetter = new Letter(
+  //         l.letterId,
+  //         letterRequestor,
+  //         letterWriter,
+  //         l.requestedAt,
+  //         l.uploadedAt
+  //       );
+  //       letters.push(newLetter);
+  //     }
+  //     console.log(letters);
+  //     return letters;
+  //   } catch (err) {
+  //     console.log(err.stack);
+  //     return letters;
+  //   }
+  // }
 
-  /**
-   * Replace user_ids with User objects
-   * @param letterHistoryIdsOnly to be transformed into LetterHistory (for Recipient)
-   */
-  private async transformLetterHistoryIdsOnlyToLetterHistoryForRecipient(
-    letterHistoryIdsOnly: LetterHistoryIdsOnly[]
-  ): Promise<LetterHistory[]> {
-    console.log("transformLetterHistoryIdsOnlyToLetterHistoryForRecipient");
-    console.log(letterHistoryIdsOnly.length);
-    console.log(letterHistoryIdsOnly);
+  // /**
+  //  * Replace user_ids with User objects
+  //  * @param letterHistory to be transformed into LetterHistory (for Recipient)
+  //  */
+  // private async transformLetterHistoryToLetterHistoryForRecipient(
+  //   letterHistory: LetterHistory[]
+  // ): Promise<LetterHistory[]> {
+  //   console.log("transformLetterHistoryToLetterHistoryForRecipient");
+  //   console.log(letterHistory.length);
+  //   console.log(letterHistory);
 
-    let letterHistory: LetterHistory[] = [];
-    if (letterHistoryIdsOnly.length === 0) return letterHistory;
-    if (!letterHistoryIdsOnly[0]) return letterHistory;
+  //   let letterHistory: LetterHistory[] = [];
+  //   if (letterHistory.length === 0) return letterHistory;
+  //   if (!letterHistory[0]) return letterHistory;
 
-    try {
-      const letterRecipient: User = await this.userDbService.selectOneRowByPrimaryId(
-        letterHistoryIdsOnly[0].letterRecipientId
-      );
-      for (let i = 0; i < letterHistoryIdsOnly.length; i++) {
-        const l: LetterHistoryIdsOnly = letterHistoryIdsOnly[i];
-        const letterRequestor: User = await this.userDbService.selectOneRowByPrimaryId(
-          l.letterRequestorId
-        );
-        const letterWriter: User = await this.userDbService.selectOneRowByPrimaryId(
-          l.letterWriterId
-        );
-        const newLetterHistory = new LetterHistory(
-          l.letterId,
-          letterRequestor,
-          letterWriter,
-          l.requestedAt,
-          l.uploadedAt,
-          letterRecipient,
-          l.sentAt
-        );
-        letterHistory.push(newLetterHistory);
-      }
-      return letterHistory;
-    } catch (err) {
-      console.log(err.stack);
-      return letterHistory;
-    }
-  }
+  //   try {
+  //     const letterRecipient: User = await this.userDbService.selectOneRowByPrimaryId(
+  //       letterHistory[0].letterRecipientId
+  //     );
+  //     for (let i = 0; i < letterHistory.length; i++) {
+  //       const l: LetterHistory = letterHistory[i];
+  //       const letterRequestor: User = await this.userDbService.selectOneRowByPrimaryId(
+  //         l.letterRequestorId
+  //       );
+  //       const letterWriter: User = await this.userDbService.selectOneRowByPrimaryId(
+  //         l.letterWriterId
+  //       );
+  //       const newLetterHistory = new LetterHistory(
+  //         l.letterId,
+  //         letterRequestor,
+  //         letterWriter,
+  //         l.requestedAt,
+  //         l.uploadedAt,
+  //         letterRecipient,
+  //         l.sentAt
+  //       );
+  //       letterHistory.push(newLetterHistory);
+  //     }
+  //     return letterHistory;
+  //   } catch (err) {
+  //     console.log(err.stack);
+  //     return letterHistory;
+  //   }
+  // }
 
-  /**
-   * Replace user_ids with User objects
-   * @param letterHistoryIdsOnly to be transformed into LetterHistory[]
-   */
-  private async transformLetterHistoryIdsOnlyToLetterHistory(
-    letterHistoryIdsOnly: LetterHistoryIdsOnly[]
-  ): Promise<LetterHistory[]> {
-    console.log("transformLetterHistoryIdsOnlyToLetterHistory");
-    console.log(letterHistoryIdsOnly);
-    let letterHistory: LetterHistory[] = [];
-    if (letterHistoryIdsOnly.length === 0) return letterHistory;
-    try {
-      const letterRequestor: User = await this.userDbService.selectOneRowByPrimaryId(
-        letterHistoryIdsOnly[0].letterRequestorId
-      );
-      const letterWriter: User = await this.userDbService.selectOneRowByPrimaryId(
-        letterHistoryIdsOnly[0].letterWriterId
-      );
-      for (let i = 0; i < LetterHistoryIdsOnly.length; i++) {
-        const letterRecipient: User = await this.userDbService.selectOneRowByPrimaryId(
-          letterHistoryIdsOnly[i].letterRecipientId
-        );
-        const l: LetterHistoryIdsOnly = letterHistoryIdsOnly[i];
-        const newLetterHistory = new LetterHistory(
-          l.letterId,
-          letterRequestor,
-          letterWriter,
-          l.requestedAt,
-          l.uploadedAt,
-          letterRecipient,
-          l.sentAt
-        );
-        letterHistory.push(newLetterHistory);
-      }
-      return letterHistory;
-    } catch (err) {
-      console.log(err.stack);
-      return letterHistory;
-    }
-  }
+  // /**
+  //  * Replace user_ids with User objects
+  //  * @param letterHistory to be transformed into LetterHistory[]
+  //  */
+  // private async transformLetterHistoryToLetterHistory(
+  //   letterHistory: LetterHistory[]
+  // ): Promise<LetterHistory[]> {
+  //   console.log("transformLetterHistoryToLetterHistory");
+  //   console.log(letterHistory);
+  //   let letterHistory: LetterHistory[] = [];
+  //   if (letterHistory.length === 0) return letterHistory;
+  //   try {
+  //     const letterRequestor: User = await this.userDbService.selectOneRowByPrimaryId(
+  //       letterHistory[0].letterRequestorId
+  //     );
+  //     const letterWriter: User = await this.userDbService.selectOneRowByPrimaryId(
+  //       letterHistory[0].letterWriterId
+  //     );
+  //     for (let i = 0; i < LetterHistory.length; i++) {
+  //       const letterRecipient: User = await this.userDbService.selectOneRowByPrimaryId(
+  //         letterHistory[i].letterRecipientId
+  //       );
+  //       const l: LetterHistory = letterHistory[i];
+  //       const newLetterHistory = new LetterHistory(
+  //         l.letterId,
+  //         letterRequestor,
+  //         letterWriter,
+  //         l.requestedAt,
+  //         l.uploadedAt,
+  //         letterRecipient,
+  //         l.sentAt
+  //       );
+  //       letterHistory.push(newLetterHistory);
+  //     }
+  //     return letterHistory;
+  //   } catch (err) {
+  //     console.log(err.stack);
+  //     return letterHistory;
+  //   }
+  // }
 
   // const LetterHistoryPromise: Promise<LetterHistory[]> = Promise.all(LetterHistoryModels).then((result) => {
   //     return result;
