@@ -1,23 +1,23 @@
-import { UsersDbService } from "../../database/users/User.dbservice";
+import { UserAuthDbService } from "../database/users/UserAuth.dbservice";
 import { Keccak } from "sha3";
 import { KJUR, utf8tohex } from "jsrsasign";
-import * as E from "cryptojs"
+// import * as E from "cryptojs"
 //import  * as jwt from "jsonwebtoken";
 import * as EthUtil from "ethereumjs-util";
 import * as EthTx from "ethereumjs-tx";
 
 export class AuthModule {
-  private usersDbService: UsersDbService;
+  private userAuthDbService: UserAuthDbService;
   private sessionMap: Map<string, Date>;
   private jwtKey: string;
 
   constructor() {
-    this.usersDbService = new UsersDbService();
+    this.userAuthDbService = new UserAuthDbService();
     this.sessionMap = new Map();
   }
 
   async authorizeUser(signature: string, publicAddress: string) {
-    let userModel = await this.usersDbService.selectOneRowByPrimaryId(publicAddress);
+    let userModel = await this.userAuthDbService.selectOneRowByPrimaryId(publicAddress);
     const sig = signature.slice(2, signature.length);
     // const offset = 2;
     // const r = signature.slice(0 + offset, 64 + offset);
@@ -27,9 +27,8 @@ export class AuthModule {
     // console.log("r", r);
     // console.log("s", s);
     // console.log("v", v);
-
-    console.log("signature", signature);
-    console.log("sig", sig);
+    // console.log("signature", signature);
+    // console.log("sig", sig);
 
     const nonce = userModel.nonce;
     // const messageHash = new Keccak(256);
@@ -38,10 +37,10 @@ export class AuthModule {
 
     const hash = messageHash.toString("hex");
     const hash2 = utf8tohex(hash);
-    console.log("publicAddress", publicAddress);
-    console.log("nonce", userModel.nonce);
-    console.log("hash", hash);
-    console.log("hash2", hash2);
+    // console.log("publicAddress", publicAddress);
+    // console.log("nonce", userModel.nonce);
+    // console.log("hash", hash);
+    // console.log("hash2", hash2);
     const sg = EthUtil.fromRpcSig(signature); // YES
  
     // const prefix = "\x19Ethereum Signed Message:\n" + nonce.length;
@@ -60,12 +59,11 @@ export class AuthModule {
         sg.s,
     );
     const pubAddress = EthUtil.bufferToHex(EthUtil.pubToAddress(pub));
-    // EthUtil.toChecksumAddress //
-    console.log("sg.v", sg.v);
-    console.log("sg.r", sg.r.toString("hex"));
-    console.log("sg.s", sg.s.toString("hex"));
-    console.log("pub", pub.toString("hex"));
-    console.log("pubAddress", pubAddress);
+    // console.log("sg.v", sg.v);
+    // console.log("sg.r", sg.r.toString("hex"));
+    // console.log("sg.s", sg.s.toString("hex"));
+    // console.log("pub", pub.toString("hex"));
+    // console.log("pubAddress", pubAddress);
 
     return EthUtil.toChecksumAddress(pubAddress) === EthUtil.toChecksumAddress(publicAddress);
 
