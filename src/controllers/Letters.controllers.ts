@@ -26,13 +26,15 @@ router.post("/requested", async (req, res, next) => {
   let numRecipients: Number[] = [];
   for (let i = 0; i < letterModels.length; i++) {
     const l = letterModels[i];
-    const num = await letterHistoryDbService.countRecipientsByLetterId(l.letterId);
+    const num = await letterHistoryDbService.countRecipientsByLetterId(
+      l.letterId
+    );
     numRecipients.push(num);
   }
   console.log(numRecipients);
 
   if (letterModels.length !== 0) {
-    res.json({ data: { letters: letterModels, numRecipients: numRecipients }});
+    res.json({ data: { letters: letterModels, numRecipients: numRecipients } });
   } else {
     res.status(400);
   }
@@ -52,13 +54,15 @@ router.post("/written", async (req, res, next) => {
   let numRecipients: Number[] = [];
   for (let i = 0; i < letterModels.length; i++) {
     const l = letterModels[i];
-    const num = await letterHistoryDbService.countRecipientsByLetterId(l.letterId);
+    const num = await letterHistoryDbService.countRecipientsByLetterId(
+      l.letterId
+    );
     numRecipients.push(num);
   }
   console.log(numRecipients);
 
   if (letterModels.length !== 0) {
-    res.json({ data: { letters: letterModels, numRecipients: numRecipients}});
+    res.json({ data: { letters: letterModels, numRecipients: numRecipients } });
   } else {
     res.status(400);
   }
@@ -134,16 +138,38 @@ router.post("/:letterId/unsentRecipients", async (req, res, next) => {
   }
 });
 
+router.post("/:letterId/updateRecipients", async (req, res, next) => {
+  // TODO: check JWT
+  console.log(req.body["auth"]);
+  console.log(req.params.letterId);
+  console.log("get unsent recipients for given letter_id");
+  const success: boolean = await letterHistoryDbService.updateRecipientsByLetterId(
+    req.params.letterId,
+    req.body["data"]
+  );
+
+  if (success) {
+    const userModels: User[] = await letterHistoryDbService.selectAllUnsentRecipientsByLetterId(
+      req.params.letterId
+    );
+    console.log(userModels);
+    res.json({ data: userModels });
+  } else {
+    res.status(400);
+    res.json({ data: {} });
+  }
+});
+
 router.post("/:letterId/contents", async (req, res, next) => {
-    console.log(req.body["auth"]);
-    console.log(req.params.letterId);
-    console.log("get letter contents for given letterId");
-    // TODO: make sure below function checks that letterId is valid id for this user to update
-    //   const success: boolean = await letterModule.getLetterContentsByLetterId(
-    //     req.params.letterId
-    //   );
-    //   console.log(success);
-    //   if (!success) res.status(400);
+  console.log(req.body["auth"]);
+  console.log(req.params.letterId);
+  console.log("get letter contents for given letterId");
+  // TODO: make sure below function checks that letterId is valid id for this user to update
+  //   const success: boolean = await letterModule.getLetterContentsByLetterId(
+  //     req.params.letterId
+  //   );
+  //   console.log(success);
+  //   if (!success) res.status(400);
 });
 
 router.post("/:letterId/contents/update", async (req, res, next) => {

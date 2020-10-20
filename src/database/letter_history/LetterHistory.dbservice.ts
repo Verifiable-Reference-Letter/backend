@@ -77,31 +77,23 @@ export class LetterHistoryDbService extends DatabaseService<LetterHistory> {
     return super.runParameterizedQueryWithValuesArrayCount(queryText, values);
   }
 
-  // async selectAllLettersByAddressAndRole(address: string, userRole: UserRole): Promise<Letter[]> {
-  //     const queryText = this.getQueryTextByUserRole(userRole);
-  //     const values = [address];
-  //     return super.runParameterizedQueryWithValuesArray(queryText, values);
-  // }
-
-  // private getQueryTextByUserRole(userRole: UserRole): any {
-  //     if (userRole.valueOf() === UserRole.Recipient.valueOf()) {
-  //         return this.selectAllLettersByRecipientIdQuery;
-  //     }
-  //     else if (userRole.valueOf() === UserRole.Requestor.valueOf()) {
-  //         return this.selectAllLettersByRequestorIdQuery;
-  //     }
-  //     else if (userRole.valueOf() === UserRole.Writer.valueOf()) {
-  //         return this.selectAllLettersByWriterIdQuery;
-  //     }
-  // }
-
-  // private selectAllLetterHistoryByLetterRecipientQuery = {
-  //     text: "select L.letter_id, letter_writer, letter_requestor, requested_at, uploaded_at, letter_recipient, sent_at from " + letterTableName + " as L inner join " + sentLetterTableName + " as S on L.letter_id = S.letter_id where S.letter_recipient = $1;"
-  // }
-
-  // private selectAllLetterHistoryByLetterIdQuery = {
-  //     text: "select L.letter_id, letter_writer, letter_requestor, requested_at, uploaded_at, letter_recipient, sent_at from " + letterTableName + " as L inner join " + sentLetterTableName + " as S on L.letter_id = S.letter_id where L.letter_id = $1;"
-  // }
+  async updateRecipientsByLetterId(letterId: string, recipients: User[]): Promise<boolean> {
+    console.log("updateRecipientsByLetterId");
+    const deleteQueryText = this.deletePreviousRecipientsByLetterId;
+    const deleteValues = [letterId];
+    const successfulDelete: boolean = await super.runParameterizedQueryWithValuesArrayDelete(deleteQueryText, deleteValues);
+    console.log("successfulDelete", successfulDelete);
+    if (!successfulDelete) return false;
+    for (let i = 0; i < recipients.length; i++) {
+      console.log(i, recipients[i]);
+      const insertQueryText = this.insertRecipientByLetterId;
+      const insertValues = [recipients[i].publicAddress, letterId];
+      const successfulInsert: boolean = await super.runParameterizedQueryWithValuesArrayInsert(insertQueryText, insertValues);
+      console.log("successfulInsert", successfulInsert);
+      if (!successfulInsert) return false;
+    }
+    return true;
+  }
 
   private selectAllLetterHistoryByLetterRecipientQuery = {
     text:
@@ -177,6 +169,14 @@ export class LetterHistoryDbService extends DatabaseService<LetterHistory> {
   private countRecipientsByLetterIdQuery = {
     text: "select * from " + sentLetterTableName + " where letter_id = $1;",
   };
+
+  private deletePreviousRecipientsByLetterId = {
+    text: "delete from " + sentLetterTableName + " where letter_id = $1 and sent_at is null;"
+  }
+
+  private insertRecipientByLetterId = {
+    text: "insert into " + sentLetterTableName + "(letter_recipient, letter_id, sent_at) values($1, $2, null);"
+  }
 
   protected dbRowToDbModel(dbRow: any): LetterHistory {
     return LetterHistory.dbRowToDbModel(dbRow);
