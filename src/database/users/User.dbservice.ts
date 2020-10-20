@@ -3,7 +3,7 @@ import { User } from "./User.dbmodel";
 
 const userTableName: string = "users";
 
-export class UsersDbService extends DatabaseService<User> {
+export class UserDbService extends DatabaseService<User> {
 
     constructor() {
         super();
@@ -19,18 +19,37 @@ export class UsersDbService extends DatabaseService<User> {
         }
     }
 
+    async selectUserByPublicAddress(publicAddress: string): Promise<User[]> {
+        const queryText = this.selectUserByPublicAddressQuery;
+        const values = [publicAddress];
+        return super.runParameterizedQueryWithValuesArray(queryText, values); 
+    }
+
+    async selectAllUsers(): Promise<User[]> {
+        const queryText = this.selectAllUsersQuery;
+        const values: string[] = [];
+        return super.runParameterizedQueryWithValuesArray(queryText, values); 
+    }
+
+    async selectAllUsersExceptSelf(publicAddress: string): Promise<User[]> {
+        const queryText = this.selectAllUsersExceptSelfQuery;
+        const values: string[] = [publicAddress];
+        return super.runParameterizedQueryWithValuesArray(queryText, values); 
+    }
+
+    private selectUserByPublicAddressQuery = {
+        text: 'SELECT public_address, name from ' + userTableName + ' WHERE public_address = $1'
+    }
+
+    private selectAllUsersQuery = {
+        text: 'SELECT public_address, name from ' + userTableName
+    }
+
+    private selectAllUsersExceptSelfQuery = {
+        text: 'SELECT public_address, name from ' + userTableName + ' WHERE public_address != $1'
+    }
+
     protected dbRowToDbModel(dbRow: any): User {
         return User.dbRowToDbModel(dbRow);
     }
-
-    async createUser(address: string, name: string): Promise<User> {
-        const values = [address, name];
-        let users: User[] = await super.runParameterizedQueryWithValuesArray(this.createUserQuery, values);
-        return users[0];
-    }
-
-    private createUserQuery = {
-        text: 'insert into users values ($1, $2, current_timestamp, 0) returning *;'
-    }
-
 }

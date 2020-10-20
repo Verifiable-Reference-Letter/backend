@@ -2,16 +2,19 @@ import express from "express";
 import cors from 'cors';
 import path from 'path';
 import bodyParser from 'body-parser';
+
 const app = express();
 const port = process.env.PORT || 8080; // default port to listen
 console.log("Process env: ");
 console.dir(process.env);
 console.log("Dynamic port: " + process.env.PORT);
 console.log("Port chosen: " + port);
+
 // Serve static files from the React app
 import { router as testAPIRouter } from './routes/testApi';
 import { router as usersRouter } from './controllers/users.controllers';
 import { router as lettersRouter } from './controllers/Letters.controllers';
+import { router as authRouter } from './controllers/Auth.controllers';
 
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, '../build')));
@@ -29,8 +32,10 @@ app.get( "/bye", (req, res) => {
 });
 
 app.use("/testAPI", testAPIRouter);
-app.use("/users", usersRouter);
-app.use("/letters", lettersRouter);
+app.use("/api/v1/users", usersRouter);
+// app.use("/api/v1/users/:publicAddress/letters", lettersRouter);
+app.use("/api/v1/letters", lettersRouter);
+app.use("/auth", authRouter);
 
 // start the Express server
 app.listen( port, () => {

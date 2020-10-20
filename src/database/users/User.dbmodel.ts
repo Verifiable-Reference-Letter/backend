@@ -1,40 +1,22 @@
 export class User {
 
-    publicAddress: string;
-    name: string;
-    creationTimestamp: Date;
-    nonce: Number;
+  publicAddress: string;
+  name: string;
 
-    constructor(
-        publicAddress: string,
-        name: string,
-        creationTimestamp: Date,
-        nonce: Number
-    ) {
-            this.publicAddress = publicAddress;
-            this.name = name;
-            this.creationTimestamp = creationTimestamp;
-            this.nonce = nonce;
-    }
+  constructor(
+      publicAddress: string,
+      name: string,
+  ) {
+          this.publicAddress = publicAddress;
+          this.name = name;
+  }
 
-    static dbRowToDbModel(dbRow: any) {
-        const newUser = new User(
-            dbRow.public_address,
-            dbRow.name,
-            dbRow.creation_timestamp,
-            dbRow.nonce
-        );
-        console.dir(newUser);
-        return newUser;
-    }
-
-    convertToClientModel() {
-        return {
-            public_address: this.publicAddress,
-            name: this.name,
-            creation_timestamp: this.creationTimestamp,
-            nonce: this.nonce
-        };
-    }
-
+  static dbRowToDbModel(dbRow: any) {
+      const newUser = new User(
+          dbRow.public_address,
+          dbRow.name,
+      );
+      console.dir(newUser);
+      return newUser;
+  }
 }
