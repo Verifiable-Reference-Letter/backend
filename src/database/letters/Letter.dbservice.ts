@@ -19,10 +19,16 @@ export class LetterDbService extends DatabaseService<Letter> {
         return super.runParameterizedQueryWithValuesArray(queryText, values);
     }
 
+    async selectLetterByAddressAndLetterId(publicAddress: string, letterId: string): Promise<Letter[]> {
+        const queryText = this.selectLetterByAddressAndLetterId;
+        const values = [publicAddress, letterId];
+        return super.runParameterizedQueryWithValuesArray(queryText, values);
+    }
+
     async insertLetterByAddressAndLetterDetails(letterId: string, letterRequestor: string, letterWriter: string, currentDate: string): Promise<boolean> {
         const queryText = this.insertLetterByAddressAndLetterDetailsQuery;
-        console.log(currentDate);
-        console.log(currentDate.substring(0, 24));
+        // console.log(currentDate);
+        // console.log(currentDate.substring(0, 24));
         const values = [letterId, letterRequestor, letterWriter, currentDate.substring(0, 24), null];
         return super.runParameterizedQueryWithValuesArrayInsert(queryText, values);
     }
@@ -43,6 +49,10 @@ export class LetterDbService extends DatabaseService<Letter> {
     private selectAllLettersByWriterIdQuery = {
         text: "select distinct L.letter_id, L.letter_requestor, U.name as letter_requestor_name, L.letter_writer, V.name as letter_writer_name, L.requested_at, L.uploaded_at from " + letterTableName + " as L inner join " + userTableName + " as U on L.letter_requestor = U.public_address join " + userTableName + " as V on L.letter_writer = V.public_address where letter_writer = $1;"
 
+    }
+
+    private selectLetterByRequestorIdQuery = {
+        text: "select distinct L.letter_id, L.letter_requestor, U.name as letter_requestor_name, L.letter_writer, V.name as letter_writer_name, L.requested_at, L.uploaded_at from " + letterTableName + " as L inner join " + userTableName + " as U on L.letter_requestor = U.public_address join " + userTableName + " as V on L.letter_writer = V.public_address where letter_requestor = $1 and letter_id = $2;"
     }
 
     private insertLetterByAddressAndLetterDetailsQuery = {

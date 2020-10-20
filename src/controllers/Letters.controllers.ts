@@ -1,4 +1,5 @@
 import express from "express";
+import { v4 as uuid } from "uuid";
 import { LetterHistory } from "../database/letter_history/LetterHistory.dbmodel";
 import { Letter } from "../database/letters/Letter.dbmodel";
 import { User } from "../database/users/User.dbmodel";
@@ -14,15 +15,15 @@ const letterHistoryDbService: LetterHistoryDbService = new LetterHistoryDbServic
 
 router.post("/requested", async (req, res, next) => {
   // TODO: check JWT
-  console.log(req.body["auth"]);
-  console.log("get letters for requestor");
+  // console.log(req.body["auth"]);
+  // console.log("get letters for requestor");
   const letterModels: Letter[] = await letterDbService.selectAllLettersByAddressAndRole(
     req.body["auth"].publicAddress,
     UserRole.Requestor
   );
-  console.log(letterModels);
+  // console.log(letterModels);
 
-  console.log("get num recipients for each letter");
+  // console.log("get num recipients for each letter");
   let numRecipients: Number[] = [];
   for (let i = 0; i < letterModels.length; i++) {
     const l = letterModels[i];
@@ -31,7 +32,7 @@ router.post("/requested", async (req, res, next) => {
     );
     numRecipients.push(num);
   }
-  console.log(numRecipients);
+  // console.log(numRecipients);
 
   if (letterModels.length !== 0) {
     res.json({ data: { letters: letterModels, numRecipients: numRecipients } });
@@ -42,15 +43,15 @@ router.post("/requested", async (req, res, next) => {
 
 router.post("/written", async (req, res, next) => {
   // TODO: check JWT
-  console.log(req.body["auth"]);
-  console.log("get letters for writer");
+  // console.log(req.body["auth"]);
+  // console.log("get letters for writer");
   const letterModels: Letter[] = await letterDbService.selectAllLettersByAddressAndRole(
     req.body["auth"].publicAddress,
     UserRole.Writer
   );
-  console.log(letterModels);
+  // console.log(letterModels);
 
-  console.log("get num recipients for each letter");
+  // console.log("get num recipients for each letter");
   let numRecipients: Number[] = [];
   for (let i = 0; i < letterModels.length; i++) {
     const l = letterModels[i];
@@ -59,7 +60,7 @@ router.post("/written", async (req, res, next) => {
     );
     numRecipients.push(num);
   }
-  console.log(numRecipients);
+  // console.log(numRecipients);
 
   if (letterModels.length !== 0) {
     res.json({ data: { letters: letterModels, numRecipients: numRecipients } });
@@ -70,12 +71,12 @@ router.post("/written", async (req, res, next) => {
 
 router.post("/received", async (req, res, next) => {
   // TODO: check JWT
-  console.log(req.body["auth"]);
-  console.log("get letter history for recipient");
+  // console.log(req.body["auth"]);
+  // console.log("get letter history for recipient");
   const letterHistoryModels: LetterHistory[] = await letterHistoryDbService.selectAllLetterHistoryByLetterRecipient(
     req.body["auth"].publicAddress
   );
-  console.log(letterHistoryModels);
+  // console.log(letterHistoryModels);
 
   if (letterHistoryModels.length !== 0) {
     res.json({ data: letterHistoryModels });
@@ -86,13 +87,13 @@ router.post("/received", async (req, res, next) => {
 
 router.post("/:letterId/history", async (req, res, next) => {
   // TODO: check JWT
-  console.log(req.body["auth"]);
-  console.log(req.params.letterId);
-  console.log("get letter history for given letter_id");
+  // console.log(req.body["auth"]);
+  // console.log(req.params.letterId);
+  // console.log("get letter history for given letter_id");
   const letterHistoryModels: LetterHistory[] = await letterHistoryDbService.selectAllSentLetterHistoryByLetterId(
     req.params.letterId
   );
-  console.log(letterHistoryModels);
+  // console.log(letterHistoryModels);
 
   if (letterHistoryModels.length !== 0) {
     res.json({ data: letterHistoryModels });
@@ -104,33 +105,33 @@ router.post("/:letterId/history", async (req, res, next) => {
 
 router.post("/:letterId/unsent", async (req, res, next) => {
   // TODO: check JWT
-  console.log(req.body["auth"]);
-  console.log(req.params.letterId);
-  console.log("get unsent letter history for given letter_id");
+  // console.log(req.body["auth"]);
+  // console.log(req.params.letterId);
+  // console.log("get unsent letter history for given letter_id");
   const letterHistoryModels: LetterHistory[] = await letterHistoryDbService.selectAllUnsentLetterHistoryByLetterId(
     req.params.letterId
   );
-  console.log(letterHistoryModels);
+  // console.log(letterHistoryModels);
   res.json({ data: letterHistoryModels });
 });
 
 router.post("/:letterId/unsentRecipients", async (req, res, next) => {
   // TODO: check JWT
-  console.log(req.body["auth"]);
-  console.log(req.params.letterId);
-  console.log("get unsent recipients for given letter_id");
+  // console.log(req.body["auth"]);
+  // console.log(req.params.letterId);
+  // console.log("get unsent recipients for given letter_id");
   const userModels: User[] = await letterHistoryDbService.selectAllUnsentRecipientsByLetterId(
     req.params.letterId
   );
-  console.log(userModels);
+  // console.log(userModels);
   res.json({ data: userModels });
 });
 
 router.post("/:letterId/updateRecipients", async (req, res, next) => {
   // TODO: check JWT
-  console.log(req.body["auth"]);
-  console.log(req.params.letterId);
-  console.log("get unsent recipients for given letter_id");
+  // console.log(req.body["auth"]);
+  // console.log(req.params.letterId);
+  // console.log("get unsent recipients for given letter_id");
   const success: boolean = await letterHistoryDbService.updateRecipientsByLetterId(
     req.params.letterId,
     req.body["data"]
@@ -140,7 +141,7 @@ router.post("/:letterId/updateRecipients", async (req, res, next) => {
     const userModels: User[] = await letterHistoryDbService.selectAllUnsentRecipientsByLetterId(
       req.params.letterId
     );
-    console.log(userModels);
+    // console.log(userModels);
     res.json({ data: userModels });
   } else {
     res.status(400);
@@ -150,37 +151,47 @@ router.post("/:letterId/updateRecipients", async (req, res, next) => {
 
 router.post("/create", async (req, res, next) => {
   const auth = req.body["auth"];
-  console.log(auth);
-  console.log(req.params.letterId);
-  console.log("creating new letter based on letter details");
+  // console.log(auth);
+  // console.log("creating new letter based on letter details");
   const data = req.body["data"];
-  console.log(data);
+  // console.log(data);
 
   // const letterId = Math.random().toString(36);
   const currentDate = Date();
-  // console.log(currentDate);
-  // console.log(new Date(currentDate));
-  const letterId = (currentDate + Math.random()).substring(0, 36);
+  // // console.log(currentDate);
+  // // console.log(new Date(currentDate));
+  // const letterId = (currentDate + Math.random()).substring(0, 36);
+  const letterId = uuid();
+  // console.log(letterId);
   const insertLetterSuccess: boolean = await letterDbService.insertLetterByAddressAndLetterDetails(
     letterId,
     auth.publicAddress,
     data.letterWriter,
     currentDate
   );
-  console.log("insertLetterSuccess", insertLetterSuccess);
+  // console.log("insertLetterSuccess", insertLetterSuccess);
   if (insertLetterSuccess) {
     const insertSentLetterSuccess: boolean = await letterHistoryDbService.insertRecipientsByLetterId(
       letterId,
       data.selectedRecipients
     );
-    console.log("insertSentLetterSuccess", insertSentLetterSuccess);
+    // console.log("insertSentLetterSuccess", insertSentLetterSuccess);
     if (insertSentLetterSuccess) {
       const letterModels: Letter[] = await letterDbService.selectAllLettersByAddressAndRole(
         auth.publicAddress,
         UserRole.Requestor
       );
-      console.log(letterModels);
-      res.json({ data: letterModels });
+      let numRecipients: Number[] = [];
+      for (let i = 0; i < letterModels.length; i++) {
+        const l = letterModels[i];
+        const num = await letterHistoryDbService.countRecipientsByLetterId(
+          l.letterId
+        );
+        numRecipients.push(num);
+      }
+      // console.log(letterModels);
+      // console.log(numRecipients);
+      res.json({ data: {letters: letterModels, numRecipients: numRecipients}});
     } else {
       res.status(400);
       res.json({ data: {} });
@@ -192,9 +203,9 @@ router.post("/create", async (req, res, next) => {
 });
 
 router.post("/:letterId/contents", async (req, res, next) => {
-  console.log(req.body["auth"]);
-  console.log(req.params.letterId);
-  console.log("get letter contents for given letterId");
+  // console.log(req.body["auth"]);
+  // console.log(req.params.letterId);
+  // console.log("get letter contents for given letterId");
   // TODO: make sure below function checks that letterId is valid id for this user to update
   //   const success: boolean = await letterModule.getLetterContentsByLetterId(
   //     req.params.letterId
@@ -205,9 +216,9 @@ router.post("/:letterId/contents", async (req, res, next) => {
 
 router.post("/:letterId/contents/update", async (req, res, next) => {
   // TODO: check JWT
-  console.log(req.body["auth"]);
-  console.log(req.params.letterId);
-  console.log("update letter contents for given letterId");
+  // console.log(req.body["auth"]);
+  // console.log(req.params.letterId);
+  // console.log("update letter contents for given letterId");
   // TODO: make sure below function checks that letterId is valid id for this user to update
   //   const success: boolean = await letterModule.updateLetterContentsByLetterId(
   //     req.params.letterId

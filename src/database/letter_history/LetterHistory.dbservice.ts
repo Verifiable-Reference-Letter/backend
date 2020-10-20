@@ -18,7 +18,7 @@ export class LetterHistoryDbService extends DatabaseService<LetterHistory> {
   async selectAllLetterHistoryByLetterRecipient(
     publicAddress: string
   ): Promise<LetterHistory[]> {
-    console.log("selectAllLetterHistoryByLetterRecipient");
+    // console.log("selectAllLetterHistoryByLetterRecipient");
     const queryText = this.selectAllLetterHistoryByLetterRecipientQuery;
     const values = [publicAddress];
     return super.runParameterizedQueryWithValuesArray(queryText, values);
@@ -30,7 +30,7 @@ export class LetterHistoryDbService extends DatabaseService<LetterHistory> {
   async selectAllLetterHistoryByLetterId(
     letterId: string
   ): Promise<LetterHistory[]> {
-    console.log("selectAllLetterHistoryByLetterId");
+    // console.log("selectAllLetterHistoryByLetterId");
     const queryText = this.selectAllLetterHistoryByLetterIdQuery;
     const values = [letterId];
     return super.runParameterizedQueryWithValuesArray(queryText, values);
@@ -42,7 +42,7 @@ export class LetterHistoryDbService extends DatabaseService<LetterHistory> {
   async selectAllSentLetterHistoryByLetterId(
     letterId: string
   ): Promise<LetterHistory[]> {
-    console.log("selectAllLetterHistoryByLetterId");
+    // console.log("selectAllLetterHistoryByLetterId");
     const queryText = this.selectAllSentLetterHistoryByLetterIdQuery;
     const values = [letterId];
     return super.runParameterizedQueryWithValuesArray(queryText, values);
@@ -54,7 +54,7 @@ export class LetterHistoryDbService extends DatabaseService<LetterHistory> {
   async selectAllUnsentLetterHistoryByLetterId(
     letterId: string
   ): Promise<LetterHistory[]> {
-    console.log("selectAllLetterHistoryByLetterId");
+    // console.log("selectAllLetterHistoryByLetterId");
     const queryText = this.selectAllUnsentLetterHistoryByLetterIdQuery;
     const values = [letterId];
     return super.runParameterizedQueryWithValuesArray(queryText, values);
@@ -64,45 +64,46 @@ export class LetterHistoryDbService extends DatabaseService<LetterHistory> {
    * @param letterId letter_id to get letter history for (ids only)
    */
   async selectAllUnsentRecipientsByLetterId(letterId: string): Promise<User[]> {
-    console.log("selectAllLetterHistoryByLetterId");
+    // console.log("selectAllLetterHistoryByLetterId");
     const queryText = this.selectAllUnsentRecipientsByLetterIdQuery;
     const values = [letterId];
     return super.runParameterizedQueryWithValuesArrayUser(queryText, values);
   }
 
   async countRecipientsByLetterId(letterId: string): Promise<Number> {
-    console.log("countRecipientsByLetterId");
+    // console.log("countRecipientsByLetterId");
     const queryText = this.countRecipientsByLetterIdQuery;
     const values = [letterId];
     return super.runParameterizedQueryWithValuesArrayCount(queryText, values);
   }
 
   async updateRecipientsByLetterId(letterId: string, recipients: User[]): Promise<boolean> {
-    console.log("updateRecipientsByLetterId");
+    // console.log("updateRecipientsByLetterId");
     const deleteQueryText = this.deletePreviousRecipientsByLetterId;
     const deleteValues = [letterId];
     const successfulDelete: boolean = await super.runParameterizedQueryWithValuesArrayDelete(deleteQueryText, deleteValues);
-    console.log("successfulDelete", successfulDelete);
+    // console.log("successfulDelete", successfulDelete);
     if (!successfulDelete) return false;
     for (let i = 0; i < recipients.length; i++) {
-      console.log(i, recipients[i]);
+      // console.log(i, recipients[i]);
       const insertQueryText = this.insertRecipientByLetterId;
       const insertValues = [recipients[i].publicAddress, letterId];
       const successfulInsert: boolean = await super.runParameterizedQueryWithValuesArrayInsert(insertQueryText, insertValues);
-      console.log("successfulInsert", successfulInsert);
+      // console.log("successfulInsert", successfulInsert);
       if (!successfulInsert) return false;
     }
     return true;
   }
 
   async insertRecipientsByLetterId(letterId: string, recipients: User[]): Promise<boolean> {
-    console.log("insertRecipientsByLetterId");
+    // console.log("insertRecipientsByLetterId");
+    // console.log(recipients);
     for (let i = 0; i < recipients.length; i++) {
-      console.log(i, recipients[i]);
+      // console.log(i, recipients[i]);
       const insertQueryText = this.insertRecipientByLetterId;
       const insertValues = [recipients[i].publicAddress, letterId];
       const successfulInsert: boolean = await super.runParameterizedQueryWithValuesArrayInsert(insertQueryText, insertValues);
-      console.log("successfulInsert", successfulInsert);
+      // console.log("successfulInsert", successfulInsert);
       if (!successfulInsert) return false;
     }
     return true;
