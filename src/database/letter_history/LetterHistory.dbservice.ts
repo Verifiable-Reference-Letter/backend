@@ -181,15 +181,15 @@ export class LetterHistoryDbService extends DatabaseService<LetterHistory> {
   };
 
   private countRecipientsByLetterIdQuery = {
-    text: "select * from " + sentLetterTableName + " where letter_id = $1;",
+    text: "select * from " + sentLetterTableName + " where letter_id = $1 and sent_at is not NULL;",
   };
 
   private deletePreviousRecipientsByLetterId = {
-    text: "delete from " + sentLetterTableName + " where letter_id = $1 and sent_at is null;"
+    text: "delete from " + sentLetterTableName + " where letter_id = $1 and sent_at is NULL;"
   }
 
   private insertRecipientByLetterId = {
-    text: "insert into " + sentLetterTableName + "(letter_recipient, letter_id, sent_at) values($1, $2, null);"
+    text: "insert into " + sentLetterTableName + "(letter_recipient, letter_id, sent_at) values($1, $2, NULL);"
   }
 
   protected dbRowToDbModel(dbRow: any): LetterHistory {
