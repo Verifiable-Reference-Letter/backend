@@ -160,6 +160,43 @@ router.post("/:letterId/updateRecipients", async (req, res, next) => {
   }
 });
 
+router.post("/create", async (req, res, next) => {
+  const auth = req.body["auth"];
+  console.log(auth);
+  console.log(req.params.letterId);
+  console.log("creating new letter based on letter details");
+  const data = req.body["data"];
+  console.log(data);
+
+  // const letterId = Math.random().toString(36);
+  const currentDate = Date();
+  // console.log(currentDate);
+  // console.log(new Date(currentDate));
+  const letterId = (currentDate + Math.random()).substring(0, 36);
+  const insertLetterSuccess: boolean = await letterDbService.insertLetterByAddressAndLetterDetails(
+    letterId,
+    auth.publicAddress,
+    data.letterWriter,
+    currentDate
+  );
+  console.log("insertLetterSuccess", insertLetterSuccess);
+  if (insertLetterSuccess) {
+    const insertSentLetterSuccess: boolean = await letterHistoryDbService.insertRecipientsByLetterId(letterId, data.selectedRecipients);
+    console.log("insertSentLetterSuccess", insertSentLetterSuccess)
+    if (insertSentLetterSuccess) {
+      const letterModels: Letter[] = await letterDbService.selectAllLettersByAddressAndRole(auth.publicAddress, UserRole.Requestor);
+      console.log(letterModels);
+      res.json({ data: letterModels });
+    } else {
+      res.status(400);
+      res.json({ data: {} });
+    }
+  } else {
+    res.status(400);
+    res.json({ data: {} });
+  }
+});
+
 router.post("/:letterId/contents", async (req, res, next) => {
   console.log(req.body["auth"]);
   console.log(req.params.letterId);

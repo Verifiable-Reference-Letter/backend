@@ -95,6 +95,19 @@ export class LetterHistoryDbService extends DatabaseService<LetterHistory> {
     return true;
   }
 
+  async insertRecipientsByLetterId(letterId: string, recipients: User[]): Promise<boolean> {
+    console.log("insertRecipientsByLetterId");
+    for (let i = 0; i < recipients.length; i++) {
+      console.log(i, recipients[i]);
+      const insertQueryText = this.insertRecipientByLetterId;
+      const insertValues = [recipients[i].publicAddress, letterId];
+      const successfulInsert: boolean = await super.runParameterizedQueryWithValuesArrayInsert(insertQueryText, insertValues);
+      console.log("successfulInsert", successfulInsert);
+      if (!successfulInsert) return false;
+    }
+    return true;
+  }
+
   private selectAllLetterHistoryByLetterRecipientQuery = {
     text:
       "select distinct L.letter_id, L.letter_requestor, U.name as letter_requestor_name, L.letter_writer, V.name as letter_writer_name, L.requested_at, L.uploaded_at, S.letter_recipient, W.name as letter_recipient_name, S.sent_at from " +

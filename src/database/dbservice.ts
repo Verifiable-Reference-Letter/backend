@@ -233,6 +233,26 @@ export abstract class DatabaseService<DatabaseModel> {
     return true;
   }
 
+  protected async runParameterizedQueryWithValuesArrayUpdate(
+    queryText: any,
+    values: any[]
+  ): Promise<boolean> {
+    const client = new Client(this.clientCredentials);
+    client.connect();
+    try {
+      await client.query(
+        queryText,
+        values,
+      );
+    } catch (err) {
+      console.log(err.stack);
+      return false;
+    } finally {
+      client.end().then(() => console.log("client has disconnected"));
+    }
+    return true;
+  }
+
 
   protected abstract dbRowToDbModel(dbRow: any): DatabaseModel;
 
