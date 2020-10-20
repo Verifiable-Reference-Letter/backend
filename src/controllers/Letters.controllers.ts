@@ -111,13 +111,7 @@ router.post("/:letterId/unsent", async (req, res, next) => {
     req.params.letterId
   );
   console.log(letterHistoryModels);
-
-  if (letterHistoryModels.length !== 0) {
-    res.json({ data: letterHistoryModels });
-  } else {
-    res.status(400);
-    res.json({ data: letterHistoryModels });
-  }
+  res.json({ data: letterHistoryModels });
 });
 
 router.post("/:letterId/unsentRecipients", async (req, res, next) => {
@@ -129,13 +123,7 @@ router.post("/:letterId/unsentRecipients", async (req, res, next) => {
     req.params.letterId
   );
   console.log(userModels);
-
-  if (userModels.length !== 0) {
-    res.json({ data: userModels });
-  } else {
-    res.status(400);
-    res.json({ data: userModels });
-  }
+  res.json({ data: userModels });
 });
 
 router.post("/:letterId/updateRecipients", async (req, res, next) => {
@@ -181,10 +169,16 @@ router.post("/create", async (req, res, next) => {
   );
   console.log("insertLetterSuccess", insertLetterSuccess);
   if (insertLetterSuccess) {
-    const insertSentLetterSuccess: boolean = await letterHistoryDbService.insertRecipientsByLetterId(letterId, data.selectedRecipients);
-    console.log("insertSentLetterSuccess", insertSentLetterSuccess)
+    const insertSentLetterSuccess: boolean = await letterHistoryDbService.insertRecipientsByLetterId(
+      letterId,
+      data.selectedRecipients
+    );
+    console.log("insertSentLetterSuccess", insertSentLetterSuccess);
     if (insertSentLetterSuccess) {
-      const letterModels: Letter[] = await letterDbService.selectAllLettersByAddressAndRole(auth.publicAddress, UserRole.Requestor);
+      const letterModels: Letter[] = await letterDbService.selectAllLettersByAddressAndRole(
+        auth.publicAddress,
+        UserRole.Requestor
+      );
       console.log(letterModels);
       res.json({ data: letterModels });
     } else {
