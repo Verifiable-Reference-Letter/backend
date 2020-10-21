@@ -6,6 +6,7 @@ import { User } from "../database/users/User.dbmodel";
 import { LetterHistoryDbService } from "../database/letter_history/LetterHistory.dbservice";
 import { UserRole } from "../database/users/UserRole";
 import { LetterDbService } from "../database/letters/Letter.dbservice";
+import { AuthModule } from "../modules/Auth.module"; 
 const router = express.Router();
 
 const letterDbService: LetterDbService = new LetterDbService();
@@ -13,12 +14,14 @@ const letterHistoryDbService: LetterHistoryDbService = new LetterHistoryDbServic
 
 // TODO: change these to get the user id from a verified JWT token once we implement logging in functionality
 
+router.use(AuthModule.verifyUser);
+
 router.post("/requested", async (req, res, next) => {
   // TODO: check JWT
   // console.log(req.body["auth"]);
   // console.log("get letters for requestor");
   const letterModels: Letter[] = await letterDbService.selectAllLettersByAddressAndRole(
-    req.body["auth"].publicAddress,
+    res.locals.jwtPayload.publicAddress,
     UserRole.Requestor
   );
   // console.log(letterModels);
@@ -35,18 +38,25 @@ router.post("/requested", async (req, res, next) => {
   // console.log(numRecipients);
 
   if (letterModels.length !== 0) {
-    res.json({ data: { letters: letterModels, numRecipients: numRecipients } });
+    res.json(
+      { 
+      auth: { 
+        jwtToken: res.locals.newJwtToken
+      }, 
+      data: { 
+        letters: letterModels, 
+        numRecipients: numRecipients 
+      } 
+      });
   } else {
     res.status(400);
   }
 });
 
 router.post("/written", async (req, res, next) => {
-  // TODO: check JWT
-  // console.log(req.body["auth"]);
   // console.log("get letters for writer");
   const letterModels: Letter[] = await letterDbService.selectAllLettersByAddressAndRole(
-    req.body["auth"].publicAddress,
+    res.locals.jwtPayload.publicAddress,
     UserRole.Writer
   );
   // console.log(letterModels);
@@ -63,31 +73,42 @@ router.post("/written", async (req, res, next) => {
   // console.log(numRecipients);
 
   if (letterModels.length !== 0) {
-    res.json({ data: { letters: letterModels, numRecipients: numRecipients } });
+    res.json(
+      { 
+      auth: { 
+        jwtToken: res.locals.newJwtToken
+      }, 
+      data: { 
+        letters: letterModels, 
+        numRecipients: numRecipients 
+      } 
+      });
   } else {
     res.status(400);
   }
 });
 
 router.post("/received", async (req, res, next) => {
-  // TODO: check JWT
-  // console.log(req.body["auth"]);
   // console.log("get letter history for recipient");
   const letterHistoryModels: LetterHistory[] = await letterHistoryDbService.selectAllLetterHistoryByLetterRecipient(
-    req.body["auth"].publicAddress
+    res.locals.jwtPayload.publicAddress
   );
   // console.log(letterHistoryModels);
 
   if (letterHistoryModels.length !== 0) {
-    res.json({ data: letterHistoryModels });
+    res.json(
+      { 
+      auth: { 
+        jwtToken: res.locals.newJwtToken
+      }, 
+      data: letterHistoryModels
+      });
   } else {
     res.status(400);
   }
 });
 
 router.post("/:letterId/history", async (req, res, next) => {
-  // TODO: check JWT
-  // console.log(req.body["auth"]);
   // console.log(req.params.letterId);
   // console.log("get letter history for given letter_id");
   const letterHistoryModels: LetterHistory[] = await letterHistoryDbService.selectAllSentLetterHistoryByLetterId(
@@ -96,23 +117,39 @@ router.post("/:letterId/history", async (req, res, next) => {
   // console.log(letterHistoryModels);
 
   if (letterHistoryModels.length !== 0) {
-    res.json({ data: letterHistoryModels });
+    res.json(
+      { 
+      auth: { 
+        jwtToken: res.locals.newJwtToken
+      }, 
+      data: letterHistoryModels 
+      });
   } else {
     res.status(400);
-    res.json({ data: letterHistoryModels });
+    res.json(
+      { 
+      auth: { 
+        jwtToken: res.locals.newJwtToken
+      }, 
+      data: letterHistoryModels 
+    });
   }
 });
 
 router.post("/:letterId/unsent", async (req, res, next) => {
-  // TODO: check JWT
-  // console.log(req.body["auth"]);
   // console.log(req.params.letterId);
   // console.log("get unsent letter history for given letter_id");
   const letterHistoryModels: LetterHistory[] = await letterHistoryDbService.selectAllUnsentLetterHistoryByLetterId(
     req.params.letterId
   );
   // console.log(letterHistoryModels);
-  res.json({ data: letterHistoryModels });
+  res.json(
+    { 
+    auth: { 
+      jwtToken: res.locals.newJwtToken
+    }, 
+    data: letterHistoryModels 
+  });
 });
 
 router.post("/:letterId/unsentRecipients", async (req, res, next) => {
@@ -124,12 +161,16 @@ router.post("/:letterId/unsentRecipients", async (req, res, next) => {
     req.params.letterId
   );
   // console.log(userModels);
-  res.json({ data: userModels });
+    res.json(
+    { 
+    auth: { 
+      jwtToken: res.locals.newJwtToken
+    }, 
+    data: userModels 
+  });
 });
 
 router.post("/:letterId/updateRecipients", async (req, res, next) => {
-  // TODO: check JWT
-  // console.log(req.body["auth"]);
   // console.log(req.params.letterId);
   // console.log("get unsent recipients for given letter_id");
   const success: boolean = await letterHistoryDbService.updateRecipientsByLetterId(
@@ -142,16 +183,26 @@ router.post("/:letterId/updateRecipients", async (req, res, next) => {
       req.params.letterId
     );
     // console.log(userModels);
-    res.json({ data: userModels });
+    res.json(
+      { 
+      auth: { 
+        jwtToken: res.locals.newJwtToken
+      }, 
+      data: userModels 
+    });
   } else {
     res.status(400);
-    res.json({ data: {} });
+    res.json(
+      { 
+      auth: { 
+        jwtToken: res.locals.newJwtToken
+      }, 
+      data: {} 
+    });
   }
 });
 
 router.post("/create", async (req, res, next) => {
-  const auth = req.body["auth"];
-  // console.log(auth);
   // console.log("creating new letter based on letter details");
   const data = req.body["data"];
   // console.log(data);
@@ -165,7 +216,7 @@ router.post("/create", async (req, res, next) => {
   // console.log(letterId);
   const insertLetterSuccess: boolean = await letterDbService.insertLetterByAddressAndLetterDetails(
     letterId,
-    auth.publicAddress,
+    res.locals.jwtPayload.publicAddress,
     data.letterWriter,
     currentDate
   );
@@ -178,7 +229,7 @@ router.post("/create", async (req, res, next) => {
     // console.log("insertSentLetterSuccess", insertSentLetterSuccess);
     if (insertSentLetterSuccess) {
       const letterModels: Letter[] = await letterDbService.selectAllLettersByAddressAndRole(
-        auth.publicAddress,
+        res.locals.jwtPayload.publicAddress,
         UserRole.Requestor
       );
       let numRecipients: Number[] = [];
@@ -191,14 +242,35 @@ router.post("/create", async (req, res, next) => {
       }
       // console.log(letterModels);
       // console.log(numRecipients);
-      res.json({ data: {letters: letterModels, numRecipients: numRecipients}});
+      res.json(
+        { 
+        auth: { 
+          jwtToken: res.locals.newJwtToken
+        }, 
+        data: { 
+          letters: letterModels, 
+          numRecipients: numRecipients 
+        } 
+        });
     } else {
       res.status(400);
-      res.json({ data: {} });
+      res.json(
+        { 
+        auth: { 
+          jwtToken: res.locals.newJwtToken
+        }, 
+        data: {} 
+      });
     }
   } else {
     res.status(400);
-    res.json({ data: {} });
+    res.json(
+      { 
+      auth: { 
+        jwtToken: res.locals.newJwtToken
+      }, 
+      data: {} 
+    });
   }
 });
 
