@@ -5,6 +5,11 @@ import { KJUR, utf8tohex } from "jsrsasign";
 //import  * as jwt from "jsonwebtoken";
 import * as EthUtil from "ethereumjs-util";
 import * as EthTx from "ethereumjs-tx";
+import { Request, Response, NextFunction } from "express";
+import * as jwt from "jsonwebtoken";
+
+// TODO: change this to be hidden
+const jwtKey: string = "my private key";
 
 export class AuthModule {
   private userAuthDbService: UserAuthDbService;
@@ -16,7 +21,7 @@ export class AuthModule {
     this.sessionMap = new Map();
   }
 
-  async authorizeUser(signature: string, publicAddress: string) {
+  async authorizeUser(signature: string, publicAddress: string): Promise<boolean> {
     let userModel = await this.userAuthDbService.selectOneRowByPrimaryId(publicAddress);
     const sig = signature.slice(2, signature.length);
     // const offset = 2;
@@ -102,4 +107,33 @@ export class AuthModule {
     //   "0x" + publicKey
     // );
   }
+
+  static verifyUser (req: Request, res: Response, next: NextFunction) {
+    const token = req.body.auth.jwtToken;
+    let jwtPayload;
+
+    // Attempt to validate the token and get public address
+    try {
+        jwtPayload = jwt.verify(token, jwtKey);
+        res.locals.jwtPayload = jwtPayload;
+    }
+    catch (e) {
+      if (e instanceof jwt.JsonWebTokenError) {
+        // JWT is unauthorized
+        return res.status(401).end()
+      }
+      // Bad request errror
+      return res.status(400).end()
+    }
+
+    // Refresh the users token on request
+    const publicAddress = jwtPayload;
+    const newToken = jwt.sign({ publicAddress }, jwtKey, {
+      expiresIn: "1h"
+    });
+    res.locals.newJwtToken = newToken;
+  
+    next()
+  }
+
 }
