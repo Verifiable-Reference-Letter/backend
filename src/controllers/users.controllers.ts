@@ -4,8 +4,8 @@ import { User } from "../database/users/User.dbmodel";
 import { UserProfile } from "../database/users/UserProfile.dbmodel";
 import { UserProfileDbService } from "../database/users/UserProfile.dbservice";
 import { AuthModule } from "../modules/Auth.module"; 
-const router = express.Router();
 
+const router = express.Router();
 const userDbService: UserDbService = new UserDbService();
 const userProfileDbService: UserProfileDbService = new UserProfileDbService();
 
