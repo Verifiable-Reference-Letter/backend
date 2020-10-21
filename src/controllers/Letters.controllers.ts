@@ -2,6 +2,7 @@ import express from "express";
 import { v4 as uuid } from "uuid";
 import { LetterHistory } from "../database/letter_history/LetterHistory.dbmodel";
 import { Letter } from "../database/letters/Letter.dbmodel";
+import { LetterContents } from "../database/letter_contents/LetterContents.dbmodel";
 import { User } from "../database/users/User.dbmodel";
 import { LetterHistoryDbService } from "../database/letter_history/LetterHistory.dbservice";
 import { UserRole } from "../database/users/UserRole";
@@ -150,6 +151,7 @@ router.post("/:letterId/updateRecipients", async (req, res, next) => {
 });
 
 router.post("/create", async (req, res, next) => {
+  // TODO: check JWT
   const auth = req.body["auth"];
   // console.log(auth);
   // console.log("creating new letter based on letter details");
@@ -191,7 +193,9 @@ router.post("/create", async (req, res, next) => {
       }
       // console.log(letterModels);
       // console.log(numRecipients);
-      res.json({ data: {letters: letterModels, numRecipients: numRecipients}});
+      res.json({
+        data: { letters: letterModels, numRecipients: numRecipients },
+      });
     } else {
       res.status(400);
       res.json({ data: {} });
@@ -202,29 +206,85 @@ router.post("/create", async (req, res, next) => {
   }
 });
 
-router.post("/:letterId/contents", async (req, res, next) => {
-  // console.log(req.body["auth"]);
-  // console.log(req.params.letterId);
-  // console.log("get letter contents for given letterId");
+router.post("/:letterId/contents/writer", async (req, res, next) => {
+  // TODO: check JWT
+
+  console.log(req.body["auth"]);
+  console.log(req.params.letterId);
+  console.log("get letter contents for given letterId");
   // TODO: make sure below function checks that letterId is valid id for this user to update
-  //   const success: boolean = await letterModule.getLetterContentsByLetterId(
-  //     req.params.letterId
-  //   );
-  //   console.log(success);
-  //   if (!success) res.status(400);
+  const letterContents: LetterContents[] = await letterDbService.selectLetterContentsByLetterIdAndWriterId(
+    req.params.letterId,
+    req.body["auth"].publicAddress
+  );
+  console.log(letterContents.length);
+  if (letterContents && letterContents.length > 0) {
+    console.log(letterContents[0].content?.length);
+    res.json({ data: letterContents[0].content });
+  } else {
+    res.status(400);
+    res.json({ data: {} });
+  }
+});
+
+router.post("/:letterId/contents/recipient", async (req, res, next) => {
+  // TODO: check JWT
+  console.log(req.body["auth"]);
+  console.log(req.params.letterId);
+  console.log("get letter contents for given letterId");
+  const letterContents: LetterContents[] = await letterHistoryDbService.selectLetterContentsByLetterIdAndRecipientId(
+    req.params.letterId,
+    req.body["auth"].publicAddress
+  );
+  console.log(letterContents.length);
+  if (letterContents && letterContents.length > 0) {
+    console.log(letterContents[0].content?.length);
+    res.json({ data: letterContents[0].content });
+  } else {
+    res.status(400);
+    res.json({ data: {} });
+  }
 });
 
 router.post("/:letterId/contents/update", async (req, res, next) => {
   // TODO: check JWT
-  // console.log(req.body["auth"]);
-  // console.log(req.params.letterId);
-  // console.log("update letter contents for given letterId");
-  // TODO: make sure below function checks that letterId is valid id for this user to update
-  //   const success: boolean = await letterModule.updateLetterContentsByLetterId(
-  //     req.params.letterId
-  //   );
-  //   console.log(success);
-  //   if (!success) res.status(400);
+  console.log(req.body["auth"]);
+  console.log(req.params.letterId);
+  console.log("update letter contents for given letterId");
+  const currentDate = Date();
+  const numRecipients: Number = await letterHistoryDbService.countRecipientsByLetterId(
+    req.params.letterId
+  );
+
+  if (numRecipients === 0) {
+    const success: boolean = await letterDbService.updateLetterContentsByLetterIdAndWriterId(
+      req.body["data"],
+      currentDate,
+      req.params.letterId,
+      req.body["auth"].publicAddress
+    );
+    console.log(success);
+    if (!success) {
+      res.status(400);
+      res.json({ data: {} });
+    } else {
+      // res.json({ data: {} });
+      const letters: Letter[] = await letterDbService.selectAllLettersByAddressAndRole(
+        req.body["auth"].publicAddress,
+        UserRole.Writer
+      );
+      if (letters) {
+        res.json({ data: letters });
+      } else {
+        res.status(400);
+        res.json({ data: {} });
+      }
+    }
+  } else {
+    console.log("invalid action: not allowed to update letter content of letter already sent to >= 1 recipient");
+    res.status(400);
+    res.json({ data: {} });
+  }
 });
 
 export { router };

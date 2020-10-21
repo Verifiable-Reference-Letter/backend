@@ -1,5 +1,6 @@
 import { Client } from "pg";
 import { User } from "./users/User.dbmodel";
+import { LetterContents } from "./letter_contents/LetterContents.dbmodel";
 
 export abstract class DatabaseService<DatabaseModel> {
   protected client: Client;
@@ -29,7 +30,11 @@ export abstract class DatabaseService<DatabaseModel> {
         console.log(jsonRow);
         this.dbModels.push(this.dbRowToDbModel(row));
       }
-      this.dbModels.filter((value: any) => Object.keys(value).length !== 0);
+      this.dbModels.filter((value: any) => {
+        if (value) {
+          Object.keys(value).length !== 0;
+        }
+      });
       this.dbModels.map((value, index) => {
         console.log("Db Model " + index + ": ");
         console.dir(value);
@@ -80,7 +85,11 @@ export abstract class DatabaseService<DatabaseModel> {
         console.log(jsonRow);
         dbModels.push(this.dbRowToDbModel(row));
       }
-      dbModels.filter((value: any) => Object.keys(value).length !== 0);
+      dbModels.filter((value: any) => {
+        if (value) {
+          Object.keys(value).length !== 0;
+        }
+      });
       dbModels.map((value, index) => {
         console.log("Db Model " + index + ": ");
         console.dir(value);
@@ -109,53 +118,29 @@ export abstract class DatabaseService<DatabaseModel> {
     }
   }
 
-  protected async runParameterizedQueryWithValuesArrayString(
+  protected async runParameterizedQueryWithValuesArrayContents(
     queryText: any,
     values: any[]
-  ): Promise<string[]> {
+  ): Promise<LetterContents[]> {
     const client = new Client(this.clientCredentials);
-    const models: string[] = [];
+    const models: LetterContents[] = [];
     client.connect();
     try {
       const res = await client.query(queryText, values);
-      let jsonRow;
+      // let jsonRow;
       for (const row of res.rows) {
-        jsonRow = JSON.stringify(row);
-        console.log(jsonRow);
-        models.push(row[0]);
+        // jsonRow = JSON.stringify(row);
+        // console.log(jsonRow);
+        models.push(LetterContents.dbRowToDbModel(row));
       }
-      models.filter((value: any) => Object.keys(value).length !== 0);
-      models.map((value, index) => {
-        console.log("Db Model " + index + ": ");
-        console.dir(value);
+      models.filter((value: any) => {
+        if (value) {
+          Object.keys(value).length !== 0;
+        }
       });
-      return models;
-    } catch (err) {
-      console.log(err.stack);
-    } finally {
-      client.end().then(() => console.log("client has disconnected"));
-    }
-  }
-
-  protected async runParameterizedQueryWithValuesArrayNumber(
-    queryText: any,
-    values: any[]
-  ): Promise<number[]> {
-    const client = new Client(this.clientCredentials);
-    const models: number[] = [];
-    client.connect();
-    try {
-      const res = await client.query(queryText, values);
-      let jsonRow;
-      for (const row of res.rows) {
-        jsonRow = JSON.stringify(row);
-        console.log(jsonRow);
-        models.push(row[0]);
-      }
-      models.filter((value: any) => Object.keys(value).length !== 0);
       models.map((value, index) => {
         console.log("Db Model " + index + ": ");
-        console.dir(value);
+        // console.dir(value);
       });
       return models;
     } catch (err) {
@@ -180,7 +165,11 @@ export abstract class DatabaseService<DatabaseModel> {
         console.log(jsonRow);
         models.push(User.dbRowToDbModel(row));
       }
-      models.filter((value: any) => Object.keys(value).length !== 0);
+      models.filter((value: any) => {
+        if (value) {
+          Object.keys(value).length !== 0;
+        }
+      });
       models.map((value, index) => {
         console.log("Db Model " + index + ": ");
         console.dir(value);
@@ -193,6 +182,7 @@ export abstract class DatabaseService<DatabaseModel> {
     }
   }
 
+
   protected async runParameterizedQueryWithValuesArrayInsert(
     queryText: any,
     values: any[]
@@ -200,10 +190,7 @@ export abstract class DatabaseService<DatabaseModel> {
     const client = new Client(this.clientCredentials);
     client.connect();
     try {
-      await client.query(
-        queryText,
-        values,
-      );
+      await client.query(queryText, values);
     } catch (err) {
       console.log(err.stack);
       return false;
@@ -220,10 +207,7 @@ export abstract class DatabaseService<DatabaseModel> {
     const client = new Client(this.clientCredentials);
     client.connect();
     try {
-      await client.query(
-        queryText,
-        values,
-      );
+      await client.query(queryText, values);
     } catch (err) {
       console.log(err.stack);
       return false;
@@ -240,10 +224,7 @@ export abstract class DatabaseService<DatabaseModel> {
     const client = new Client(this.clientCredentials);
     client.connect();
     try {
-      await client.query(
-        queryText,
-        values,
-      );
+      await client.query(queryText, values);
     } catch (err) {
       console.log(err.stack);
       return false;
@@ -252,7 +233,6 @@ export abstract class DatabaseService<DatabaseModel> {
     }
     return true;
   }
-
 
   protected abstract dbRowToDbModel(dbRow: any): DatabaseModel;
 

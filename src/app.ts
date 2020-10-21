@@ -16,7 +16,11 @@ import { router as usersRouter } from './controllers/users.controllers';
 import { router as lettersRouter } from './controllers/Letters.controllers';
 import { router as authRouter } from './controllers/Auth.controllers';
 
-app.use(bodyParser.json());
+// app.use(bodyParser.json());
+// fixes request payload too large error
+app.use(bodyParser.json({ limit: "50mb" }))
+app.use(bodyParser.urlencoded({ limit: "50mb", extended: true, parameterLimit: 50000 }))
+
 app.use(express.static(path.join(__dirname, '../build')));
 app.use(cors());
 

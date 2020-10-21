@@ -1,5 +1,6 @@
 import { DatabaseService } from "../dbservice";
 import { LetterHistory } from "./LetterHistory.dbmodel";
+import { LetterContents } from "../letter_contents/LetterContents.dbmodel";
 import { User } from "../users/User.dbmodel";
 
 const sentLetterTableName = "sent_letters";
@@ -77,37 +78,83 @@ export class LetterHistoryDbService extends DatabaseService<LetterHistory> {
     return super.runParameterizedQueryWithValuesArrayCount(queryText, values);
   }
 
-  async updateRecipientsByLetterId(letterId: string, recipients: User[]): Promise<boolean> {
+  async updateRecipientsByLetterId(
+    letterId: string,
+    recipients: User[]
+  ): Promise<boolean> {
     // console.log("updateRecipientsByLetterId");
-    const deleteQueryText = this.deletePreviousRecipientsByLetterId;
+    const deleteQueryText = this.deletePreviousRecipientsByLetterIdQuery;
     const deleteValues = [letterId];
-    const successfulDelete: boolean = await super.runParameterizedQueryWithValuesArrayDelete(deleteQueryText, deleteValues);
+    const successfulDelete: boolean = await super.runParameterizedQueryWithValuesArrayDelete(
+      deleteQueryText,
+      deleteValues
+    );
     // console.log("successfulDelete", successfulDelete);
     if (!successfulDelete) return false;
     for (let i = 0; i < recipients.length; i++) {
+      const selectQueryText = this
+        .selectAllLetterHistoryByLetterIdAndRecipientIdQuery;
+      const selectValues = [letterId, recipients[i].publicAddress];
+      const successfulSelect: LetterHistory[] = await super.runParameterizedQueryWithValuesArray(
+        selectQueryText,
+        selectValues
+      );
+      if (successfulSelect && successfulSelect.length > 0) {
+        continue;
+        // TODO: should return error notifying user that can't add recipient already sent to
+        // Then again, this shouldn't be allowed to happen on the frontend
+      }
+
       // console.log(i, recipients[i]);
-      const insertQueryText = this.insertRecipientByLetterId;
+      const insertQueryText = this.insertRecipientByLetterIdQuery;
       const insertValues = [recipients[i].publicAddress, letterId];
-      const successfulInsert: boolean = await super.runParameterizedQueryWithValuesArrayInsert(insertQueryText, insertValues);
+      const successfulInsert: boolean = await super.runParameterizedQueryWithValuesArrayInsert(
+        insertQueryText,
+        insertValues
+      );
       // console.log("successfulInsert", successfulInsert);
       if (!successfulInsert) return false;
     }
     return true;
   }
 
-  async insertRecipientsByLetterId(letterId: string, recipients: User[]): Promise<boolean> {
+  async insertRecipientsByLetterId(
+    letterId: string,
+    recipients: User[]
+  ): Promise<boolean> {
     // console.log("insertRecipientsByLetterId");
     // console.log(recipients);
     for (let i = 0; i < recipients.length; i++) {
       // console.log(i, recipients[i]);
-      const insertQueryText = this.insertRecipientByLetterId;
+      const insertQueryText = this.insertRecipientByLetterIdQuery;
       const insertValues = [recipients[i].publicAddress, letterId];
-      const successfulInsert: boolean = await super.runParameterizedQueryWithValuesArrayInsert(insertQueryText, insertValues);
+      const successfulInsert: boolean = await super.runParameterizedQueryWithValuesArrayInsert(
+        insertQueryText,
+        insertValues
+      );
       // console.log("successfulInsert", successfulInsert);
       if (!successfulInsert) return false;
     }
     return true;
   }
+
+  async selectLetterContentsByLetterIdAndRecipientId(
+    letterId: string,
+    letterWriter: string
+  ): Promise<LetterContents[]> {
+    const queryText = this.selectLetterContentsByLetterIdAndRecipientIdQuery;
+    const values = [letterId, letterWriter];
+    return super.runParameterizedQueryWithValuesArrayContents(
+      queryText,
+      values
+    );
+  }
+
+  // async updateLetterContentsByRecipientIdAndLetterId(letterContents: string, letterId: string, letterRecipient: string): Promise<boolean> {
+  //   const queryText = this.updateLetterContentsByRecipientIdAndLetterIdQuery;
+  //   const values = [letterContents, letterId, letterRecipient];
+  //   return super.runParameterizedQueryWithValuesArrayUpdate(queryText, values);
+  // }
 
   private selectAllLetterHistoryByLetterRecipientQuery = {
     text:
@@ -181,16 +228,50 @@ export class LetterHistoryDbService extends DatabaseService<LetterHistory> {
   };
 
   private countRecipientsByLetterIdQuery = {
-    text: "select * from " + sentLetterTableName + " where letter_id = $1 and sent_at is not NULL;",
+    text:
+      "select * from " +
+      sentLetterTableName +
+      " where letter_id = $1 and sent_at is not NULL;",
   };
 
-  private deletePreviousRecipientsByLetterId = {
-    text: "delete from " + sentLetterTableName + " where letter_id = $1 and sent_at is NULL;"
-  }
+  private deletePreviousRecipientsByLetterIdQuery = {
+    text:
+      "delete from " +
+      sentLetterTableName +
+      " where letter_id = $1 and sent_at is NULL;",
+  };
 
-  private insertRecipientByLetterId = {
-    text: "insert into " + sentLetterTableName + "(letter_recipient, letter_id, sent_at) values($1, $2, NULL);"
-  }
+  private selectAllLetterHistoryByLetterIdAndRecipientIdQuery = {
+    text:
+      "select * from " +
+      sentLetterTableName +
+      " where letter_id = $1 and letter_recipient = $2 and sent_at is not NULL;",
+  };
+
+  private insertRecipientByLetterIdQuery = {
+    text:
+      "insert into " +
+      sentLetterTableName +
+      "(letter_recipient, letter_id, sent_at) values($1, $2, NULL);",
+  };
+
+  private selectLetterContentsByLetterIdAndRecipientIdQuery = {
+    text:
+      "select distinct letter_contents from " +
+      letterTableName +
+      " as L join " +
+      sentLetterTableName +
+      " as S on L.letter_id = S.letter_id where L.letter_id = $1 and S.letter_recipient = $2;",
+  };
+
+  // private updateLetterContentsByRecipientIdAndLetterIdQuery = {
+  //   text:
+  //     "update " +
+  //     letterTableName +
+  //     " as L set L.contents = $1 from " +
+  //     sentLetterTableName +
+  //     " as S where L.letter_id = S.letter_id and L.letter_id = $2 and S.letter_recipient = $3;",
+  // };
 
   protected dbRowToDbModel(dbRow: any): LetterHistory {
     return LetterHistory.dbRowToDbModel(dbRow);
