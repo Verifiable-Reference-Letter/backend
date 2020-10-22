@@ -57,6 +57,6 @@ export class UserAuthDbService extends DatabaseService<UserAuth> {
     text:
       "select public_address, name, nonce from " +
       userTableName +
-      " where public_address = $1",
+      " where public_address = $1;",
   };
 }

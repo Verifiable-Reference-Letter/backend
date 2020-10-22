@@ -7,22 +7,31 @@ import * as EthUtil from "ethereumjs-util";
 import * as EthTx from "ethereumjs-tx";
 import { Request, Response, NextFunction } from "express";
 import * as jwt from "jsonwebtoken";
+import { UserKey } from "../database/users/UserKey.dbmodel";
+import { UserKeyDbService } from "../database/users/UserKey.dbservice";
 
 // TODO: change this to be hidden
 const jwtKey: string = "my private key";
 
 export class AuthModule {
   private userAuthDbService: UserAuthDbService;
-  private sessionMap: Map<string, Date>;
-  private jwtKey: string;
+  private userKeyDbService: UserKeyDbService;
+  // private sessionMap: Map<string, Date>;
+  // private jwtKey: string;
 
   constructor() {
     this.userAuthDbService = new UserAuthDbService();
-    this.sessionMap = new Map();
+    this.userKeyDbService = new UserKeyDbService();
+    // this.sessionMap = new Map();
   }
 
-  async authorizeUser(signature: string, publicAddress: string): Promise<boolean> {
-    let userModel = await this.userAuthDbService.selectOneRowByPrimaryId(publicAddress);
+  async authorizeUser(
+    signature: string,
+    publicAddress: string
+  ): Promise<boolean> {
+    let userModel = await this.userAuthDbService.selectOneRowByPrimaryId(
+      publicAddress
+    );
     const sig = signature.slice(2, signature.length);
     // const offset = 2;
     // const r = signature.slice(0 + offset, 64 + offset);
@@ -47,93 +56,74 @@ export class AuthModule {
     // console.log("hash", hash);
     // console.log("hash2", hash2);
     const sg = EthUtil.fromRpcSig(signature); // YES
- 
+
     // const prefix = "\x19Ethereum Signed Message:\n" + nonce.length;
     // const prefix ="\x19Ethereum Signed Message:\n32"; //+ String.fromCharCode(hash.length);
     // const prefixedHash = EthUtil.keccak256(prefix + hash);
     // console.log("prefixedHash", prefixedHash.toString("hex"));
-    const pub = EthUtil.ecrecover(
-        //  prefixedHash,
-        // messageHash.digest(),
-        Buffer.from(hash, "hex"),
-        //   EthUtil.toBuffer(EthUtil.keccak256(prefixedNonce)),
-        sg.v,
-        // new Buffer("0x" + sg.r.toString("hex")),
-        // new Buffer("0x" + sg.s.toString("hex")),
-        sg.r,
-        sg.s,
+    const publicKey = EthUtil.ecrecover(
+      //  prefixedHash,
+      // messageHash.digest(),
+      Buffer.from(hash, "hex"),
+      //   EthUtil.toBuffer(EthUtil.keccak256(prefixedNonce)),
+      sg.v,
+      // new Buffer("0x" + sg.r.toString("hex")),
+      // new Buffer("0x" + sg.s.toString("hex")),
+      sg.r,
+      sg.s
     );
-    const pubAddress = EthUtil.bufferToHex(EthUtil.pubToAddress(pub));
+    const pubAddress = EthUtil.bufferToHex(EthUtil.pubToAddress(publicKey));
     // console.log("sg.v", sg.v);
     // console.log("sg.r", sg.r.toString("hex"));
     // console.log("sg.s", sg.s.toString("hex"));
-    // console.log("pub", pub.toString("hex"));
+    // console.log("publicKey", "0x" + publicKey.toString("hex"));
     // console.log("pubAddress", pubAddress);
-
-    return EthUtil.toChecksumAddress(pubAddress) === EthUtil.toChecksumAddress(publicAddress);
-
-    // let ec2 = new KJUR.crypto.ECDSA({ curve: "secp256k1" });
-    // let result = ec2.verifyHex(
-    //   messageHash.toString("hex"),
-    //   sig,
-    //   pub.toString("hex")
-    // );
-
-    // let result2 = ec2.verifyHex(
-    //   "0x" + messageHash.toString("hex"),
-    //   signature,
-    //   "0x" + pub.toString("hex")
-    // )
-    // console.log(result);
-    // console.log(result2);
-
-    // const pk = EthUtil.ecrecover(
-    //   messageHash.digest(),
-    //   v,
-    //   Buffer.from(r, "utf8"),
-    //   Buffer.from(s, "utf8")
-    // );
-    // const publicKey = pk.toString("hex");
-    // console.log("publickey", publicKey);
-
-    // const pkHash = new Keccak(256);
-    // pkHash.update(publicKey);
-    // console.log("address?", pkHash.digest("hex"));
-    // console.log("hash", messageHash.digest("hex"));
-    // let ec = new KJUR.crypto.ECDSA({ curve: "secp256r1" });
-    // let result = ec.verifyHex(
-    //   "0x" + messageHash.digest("hex"),
-    //   signature,
-    //   "0x" + publicKey
-    // );
+    if (
+      EthUtil.toChecksumAddress(pubAddress) ===
+      EthUtil.toChecksumAddress(publicAddress)
+    ) {
+      // TODO: differentiate between failed verification and failed update of public key
+      const userKey: UserKey = await this.userKeyDbService.selectUserKey(
+        publicAddress
+      );
+      if (!userKey || userKey.publicKey === null) {
+        const successfulUpdate = await this.userKeyDbService.updateUserKey(
+          publicAddress,
+          "0x" + publicKey.toString("hex")
+        );
+        // console.log(successfulUpdate, "update of public key");
+        return successfulUpdate;
+      }
+      // console.log("public key already exists");
+      return true;
+    }
+    return false;
   }
 
-  static verifyUser (req: Request, res: Response, next: NextFunction) {
+  static verifyUser(req: Request, res: Response, next: NextFunction) {
     const token = req.body.auth.jwtToken;
     let jwtPayload;
 
     // Attempt to validate the token and get public address
     try {
-        jwtPayload = jwt.verify(token, jwtKey);
-        res.locals.jwtPayload = jwtPayload;
-    }
-    catch (e) {
+      jwtPayload = jwt.verify(token, jwtKey);
+      res.locals.jwtPayload = jwtPayload;
+    } catch (e) {
       if (e instanceof jwt.JsonWebTokenError) {
         // JWT is unauthorized
-        return res.status(401).end()
+        return res.status(401).end();
       }
       // Bad request errror
-      return res.status(400).end()
+      return res.status(400).end();
     }
 
     // Refresh the users token on request
     const publicAddress = jwtPayload;
     const newToken = jwt.sign({ publicAddress }, jwtKey, {
-      expiresIn: "1h"
+      expiresIn: "1h",
     });
     res.locals.newJwtToken = newToken;
-  
-    next()
-  }
 
+    next();
+  }
 }
