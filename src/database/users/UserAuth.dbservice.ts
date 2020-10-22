@@ -1,4 +1,4 @@
-import * as uuid from "uuid";
+import { v4 as uuid } from "uuid";
 import { DatabaseService } from "../dbservice";
 import { UserAuth } from "./UserAuth.dbmodel";
 
@@ -24,7 +24,7 @@ export class UserAuthDbService extends DatabaseService<UserAuth> {
   }
 
   async createUser(address: string, name: string): Promise<UserAuth> | null {
-    let nonce = uuid.v4();
+    let nonce = uuid();
     const values = [address, name, nonce];
     let users: UserAuth[] = await super.runParameterizedQueryWithValuesArray(
       this.createUserQuery,
