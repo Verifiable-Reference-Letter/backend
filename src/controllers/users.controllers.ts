@@ -3,22 +3,30 @@ import { UserDbService } from "../database/users/User.dbservice";
 import { User } from "../database/users/User.dbmodel";
 import { UserProfile } from "../database/users/UserProfile.dbmodel";
 import { UserProfileDbService } from "../database/users/UserProfile.dbservice";
-const router = express.Router();
+import { AuthModule } from "../modules/Auth.module"; 
 
+const router = express.Router();
 const userDbService: UserDbService = new UserDbService();
 const userProfileDbService: UserProfileDbService = new UserProfileDbService();
+
+router.use(AuthModule.verifyUser);
 
 /**
  * get all users (basic info)
  */
 router.post("/", async (req, res, next) => {
-  console.log(req.body["auth"]);
   console.log("getting all users except self");
   const userModels: User[] = await userDbService.selectAllUsersExceptSelf(
-    req.body["auth"].publicAddress
+    res.locals.jwtPayload.publicAddress
   ); // TODO: change to subtract user self
   console.log(userModels);
-  res.send({ data: userModels });
+  res.json(
+    { 
+    auth: { 
+      jwtToken: res.locals.newJwtToken
+    }, 
+    data: userModels
+    });
 });
 
 /**
@@ -31,10 +39,22 @@ router.post("/:publicAddress", async (req, res, next) => {
   );
   console.log(userModel);
   if (userModel.length !== 0) {
-    res.send({ data: userModel });
+    res.json(
+      { 
+      auth: { 
+        jwtToken: res.locals.newJwtToken
+      }, 
+      data: userModel
+      });
   } else {
     res.status(400);
-    res.send({ data: [] });
+    res.json(
+      { 
+      auth: { 
+        jwtToken: res.locals.newJwtToken
+      }, 
+      data: []
+      });
   }
 });
 
@@ -48,10 +68,22 @@ router.post("/:publicAddress/profile", async (req, res, next) => {
   );
   console.log(userProfileModel);
   if (userProfileModel.length !== 0) {
-    res.send({ data: userProfileModel });
+    res.json(
+      { 
+      auth: { 
+        jwtToken: res.locals.newJwtToken
+      }, 
+      data: userProfileModel
+      });
   } else {
     res.status(400);
-    res.send({ data: [] });
+    res.json(
+      { 
+      auth: { 
+        jwtToken: res.locals.newJwtToken
+      }, 
+      data: userProfileModel
+      });
   }
 });
 

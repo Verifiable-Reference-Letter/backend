@@ -36,10 +36,16 @@ app.get( "/bye", (req, res) => {
 });
 
 app.use("/testAPI", testAPIRouter);
-app.use("/api/v1/users", usersRouter);
-// app.use("/api/v1/users/:publicAddress/letters", lettersRouter);
-app.use("/api/v1/letters", lettersRouter);
+
 app.use("/auth", authRouter);
+
+/*
+* Any your preceded by /api/v1 indicates an authenticated route
+* The controller for these routes should contain the line to work correctly
+* router.use(AuthModule.verifyUser);
+*/
+app.use("/api/v1/users", usersRouter);
+app.use("/api/v1/letters", lettersRouter);
 
 // start the Express server
 app.listen( port, () => {
