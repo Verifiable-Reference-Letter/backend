@@ -3,11 +3,14 @@ import { UserDbService } from "../database/users/User.dbservice";
 import { User } from "../database/users/User.dbmodel";
 import { UserProfile } from "../database/users/UserProfile.dbmodel";
 import { UserProfileDbService } from "../database/users/UserProfile.dbservice";
-import { AuthModule } from "../modules/Auth.module"; 
+import { UserKey } from "../database/users/UserKey.dbmodel";
+import { UserKeyDbService } from "../database/users/UserKey.dbservice";
+import { AuthModule } from "../modules/Auth.module";
 
 const router = express.Router();
 const userDbService: UserDbService = new UserDbService();
 const userProfileDbService: UserProfileDbService = new UserProfileDbService();
+const userKeyDbService: UserKeyDbService = new UserKeyDbService();
 
 router.use(AuthModule.verifyUser);
 
@@ -20,13 +23,12 @@ router.post("/", async (req, res, next) => {
     res.locals.jwtPayload.publicAddress
   ); // TODO: change to subtract user self
   console.log(userModels);
-  res.json(
-    { 
-    auth: { 
-      jwtToken: res.locals.newJwtToken
-    }, 
-    data: userModels
-    });
+  res.json({
+    auth: {
+      jwtToken: res.locals.newJwtToken,
+    },
+    data: userModels,
+  });
 });
 
 /**
@@ -39,22 +41,20 @@ router.post("/:publicAddress", async (req, res, next) => {
   );
   console.log(userModel);
   if (userModel.length !== 0) {
-    res.json(
-      { 
-      auth: { 
-        jwtToken: res.locals.newJwtToken
-      }, 
-      data: userModel
-      });
+    res.json({
+      auth: {
+        jwtToken: res.locals.newJwtToken,
+      },
+      data: userModel,
+    });
   } else {
     res.status(400);
-    res.json(
-      { 
-      auth: { 
-        jwtToken: res.locals.newJwtToken
-      }, 
-      data: []
-      });
+    res.json({
+      auth: {
+        jwtToken: res.locals.newJwtToken,
+      },
+      data: [],
+    });
   }
 });
 
@@ -68,22 +68,20 @@ router.post("/:publicAddress/profile", async (req, res, next) => {
   );
   console.log(userProfileModel);
   if (userProfileModel.length !== 0) {
-    res.json(
-      { 
-      auth: { 
-        jwtToken: res.locals.newJwtToken
-      }, 
-      data: userProfileModel
-      });
+    res.json({
+      auth: {
+        jwtToken: res.locals.newJwtToken,
+      },
+      data: userProfileModel,
+    });
   } else {
     res.status(400);
-    res.json(
-      { 
-      auth: { 
-        jwtToken: res.locals.newJwtToken
-      }, 
-      data: userProfileModel
-      });
+    res.json({
+      auth: {
+        jwtToken: res.locals.newJwtToken,
+      },
+      data: userProfileModel,
+    });
   }
 });
 
@@ -93,6 +91,28 @@ router.post("/:publicAddress/profile", async (req, res, next) => {
  */
 router.post("/:publicAddress/sendEmail", async (req, res, next) => {
   console.log("send email to publicAddress");
+});
+
+router.post("/list/keys", async (req, res, next) => {
+  console.log("get userkeys for list of users");
+  // TODO: check that each that users are indeed recipients of given letter Ids before sending public keys
+  const userList = req.body["data"];
+  let userKeys: UserKey[] = [];
+  for (let i = 0; i < userList.length; i++) {
+    const publicAddress = userList[i];
+    const userKey: UserKey = await userKeyDbService.selectUserKey(publicAddress);
+    if (userKey) {
+      userKeys.push(userKey);
+    } else {
+      console.log("userKey not found for", publicAddress);
+    }
+  }
+  if (userKeys.length === 0) {
+    res.status(400);
+    res.json({data: {}});
+  } else {
+    res.json({data: userKeys});
+  }
 });
 
 export { router };

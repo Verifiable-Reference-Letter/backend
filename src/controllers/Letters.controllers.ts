@@ -51,6 +51,13 @@ router.post("/requested", async (req, res, next) => {
       });
   } else {
     res.status(400);
+    res.json(
+      { 
+      auth: { 
+        jwtToken: res.locals.newJwtToken
+      }, 
+      data: {} 
+    });
   }
 });
 
@@ -86,6 +93,13 @@ router.post("/written", async (req, res, next) => {
       });
   } else {
     res.status(400);
+    res.json(
+      { 
+      auth: { 
+        jwtToken: res.locals.newJwtToken
+      }, 
+      data: {} 
+    });
   }
 });
 
@@ -106,6 +120,13 @@ router.post("/received", async (req, res, next) => {
       });
   } else {
     res.status(400);
+    res.json(
+      { 
+      auth: { 
+        jwtToken: res.locals.newJwtToken
+      }, 
+      data: {} 
+    });
   }
 });
 

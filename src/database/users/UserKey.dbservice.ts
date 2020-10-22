@@ -43,7 +43,7 @@ export class UserKeyDbService extends DatabaseService<UserKey> {
    */
   async updateUserKey(publicAddress: string, publicKey: string): Promise<boolean> {
     const queryText = this.updateUserKeyQuery;
-    const values = [publicAddress, publicKey];
+    const values = [publicKey, publicAddress,];
     return await super.runParameterizedQueryWithValuesArrayUpdate(
       queryText,
       values
