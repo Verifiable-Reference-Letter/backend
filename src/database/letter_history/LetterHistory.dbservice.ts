@@ -14,8 +14,8 @@ export class LetterHistoryDbService extends DatabaseService<LetterHistory> {
   }
 
   /**
-   *
-   * @param publicAddress of the letter_recipient
+   * retrieval of letters for recipient's page
+   * @param publicAddress of the letter recipient
    */
   async selectAllLetterHistoryByLetterRecipient(
     publicAddress: string
@@ -27,7 +27,10 @@ export class LetterHistoryDbService extends DatabaseService<LetterHistory> {
   }
 
   /**
-   * @param letterId letter_id to get letter history for (ids only)
+   * unsent and sent history
+   * retrieval of all letter history for a given letter id (for either requestor or writer)
+   * includes both unsent and sent letter history
+   * @param letterId letter id to get letter history
    */
   async selectAllLetterHistoryByLetterId(
     letterId: string
@@ -39,7 +42,9 @@ export class LetterHistoryDbService extends DatabaseService<LetterHistory> {
   }
 
   /**
-   * @param letterId letter_id to get letter history for (ids only)
+   * sent history
+   * retrieval of all sent letter history for a given letter id (for either requestor or writer)
+   * @param letterId
    */
   async selectAllSentLetterHistoryByLetterId(
     letterId: string
@@ -51,60 +56,85 @@ export class LetterHistoryDbService extends DatabaseService<LetterHistory> {
   }
 
   /**
-   * @param letterId letter_id to get letter history for (ids only)
+   * unsent history
+   * retrieval of all unsent letter history for a given letter id (for either requestor or writer)
+   * @param letterId
    */
   async selectAllUnsentLetterHistoryByLetterId(
     letterId: string
   ): Promise<LetterHistory[]> {
-    // console.log("selectAllLetterHistoryByLetterId");
     const queryText = this.selectAllUnsentLetterHistoryByLetterIdQuery;
     const values = [letterId];
     return super.runParameterizedQueryWithValuesArray(queryText, values);
   }
 
   /**
-   * @param letterId letter_id to get letter history for (ids only)
+   * unsent recipients
+   * retrieval of all unsent letter recipients (Users) rather than full letter history
+   * for a given letter id (for either requestor or writer)
+   * @param letterId
    */
   async selectAllUnsentRecipientsByLetterId(letterId: string): Promise<User[]> {
-    // console.log("selectAllLetterHistoryByLetterId");
     const queryText = this.selectAllUnsentRecipientsByLetterIdQuery;
     const values = [letterId];
     return super.runParameterizedQueryWithValuesArrayUser(queryText, values);
   }
 
-  async selectAllUnsentRecipientKeysByLetterId(letterId: string): Promise<UserKey[]> {
-    // console.log("selectAllLetterHistoryByLetterId");
+  /**
+   * unsent recipient keys
+   * retrieval of all unsent letter recipients keys (UserKeys) rather than full letter history
+   * for a given letter id (for either requestor or writer)
+   * @param letterId
+   */
+  async selectAllUnsentRecipientKeysByLetterId(
+    letterId: string
+  ): Promise<UserKey[]> {
     const queryText = this.selectAllUnsentRecipientKeyByLetterIdQuery;
     const values = [letterId];
     return super.runParameterizedQueryWithValuesArrayUserKey(queryText, values);
   }
 
-  async countRecipientsByLetterId(letterId: string): Promise<Number> {
-    // console.log("countRecipientsByLetterId");
-    const queryText = this.countRecipientsByLetterIdQuery;
+  /**
+   * # sent recipients
+   * count the number of sent recipients for a given letter id
+   * useful for letter displays
+   * @param letterId
+   */
+  async countSentRecipientsByLetterId(letterId: string): Promise<Number> {
+    const queryText = this.countSentRecipientsByLetterIdQuery;
     const values = [letterId];
     return super.runParameterizedQueryWithValuesArrayCount(queryText, values);
   }
 
+  /**
+   * # unsent recipients
+   * count the number of unsent recipients for a given letter id
+   * useful for letter displays
+   * @param letterId
+   */
   async countUnsentRecipientsByLetterId(letterId: string): Promise<Number> {
-    // console.log("countRecipientsByLetterId");
     const queryText = this.countUnsentRecipientsByLetterIdQuery;
     const values = [letterId];
     return super.runParameterizedQueryWithValuesArrayCount(queryText, values);
   }
 
+  /**
+   * update recipients list for a given letter id (for requestor page)
+   * currently deletes previous recipients by letter id and inserts new
+   * rather than comparing new and old lists
+   * @param letterId
+   * @param recipients list of new recipients
+   */
   async updateRecipientsByLetterId(
     letterId: string,
     recipients: User[]
   ): Promise<boolean> {
-    // console.log("updateRecipientsByLetterId");
     const deleteQueryText = this.deletePreviousRecipientsByLetterIdQuery;
     const deleteValues = [letterId];
     const successfulDelete: boolean = await super.runParameterizedQueryWithValuesArrayDelete(
       deleteQueryText,
       deleteValues
     );
-    // console.log("successfulDelete", successfulDelete);
     if (!successfulDelete) return false;
     for (let i = 0; i < recipients.length; i++) {
       const selectQueryText = this
@@ -120,51 +150,60 @@ export class LetterHistoryDbService extends DatabaseService<LetterHistory> {
         // Then again, this shouldn't be allowed to happen on the frontend
       }
 
-      // console.log(i, recipients[i]);
       const insertQueryText = this.insertRecipientByLetterIdQuery;
       const insertValues = [recipients[i].publicAddress, letterId];
       const successfulInsert: boolean = await super.runParameterizedQueryWithValuesArrayInsert(
         insertQueryText,
         insertValues
       );
-      // console.log("successfulInsert", successfulInsert);
       if (!successfulInsert) return false;
     }
     return true;
   }
 
+  /**
+   * insert new recipients for a letter id
+   * for when new letter request is made (with indicated list of recipients)
+   * @param letterId
+   * @param recipients
+   */
   async insertRecipientsByLetterId(
     letterId: string,
     recipients: User[]
   ): Promise<boolean> {
-    // console.log("insertRecipientsByLetterId");
-    // console.log(recipients);
     for (let i = 0; i < recipients.length; i++) {
-      // console.log(i, recipients[i]);
       const insertQueryText = this.insertRecipientByLetterIdQuery;
       const insertValues = [recipients[i].publicAddress, letterId];
       const successfulInsert: boolean = await super.runParameterizedQueryWithValuesArrayInsert(
         insertQueryText,
         insertValues
       );
-      // console.log("successfulInsert", successfulInsert);
       if (!successfulInsert) return false;
     }
     return true;
   }
 
+  /**
+   * retrieve letter contents by letter id and recipient id
+   * @param letterId 
+   * @param letterRecipient 
+   */
   async selectLetterContentsByLetterIdAndRecipientId(
     letterId: string,
-    letterWriter: string
+    letterRecipient: string
   ): Promise<LetterContents[]> {
     const queryText = this.selectLetterContentsByLetterIdAndRecipientIdQuery;
-    const values = [letterId, letterWriter];
+    const values = [letterId, letterRecipient];
     return super.runParameterizedQueryWithValuesArrayContents(
       queryText,
       values
     );
   }
 
+  /**
+   * update letter contents by letter id and recipient id
+   * not needed under current requirements
+   */
   // async updateLetterContentsByRecipientIdAndLetterId(letterContents: string, letterId: string, letterRecipient: string): Promise<boolean> {
   //   const queryText = this.updateLetterContentsByRecipientIdAndLetterIdQuery;
   //   const values = [letterContents, letterId, letterRecipient];
@@ -253,7 +292,7 @@ export class LetterHistoryDbService extends DatabaseService<LetterHistory> {
       " as W on S.letter_recipient = W.public_address where L.letter_id = $1 and S.sent_at is NULL;",
   };
 
-  private countRecipientsByLetterIdQuery = {
+  private countSentRecipientsByLetterIdQuery = {
     text:
       "select * from " +
       sentLetterTableName +

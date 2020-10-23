@@ -19,7 +19,11 @@ export class UserProfileDbService extends DatabaseService<UserProfile> {
         }
     }
 
-    async selectUserByPublicAddress(publicAddress: string): Promise<UserProfile[]> {
+    /**
+     * retrieve userprofile by public address
+     * @param publicAddress 
+     */
+    async selectUserProfileByPublicAddress(publicAddress: string): Promise<UserProfile[]> {
         const queryText = this.selectUserProfileByPublicAddressQuery;
         const values = [publicAddress];
         return super.runParameterizedQueryWithValuesArray(queryText, values); 

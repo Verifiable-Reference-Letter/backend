@@ -35,7 +35,7 @@ router.post("/requested", async (req, res, next) => {
   // let numUnsentRecipients: Number[] = [];
   for (let i = 0; i < letterModels.length; i++) {
     const l = letterModels[i];
-    const num: Number = await letterHistoryDbService.countRecipientsByLetterId(
+    const num: Number = await letterHistoryDbService.countSentRecipientsByLetterId(
       l.letterId
     );
     // const numUnsent: Number = await letterHistoryDbService.countUnsentRecipientsByLetterId(
@@ -80,7 +80,7 @@ router.post("/written", async (req, res, next) => {
   let numUnsentRecipients: Number[] = [];
   for (let i = 0; i < letterModels.length; i++) {
     const l = letterModels[i];
-    const num: Number = await letterHistoryDbService.countRecipientsByLetterId(
+    const num: Number = await letterHistoryDbService.countSentRecipientsByLetterId(
       l.letterId
     );
     const numUnsent: Number = await letterHistoryDbService.countUnsentRecipientsByLetterId(
@@ -259,7 +259,7 @@ router.post("/create", async (req, res, next) => {
       // let numUnsentRecipients: Number[] = [];
       for (let i = 0; i < letterModels.length; i++) {
         const l = letterModels[i];
-        const num: Number = await letterHistoryDbService.countRecipientsByLetterId(
+        const num: Number = await letterHistoryDbService.countSentRecipientsByLetterId(
           l.letterId
         );
         // const numUnsent: Number = await letterHistoryDbService.countUnsentRecipientsByLetterId(
@@ -345,7 +345,7 @@ router.post("/:letterId/contents/update", async (req, res, next) => {
   console.log(req.params.letterId);
   console.log("update letter contents for given letterId");
   const currentDate = Date();
-  const numRecipients: Number = await letterHistoryDbService.countRecipientsByLetterId(
+  const numRecipients: Number = await letterHistoryDbService.countSentRecipientsByLetterId(
     req.params.letterId
   );
 

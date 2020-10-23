@@ -19,11 +19,19 @@ export class SentLetterDbService extends DatabaseService<SentLetter> {
         }
     }
 
+    /**
+     * select all sent letter rows by recipient's address
+     * @param id
+     */
     async selectAllSentLettersByRecipientAddress(id: string): Promise<SentLetter[]> {
         const values = [id];
         return super.runParameterizedQueryWithValuesArray(this.selectAllSentLettersByRecipientQuery, values);
     }
 
+    /**
+     * select all sent letter rows by letter id
+     * @param id 
+     */
     async selectAllSentLettersByLetterId(id: string): Promise<SentLetter[]> {
         const values = [id];
         return super.runParameterizedQueryWithValuesArray(this.selectAllSentLettersByLetterIdQuery, values);

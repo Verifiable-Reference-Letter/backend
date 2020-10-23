@@ -1,10 +1,8 @@
 import { DatabaseService } from "../dbservice";
 import { Letter } from "./Letter.dbmodel";
 import { LetterContents } from "../letter_contents/LetterContents.dbmodel";
-import { Client } from "pg";
 import { UserRole } from "../users/UserRole";
 
-const sentLetterTableName = "sent_letters";
 const letterTableName = "letters";
 const userTableName = "users";
 
@@ -13,6 +11,11 @@ export class LetterDbService extends DatabaseService<Letter> {
     super();
   }
 
+  /**
+   * select all letters for either requestor or writer by public address
+   * @param publicAddress 
+   * @param userRole 
+   */
   async selectAllLettersByAddressAndRole(
     publicAddress: string,
     userRole: UserRole
@@ -22,22 +25,36 @@ export class LetterDbService extends DatabaseService<Letter> {
     return super.runParameterizedQueryWithValuesArray(queryText, values);
   }
 
+  /**
+   * select a letter by address, letter id, and user role
+   * @param publicAddress
+   * @param letterId 
+   * @param userRole 
+   */
   async selectLetterByAddressAndLetterId(
     publicAddress: string,
     letterId: string,
-    role: UserRole
+    userRole: UserRole
   ): Promise<Letter[]> {
-    if (role === UserRole.Requestor) {
+    if (userRole === UserRole.Requestor) {
       const queryText = this.selectLetterByLetterIdAndRequestorIdQuery;
       const values = [publicAddress, letterId];
       return super.runParameterizedQueryWithValuesArray(queryText, values);
-    } else if (role == UserRole.Writer) {
+    } else if (userRole == UserRole.Writer) {
       const queryText = this.selectLetterByLetterIdAndWriterIdQuery;
       const values = [publicAddress, letterId];
       return super.runParameterizedQueryWithValuesArray(queryText, values);
     }
   }
 
+  /**
+   * creation of new letter
+   * insert a letter based on letter details
+   * @param letterId 
+   * @param letterRequestor 
+   * @param letterWriter writer's public address
+   * @param currentDate 
+   */
   async insertLetterByAddressAndLetterDetails(
     letterId: string,
     letterRequestor: string,
@@ -55,6 +72,12 @@ export class LetterDbService extends DatabaseService<Letter> {
     return super.runParameterizedQueryWithValuesArrayInsert(queryText, values);
   }
 
+  /**
+   * retrieval of the letter contents
+   * select the letter contents by letter id and writer's public address
+   * @param letterId 
+   * @param letterWriter 
+   */
   async selectLetterContentsByLetterIdAndWriterId(
     letterId: string,
     letterWriter: string
@@ -67,6 +90,14 @@ export class LetterDbService extends DatabaseService<Letter> {
     );
   }
 
+  /**
+   * update the letter contents as a buffer from utf8
+   * previously null if first upload
+   * @param letterContents in utf8
+   * @param currentDate 
+   * @param letterId 
+   * @param letterWriter 
+   */
   async updateLetterContentsByLetterIdAndWriterId(
     letterContents: string,
     currentDate: string,
@@ -80,6 +111,11 @@ export class LetterDbService extends DatabaseService<Letter> {
     return super.runParameterizedQueryWithValuesArrayUpdate(queryText, values);
   }
 
+  /**
+   * helper for the select all letter method
+   * determine query based off user role
+   * @param userRole requestor or writer
+   */
   private getQueryTextByUserRole(userRole: UserRole): any {
     if (userRole.valueOf() === UserRole.Requestor.valueOf()) {
       return this.selectAllLettersByRequestorIdQuery;

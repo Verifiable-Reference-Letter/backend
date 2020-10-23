@@ -23,6 +23,13 @@ export class UserAuthDbService extends DatabaseService<UserAuth> {
     return UserAuth.dbRowToDbModel(dbRow);
   }
 
+  /**
+   * sign up to create new users
+   * set random nonce
+   * TODO: user should be created in the db with the public key also
+   * @param address 
+   * @param name 
+   */
   async createUser(address: string, name: string): Promise<UserAuth> | null {
     let nonce = uuid();
     const values = [address, name, nonce];
@@ -36,6 +43,10 @@ export class UserAuthDbService extends DatabaseService<UserAuth> {
     return users[0];
   }
 
+  /**
+   * retrieve a user with nonce by public address
+   * @param publicAddress 
+   */
   async getUserAuth(publicAddress: string): Promise<UserAuth> | null {
     const values = [publicAddress];
     let users: UserAuth[] = await super.runParameterizedQueryWithValuesArray(

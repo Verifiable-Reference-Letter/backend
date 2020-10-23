@@ -19,10 +19,10 @@ export class UserKeyDbService extends DatabaseService<UserKey> {
     };
   }
 
-  protected dbRowToDbModel(dbRow: any): UserKey {
-    return UserKey.dbRowToDbModel(dbRow);
-  }
-
+  /**
+   * select userkey by public address
+   * @param publicAddress 
+   */
   async selectUserKey(publicAddress: string): Promise<UserKey> | null {
     const values = [publicAddress];
     let users: UserKey[] = await super.runParameterizedQueryWithValuesArray(
@@ -36,14 +36,17 @@ export class UserKeyDbService extends DatabaseService<UserKey> {
   }
 
   /**
-   * update publicKey field of user
-   * TODO: make this at signup rather than at first login
+   * update public key of user
+   * TODO: need to make sure user is created in the databse with public key
    * @param publicAddress of user to update
    * @param publicKey of user
    */
-  async updateUserKey(publicAddress: string, publicKey: string): Promise<boolean> {
+  async updateUserKey(
+    publicAddress: string,
+    publicKey: string
+  ): Promise<boolean> {
     const queryText = this.updateUserKeyQuery;
-    const values = [publicKey, publicAddress,];
+    const values = [publicKey, publicAddress];
     return await super.runParameterizedQueryWithValuesArrayUpdate(
       queryText,
       values
@@ -63,4 +66,8 @@ export class UserKeyDbService extends DatabaseService<UserKey> {
       userTableName +
       " set public_key = $1 where public_address = $2;",
   };
+
+  protected dbRowToDbModel(dbRow: any): UserKey {
+    return UserKey.dbRowToDbModel(dbRow);
+  }
 }

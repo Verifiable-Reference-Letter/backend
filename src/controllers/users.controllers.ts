@@ -60,7 +60,7 @@ router.post("/:publicAddress", async (req, res, next) => {
  */
 router.post("/:publicAddress/profile", async (req, res, next) => {
   console.log("Get the user profile by publicAddress");
-  const userProfileModel: UserProfile[] = await userProfileDbService.selectUserByPublicAddress(
+  const userProfileModel: UserProfile[] = await userProfileDbService.selectUserProfileByPublicAddress(
     req.params.publicAddress
   );
   console.log(userProfileModel);

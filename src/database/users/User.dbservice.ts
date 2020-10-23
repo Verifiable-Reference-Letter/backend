@@ -19,18 +19,30 @@ export class UserDbService extends DatabaseService<User> {
         }
     }
 
+    /**
+     * retrieve an user by public address
+     * @param publicAddress 
+     */
     async selectUserByPublicAddress(publicAddress: string): Promise<User[]> {
         const queryText = this.selectUserByPublicAddressQuery;
         const values = [publicAddress];
         return super.runParameterizedQueryWithValuesArray(queryText, values); 
     }
 
+    /**
+     * retrieve all users
+     */
     async selectAllUsers(): Promise<User[]> {
         const queryText = this.selectAllUsersQuery;
         const values: string[] = [];
         return super.runParameterizedQueryWithValuesArray(queryText, values); 
     }
 
+    /**
+     * retrieve all users but exclude self
+     * i.e cannot request letter to self
+     * @param publicAddress 
+     */
     async selectAllUsersExceptSelf(publicAddress: string): Promise<User[]> {
         const queryText = this.selectAllUsersExceptSelfQuery;
         const values: string[] = [publicAddress];
