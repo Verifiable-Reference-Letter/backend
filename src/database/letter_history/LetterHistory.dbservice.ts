@@ -2,6 +2,7 @@ import { DatabaseService } from "../dbservice";
 import { LetterHistory } from "./LetterHistory.dbmodel";
 import { LetterContents } from "../letter_contents/LetterContents.dbmodel";
 import { User } from "../users/User.dbmodel";
+import { UserKey } from "../users/UserKey.dbmodel";
 
 const sentLetterTableName = "sent_letters";
 const letterTableName = "letters";
@@ -71,9 +72,23 @@ export class LetterHistoryDbService extends DatabaseService<LetterHistory> {
     return super.runParameterizedQueryWithValuesArrayUser(queryText, values);
   }
 
+  async selectAllUnsentRecipientKeysByLetterId(letterId: string): Promise<UserKey[]> {
+    // console.log("selectAllLetterHistoryByLetterId");
+    const queryText = this.selectAllUnsentRecipientKeyByLetterIdQuery;
+    const values = [letterId];
+    return super.runParameterizedQueryWithValuesArrayUserKey(queryText, values);
+  }
+
   async countRecipientsByLetterId(letterId: string): Promise<Number> {
     // console.log("countRecipientsByLetterId");
     const queryText = this.countRecipientsByLetterIdQuery;
+    const values = [letterId];
+    return super.runParameterizedQueryWithValuesArrayCount(queryText, values);
+  }
+
+  async countUnsentRecipientsByLetterId(letterId: string): Promise<Number> {
+    // console.log("countRecipientsByLetterId");
+    const queryText = this.countUnsentRecipientsByLetterIdQuery;
     const values = [letterId];
     return super.runParameterizedQueryWithValuesArrayCount(queryText, values);
   }
@@ -227,11 +242,29 @@ export class LetterHistoryDbService extends DatabaseService<LetterHistory> {
       " as W on S.letter_recipient = W.public_address where L.letter_id = $1 and S.sent_at is NULL;",
   };
 
+  private selectAllUnsentRecipientKeyByLetterIdQuery = {
+    text:
+      "select distinct W.public_address, W.name, W.public_key from " +
+      letterTableName +
+      " as L inner join " +
+      sentLetterTableName +
+      " as S on L.letter_id = S.letter_id join " +
+      userTableName +
+      " as W on S.letter_recipient = W.public_address where L.letter_id = $1 and S.sent_at is NULL;",
+  };
+
   private countRecipientsByLetterIdQuery = {
     text:
       "select * from " +
       sentLetterTableName +
       " where letter_id = $1 and sent_at is not NULL;",
+  };
+
+  private countUnsentRecipientsByLetterIdQuery = {
+    text:
+      "select * from " +
+      sentLetterTableName +
+      " where letter_id = $1 and sent_at is NULL;",
   };
 
   private deletePreviousRecipientsByLetterIdQuery = {

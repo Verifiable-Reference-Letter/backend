@@ -1,5 +1,6 @@
 import { Client } from "pg";
 import { User } from "./users/User.dbmodel";
+import { UserKey } from "./users/UserKey.dbmodel";
 import { LetterContents } from "./letter_contents/LetterContents.dbmodel";
 
 export abstract class DatabaseService<DatabaseModel> {
@@ -182,6 +183,37 @@ export abstract class DatabaseService<DatabaseModel> {
     }
   }
 
+  protected async runParameterizedQueryWithValuesArrayUserKey(
+    queryText: any,
+    values: any[]
+  ): Promise<UserKey[]> {
+    const client = new Client(this.clientCredentials);
+    const models: UserKey[] = [];
+    client.connect();
+    try {
+      const res = await client.query(queryText, values);
+      let jsonRow;
+      for (const row of res.rows) {
+        jsonRow = JSON.stringify(row);
+        console.log(jsonRow);
+        models.push(UserKey.dbRowToDbModel(row));
+      }
+      models.filter((value: any) => {
+        if (value) {
+          Object.keys(value).length !== 0;
+        }
+      });
+      models.map((value, index) => {
+        console.log("Db Model " + index + ": ");
+        console.dir(value);
+      });
+      return models;
+    } catch (err) {
+      console.log(err.stack);
+    } finally {
+      client.end().then(() => console.log("client has disconnected"));
+    }
+  }
 
   protected async runParameterizedQueryWithValuesArrayInsert(
     queryText: any,

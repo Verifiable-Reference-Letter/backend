@@ -5,13 +5,16 @@ import { Letter } from "../database/letters/Letter.dbmodel";
 import { LetterContents } from "../database/letter_contents/LetterContents.dbmodel";
 import { User } from "../database/users/User.dbmodel";
 import { LetterHistoryDbService } from "../database/letter_history/LetterHistory.dbservice";
+import { UserKey } from "../database/users/UserKey.dbmodel";
+import { UserKeyDbService } from "../database/users/UserKey.dbservice";
 import { UserRole } from "../database/users/UserRole";
 import { LetterDbService } from "../database/letters/Letter.dbservice";
-import { AuthModule } from "../modules/Auth.module"; 
+import { AuthModule } from "../modules/Auth.module";
 const router = express.Router();
 
 const letterDbService: LetterDbService = new LetterDbService();
 const letterHistoryDbService: LetterHistoryDbService = new LetterHistoryDbService();
+const userKeyDbService: UserKeyDbService = new UserKeyDbService();
 
 // TODO: change these to get the user id from a verified JWT token once we implement logging in functionality
 
@@ -29,34 +32,37 @@ router.post("/requested", async (req, res, next) => {
 
   // console.log("get num recipients for each letter");
   let numRecipients: Number[] = [];
+  // let numUnsentRecipients: Number[] = [];
   for (let i = 0; i < letterModels.length; i++) {
     const l = letterModels[i];
-    const num = await letterHistoryDbService.countRecipientsByLetterId(
+    const num: Number = await letterHistoryDbService.countRecipientsByLetterId(
       l.letterId
     );
+    // const numUnsent: Number = await letterHistoryDbService.countUnsentRecipientsByLetterId(
+    //   l.letterId
+    // );
     numRecipients.push(num);
+    // numUnsentRecipients.push(numUnsent);
   }
-  // console.log(numRecipients);
 
   if (letterModels.length !== 0) {
-    res.json(
-      { 
-      auth: { 
-        jwtToken: res.locals.newJwtToken
-      }, 
-      data: { 
-        letters: letterModels, 
-        numRecipients: numRecipients 
-      } 
-      });
+    res.json({
+      auth: {
+        jwtToken: res.locals.newJwtToken,
+      },
+      data: {
+        letters: letterModels,
+        numRecipients: numRecipients,
+        // numUnsentRecipients: numUnsentRecipients,
+      },
+    });
   } else {
     res.status(400);
-    res.json(
-      { 
-      auth: { 
-        jwtToken: res.locals.newJwtToken
-      }, 
-      data: {} 
+    res.json({
+      auth: {
+        jwtToken: res.locals.newJwtToken,
+      },
+      data: {},
     });
   }
 });
@@ -71,34 +77,37 @@ router.post("/written", async (req, res, next) => {
 
   // console.log("get num recipients for each letter");
   let numRecipients: Number[] = [];
+  let numUnsentRecipients: Number[] = [];
   for (let i = 0; i < letterModels.length; i++) {
     const l = letterModels[i];
-    const num = await letterHistoryDbService.countRecipientsByLetterId(
+    const num: Number = await letterHistoryDbService.countRecipientsByLetterId(
+      l.letterId
+    );
+    const numUnsent: Number = await letterHistoryDbService.countUnsentRecipientsByLetterId(
       l.letterId
     );
     numRecipients.push(num);
+    numUnsentRecipients.push(numUnsent);
   }
-  // console.log(numRecipients);
 
   if (letterModels.length !== 0) {
-    res.json(
-      { 
-      auth: { 
-        jwtToken: res.locals.newJwtToken
-      }, 
-      data: { 
-        letters: letterModels, 
-        numRecipients: numRecipients 
-      } 
-      });
+    res.json({
+      auth: {
+        jwtToken: res.locals.newJwtToken,
+      },
+      data: {
+        letters: letterModels,
+        numRecipients: numRecipients,
+        numUnsentRecipients: numUnsentRecipients,
+      },
+    });
   } else {
     res.status(400);
-    res.json(
-      { 
-      auth: { 
-        jwtToken: res.locals.newJwtToken
-      }, 
-      data: {} 
+    res.json({
+      auth: {
+        jwtToken: res.locals.newJwtToken,
+      },
+      data: {},
     });
   }
 });
@@ -111,21 +120,19 @@ router.post("/received", async (req, res, next) => {
   // console.log(letterHistoryModels);
 
   if (letterHistoryModels.length !== 0) {
-    res.json(
-      { 
-      auth: { 
-        jwtToken: res.locals.newJwtToken
-      }, 
-      data: letterHistoryModels
-      });
+    res.json({
+      auth: {
+        jwtToken: res.locals.newJwtToken,
+      },
+      data: letterHistoryModels,
+    });
   } else {
     res.status(400);
-    res.json(
-      { 
-      auth: { 
-        jwtToken: res.locals.newJwtToken
-      }, 
-      data: {} 
+    res.json({
+      auth: {
+        jwtToken: res.locals.newJwtToken,
+      },
+      data: {},
     });
   }
 });
@@ -139,21 +146,19 @@ router.post("/:letterId/history", async (req, res, next) => {
   // console.log(letterHistoryModels);
 
   if (letterHistoryModels.length !== 0) {
-    res.json(
-      { 
-      auth: { 
-        jwtToken: res.locals.newJwtToken
-      }, 
-      data: letterHistoryModels 
-      });
+    res.json({
+      auth: {
+        jwtToken: res.locals.newJwtToken,
+      },
+      data: letterHistoryModels,
+    });
   } else {
     res.status(400);
-    res.json(
-      { 
-      auth: { 
-        jwtToken: res.locals.newJwtToken
-      }, 
-      data: letterHistoryModels 
+    res.json({
+      auth: {
+        jwtToken: res.locals.newJwtToken,
+      },
+      data: letterHistoryModels,
     });
   }
 });
@@ -165,12 +170,11 @@ router.post("/:letterId/unsent", async (req, res, next) => {
     req.params.letterId
   );
   // console.log(letterHistoryModels);
-  res.json(
-    { 
-    auth: { 
-      jwtToken: res.locals.newJwtToken
-    }, 
-    data: letterHistoryModels 
+  res.json({
+    auth: {
+      jwtToken: res.locals.newJwtToken,
+    },
+    data: letterHistoryModels,
   });
 });
 
@@ -183,12 +187,11 @@ router.post("/:letterId/unsentRecipients", async (req, res, next) => {
     req.params.letterId
   );
   // console.log(userModels);
-    res.json(
-    { 
-    auth: { 
-      jwtToken: res.locals.newJwtToken
-    }, 
-    data: userModels 
+  res.json({
+    auth: {
+      jwtToken: res.locals.newJwtToken,
+    },
+    data: userModels,
   });
 });
 
@@ -205,21 +208,19 @@ router.post("/:letterId/updateRecipients", async (req, res, next) => {
       req.params.letterId
     );
     // console.log(userModels);
-    res.json(
-      { 
-      auth: { 
-        jwtToken: res.locals.newJwtToken
-      }, 
-      data: userModels 
+    res.json({
+      auth: {
+        jwtToken: res.locals.newJwtToken,
+      },
+      data: userModels,
     });
   } else {
     res.status(400);
-    res.json(
-      { 
-      auth: { 
-        jwtToken: res.locals.newJwtToken
-      }, 
-      data: {} 
+    res.json({
+      auth: {
+        jwtToken: res.locals.newJwtToken,
+      },
+      data: {},
     });
   }
 });
@@ -255,45 +256,45 @@ router.post("/create", async (req, res, next) => {
         UserRole.Requestor
       );
       let numRecipients: Number[] = [];
+      // let numUnsentRecipients: Number[] = [];
       for (let i = 0; i < letterModels.length; i++) {
         const l = letterModels[i];
-        const num = await letterHistoryDbService.countRecipientsByLetterId(
+        const num: Number = await letterHistoryDbService.countRecipientsByLetterId(
           l.letterId
         );
+        // const numUnsent: Number = await letterHistoryDbService.countUnsentRecipientsByLetterId(
+        //   l.letterId
+        // );
         numRecipients.push(num);
+        // numUnsentRecipients.push(numUnsent);
       }
-      // console.log(letterModels);
-      // console.log(numRecipients);
-      
-      res.json(
-        { 
-        auth: { 
-          jwtToken: res.locals.newJwtToken
-        }, 
-        data: { 
-          letters: letterModels, 
-          numRecipients: numRecipients 
-        } 
-      });
 
+      res.json({
+        auth: {
+          jwtToken: res.locals.newJwtToken,
+        },
+        data: {
+          letters: letterModels,
+          numRecipients: numRecipients,
+          // numUnsentRecipients: numUnsentRecipients,
+        },
+      });
     } else {
       res.status(400);
-      res.json(
-        { 
-        auth: { 
-          jwtToken: res.locals.newJwtToken
-        }, 
-        data: {} 
+      res.json({
+        auth: {
+          jwtToken: res.locals.newJwtToken,
+        },
+        data: {},
       });
     }
   } else {
     res.status(400);
-    res.json(
-      { 
-      auth: { 
-        jwtToken: res.locals.newJwtToken
-      }, 
-      data: {} 
+    res.json({
+      auth: {
+        jwtToken: res.locals.newJwtToken,
+      },
+      data: {},
     });
   }
 });
@@ -373,10 +374,50 @@ router.post("/:letterId/contents/update", async (req, res, next) => {
       }
     }
   } else {
-    console.log("invalid action: not allowed to update letter content of letter already sent to >= 1 recipient");
+    console.log(
+      "invalid action: not allowed to update letter content of letter already sent to >= 1 recipient"
+    );
     res.status(400);
     res.json({ data: {} });
   }
+});
+
+router.post("/:letterId/unsentRecipientKeys", async (req, res, next) => {
+  const userKeyModels: UserKey[] = await letterHistoryDbService.selectAllUnsentRecipientKeysByLetterId(
+    req.params.letterId
+  );
+  console.log(userKeyModels.length);
+  if (userKeyModels.length === 0) {
+    res.status(400);
+    res.json({ data: {} });
+  } else {
+    res.json({ data: { userKeys: userKeyModels } });
+  }
+  
+  // const userModels: User[] = await letterHistoryDbService.selectAllUnsentRecipientsByLetterId(
+  //   req.params.letterId
+  // );
+  // console.log(userModels.length);
+
+  // let userKeys: UserKey[] = [];
+  // for (let i = 0; i < userModels.length; i++) {
+  //   const publicAddress = userModels[i].publicAddress;
+  //   const userKey: UserKey = await userKeyDbService.selectUserKey(
+  //     publicAddress
+  //   );
+  //   if (userKey) {
+  //     userKeys.push(userKey);
+  //   } else {
+  //     console.log("userKey not found for", publicAddress);
+  //   }
+  // }
+  // console.log(userKeys.length);
+  // if (userKeys.length === 0) {
+  //   res.status(400);
+  //   res.json({ data: {} });
+  // } else {
+  //   res.json({ data: { userKeys: userKeys } });
+  // }
 });
 
 export { router };
