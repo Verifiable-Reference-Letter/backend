@@ -185,8 +185,8 @@ export class LetterHistoryDbService extends DatabaseService<LetterHistory> {
 
   /**
    * retrieve letter contents by letter id and recipient id
-   * @param letterId 
-   * @param letterRecipient 
+   * @param letterId
+   * @param letterRecipient
    */
   async selectLetterContentsByLetterIdAndRecipientId(
     letterId: string,
@@ -210,6 +210,24 @@ export class LetterHistoryDbService extends DatabaseService<LetterHistory> {
   //   return super.runParameterizedQueryWithValuesArrayUpdate(queryText, values);
   // }
 
+  async selectAllLetterRequestorByLetterRecipient(
+    publicAddress: string
+  ): Promise<User[]> {
+    const queryText = this.selectAllLetterRequestorByLetterRecipientQuery;
+    const values = [publicAddress];
+    return super.runParameterizedQueryWithValuesArrayUser(queryText, values);
+  }
+
+  async selectAllLetterHistoryByLetterRecipientAndLetterRequestor(
+    letterRecipient: string,
+    letterRequestor: string
+  ): Promise<LetterHistory[]> {
+    const queryText = this
+      .selectAllLetterHistoryByLetterRecipientAndLetterRequestorQuery;
+    const values = [letterRecipient, letterRequestor];
+    return super.runParameterizedQueryWithValuesArray(queryText, values);
+  }
+
   private selectAllLetterHistoryByLetterRecipientQuery = {
     text:
       "select distinct L.letter_id, L.letter_requestor, U.name as letter_requestor_name, L.letter_writer, V.name as letter_writer_name, L.requested_at, L.uploaded_at, S.letter_recipient, W.name as letter_recipient_name, S.sent_at from " +
@@ -222,7 +240,37 @@ export class LetterHistoryDbService extends DatabaseService<LetterHistory> {
       userTableName +
       " as V on L.letter_writer = V.public_address join " +
       userTableName +
-      " as W on S.letter_recipient = W.public_address where S.letter_recipient = $1 order by S.sent_at DESC;",
+      " as W on S.letter_recipient = W.public_address where S.letter_recipient = $1 order by letter_requestor_name ASC, S.sent_at DESC;",
+  };
+
+  private selectAllLetterHistoryByLetterRecipientAndLetterRequestorQuery = {
+    text:
+      "select distinct L.letter_id, L.letter_requestor, U.name as letter_requestor_name, L.letter_writer, V.name as letter_writer_name, L.requested_at, L.uploaded_at, S.letter_recipient, W.name as letter_recipient_name, S.sent_at from " +
+      letterTableName +
+      " as L inner join " +
+      sentLetterTableName +
+      " as S on L.letter_id = S.letter_id join " +
+      userTableName +
+      " as U on L.letter_requestor = U.public_address join " +
+      userTableName +
+      " as V on L.letter_writer = V.public_address join " +
+      userTableName +
+      " as W on S.letter_recipient = W.public_address where S.letter_recipient = $1 and L.letter_requestor = $2 order by S.sent_at DESC;",
+  };
+
+  private selectAllLetterRequestorByLetterRecipientQuery = {
+    text:
+      "select distinct on (letter_requestor) letter_requestor as public_address, letter_requestor_name as name from (select distinct L.letter_requestor, U.name as letter_requestor_name, S.sent_at from " +
+      letterTableName +
+      " as L inner join " +
+      sentLetterTableName +
+      " as S on L.letter_id = S.letter_id join " +
+      userTableName +
+      " as U on L.letter_requestor = U.public_address join " +
+      userTableName +
+      " as V on L.letter_writer = V.public_address join " +
+      userTableName +
+      " as W on S.letter_recipient = W.public_address where S.letter_recipient = $1 order by S.sent_at DESC ) subquery;",
   };
 
   // private selectAllLetterHistoryByLetterIdQuery = {

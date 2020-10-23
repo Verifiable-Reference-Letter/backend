@@ -137,6 +137,55 @@ router.post("/received", async (req, res, next) => {
   }
 });
 
+router.post("/receivedRequestors", async (req, res, next) => {
+  console.log(res.locals.jwtPayload.publicAddress);
+  const requestors: User[] = await letterHistoryDbService.selectAllLetterRequestorByLetterRecipient(
+    res.locals.jwtPayload.publicAddress
+  );
+
+  if (requestors.length !== 0) {
+    res.json({
+      auth: {
+        jwtToken: res.locals.newJwtToken,
+      },
+      data: requestors,
+    });
+  } else {
+    res.status(400);
+    res.json({
+      auth: {
+        jwtToken: res.locals.newJwtToken,
+      },
+      data: {},
+    });
+  }
+});
+
+router.post("/received/:publicAddress", async (req, res, next) => {
+  const letterRequestor = req.params.publicAddress;
+  const letterHistoryModels: LetterHistory[] = await letterHistoryDbService.selectAllLetterHistoryByLetterRecipientAndLetterRequestor(
+    res.locals.jwtPayload.publicAddress,
+    letterRequestor
+  );
+
+  if (letterHistoryModels.length !== 0) {
+    res.json({
+      auth: {
+        jwtToken: res.locals.newJwtToken,
+      },
+      data: letterHistoryModels,
+    });
+  } else {
+    res.status(400);
+    res.json({
+      auth: {
+        jwtToken: res.locals.newJwtToken,
+      },
+      data: {},
+    });
+  }
+});
+
 router.post("/:letterId/history", async (req, res, next) => {
   // console.log(req.params.letterId);
   // console.log("get letter history for given letter_id");
@@ -393,7 +442,7 @@ router.post("/:letterId/unsentRecipientKeys", async (req, res, next) => {
   } else {
     res.json({ data: { userKeys: userKeyModels } });
   }
-  
+
   // const userModels: User[] = await letterHistoryDbService.selectAllUnsentRecipientsByLetterId(
   //   req.params.letterId
   // );
