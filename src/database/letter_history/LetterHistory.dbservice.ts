@@ -32,14 +32,14 @@ export class LetterHistoryDbService extends DatabaseService<LetterHistory> {
    * includes both unsent and sent letter history
    * @param letterId letter id to get letter history
    */
-  async selectAllLetterHistoryByLetterId(
-    letterId: string
-  ): Promise<LetterHistory[]> {
-    // console.log("selectAllLetterHistoryByLetterId");
-    const queryText = this.selectAllLetterHistoryByLetterIdQuery;
-    const values = [letterId];
-    return super.runParameterizedQueryWithValuesArray(queryText, values);
-  }
+  // async selectAllLetterHistoryByLetterId(
+  //   letterId: string
+  // ): Promise<LetterHistory[]> {
+  //   // console.log("selectAllLetterHistoryByLetterId");
+  //   const queryText = this.selectAllLetterHistoryByLetterIdQuery;
+  //   const values = [letterId];
+  //   return super.runParameterizedQueryWithValuesArray(queryText, values);
+  // }
 
   /**
    * sent history
@@ -222,23 +222,23 @@ export class LetterHistoryDbService extends DatabaseService<LetterHistory> {
       userTableName +
       " as V on L.letter_writer = V.public_address join " +
       userTableName +
-      " as W on S.letter_recipient = W.public_address where S.letter_recipient = $1;",
+      " as W on S.letter_recipient = W.public_address where S.letter_recipient = $1 order by S.sent_at DESC;",
   };
 
-  private selectAllLetterHistoryByLetterIdQuery = {
-    text:
-      "select distinct L.letter_id, L.letter_requestor, U.name as letter_requestor_name, L.letter_writer, V.name as letter_writer_name, L.requested_at, L.uploaded_at, S.letter_recipient, W.name as letter_recipient_name, S.sent_at from " +
-      letterTableName +
-      " as L inner join " +
-      sentLetterTableName +
-      " as S on L.letter_id = S.letter_id join " +
-      userTableName +
-      " as U on L.letter_requestor = U.public_address join " +
-      userTableName +
-      " as V on L.letter_writer = V.public_address join " +
-      userTableName +
-      " as W on S.letter_recipient = W.public_address where L.letter_id = $1;",
-  };
+  // private selectAllLetterHistoryByLetterIdQuery = {
+  //   text:
+  //     "select distinct L.letter_id, L.letter_requestor, U.name as letter_requestor_name, L.letter_writer, V.name as letter_writer_name, L.requested_at, L.uploaded_at, S.letter_recipient, W.name as letter_recipient_name, S.sent_at from " +
+  //     letterTableName +
+  //     " as L inner join " +
+  //     sentLetterTableName +
+  //     " as S on L.letter_id = S.letter_id join " +
+  //     userTableName +
+  //     " as U on L.letter_requestor = U.public_address join " +
+  //     userTableName +
+  //     " as V on L.letter_writer = V.public_address join " +
+  //     userTableName +
+  //     " as W on S.letter_recipient = W.public_address where L.letter_id = $1;",
+  // };
 
   private selectAllSentLetterHistoryByLetterIdQuery = {
     text:
@@ -252,7 +252,7 @@ export class LetterHistoryDbService extends DatabaseService<LetterHistory> {
       userTableName +
       " as V on L.letter_writer = V.public_address join " +
       userTableName +
-      " as W on S.letter_recipient = W.public_address where L.letter_id = $1 and S.sent_at is not NULL;",
+      " as W on S.letter_recipient = W.public_address where L.letter_id = $1 and S.sent_at is not NULL order by S.sent_at DESC;",
   };
 
   private selectAllUnsentLetterHistoryByLetterIdQuery = {
@@ -267,7 +267,7 @@ export class LetterHistoryDbService extends DatabaseService<LetterHistory> {
       userTableName +
       " as V on L.letter_writer = V.public_address join " +
       userTableName +
-      " as W on S.letter_recipient = W.public_address where L.letter_id = $1 and S.sent_at is NULL;",
+      " as W on S.letter_recipient = W.public_address where L.letter_id = $1 and S.sent_at is NULL order by S.letter_recipient ASC;",
   };
 
   private selectAllUnsentRecipientsByLetterIdQuery = {
@@ -278,7 +278,7 @@ export class LetterHistoryDbService extends DatabaseService<LetterHistory> {
       sentLetterTableName +
       " as S on L.letter_id = S.letter_id join " +
       userTableName +
-      " as W on S.letter_recipient = W.public_address where L.letter_id = $1 and S.sent_at is NULL;",
+      " as W on S.letter_recipient = W.public_address where L.letter_id = $1 and S.sent_at is NULL order by W.public_address ASC;",
   };
 
   private selectAllUnsentRecipientKeyByLetterIdQuery = {
@@ -289,7 +289,7 @@ export class LetterHistoryDbService extends DatabaseService<LetterHistory> {
       sentLetterTableName +
       " as S on L.letter_id = S.letter_id join " +
       userTableName +
-      " as W on S.letter_recipient = W.public_address where L.letter_id = $1 and S.sent_at is NULL;",
+      " as W on S.letter_recipient = W.public_address where L.letter_id = $1 and S.sent_at is NULL order by W.public_address ASC;",
   };
 
   private countSentRecipientsByLetterIdQuery = {

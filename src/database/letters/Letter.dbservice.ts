@@ -132,7 +132,7 @@ export class LetterDbService extends DatabaseService<Letter> {
       userTableName +
       " as U on L.letter_requestor = U.public_address join " +
       userTableName +
-      " as V on L.letter_writer = V.public_address where letter_requestor = $1;",
+      " as V on L.letter_writer = V.public_address where letter_requestor = $1 order by L.requested_at DESC;",
   };
 
   private selectAllLettersByWriterIdQuery = {
@@ -143,7 +143,7 @@ export class LetterDbService extends DatabaseService<Letter> {
       userTableName +
       " as U on L.letter_requestor = U.public_address join " +
       userTableName +
-      " as V on L.letter_writer = V.public_address where letter_writer = $1;",
+      " as V on L.letter_writer = V.public_address where letter_writer = $1 order by L.requested_at DESC;",
   };
 
   private selectLetterByLetterIdAndRequestorIdQuery = {

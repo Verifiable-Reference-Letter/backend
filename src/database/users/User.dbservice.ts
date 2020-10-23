@@ -54,11 +54,11 @@ export class UserDbService extends DatabaseService<User> {
     }
 
     private selectAllUsersQuery = {
-        text: 'SELECT public_address, name from ' + userTableName
+        text: 'SELECT public_address, name from ' + userTableName + ' order by name ASC'
     }
 
     private selectAllUsersExceptSelfQuery = {
-        text: 'SELECT public_address, name from ' + userTableName + ' WHERE public_address != $1'
+        text: 'SELECT public_address, name from ' + userTableName + ' WHERE public_address != $1 order by name ASC'
     }
 
     protected dbRowToDbModel(dbRow: any): User {
