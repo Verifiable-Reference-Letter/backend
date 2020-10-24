@@ -13,7 +13,7 @@ import { AuthModule } from "../modules/Auth.module";
 import { LetterContentsDbService } from "../database/letter_contents/LetterContents.dbservice";
 import { LetterRecipientContentsDbService } from "../database/letter_recipient_contents/LetterRecipientContents.dbservice";
 import { UserDbService } from "../database/users/User.dbservice";
-import { LetterRecipientContents } from "src/database/letter_recipient_contents/LetterRecipientContents.dbmodel";
+import { LetterRecipientContents } from "../database/letter_recipient_contents/LetterRecipientContents.dbmodel";
 const router = express.Router();
 
 const letterDbService: LetterDbService = new LetterDbService();
@@ -24,9 +24,11 @@ const userKeyDbService: UserKeyDbService = new UserKeyDbService();
 const userDbService: UserDbService = new UserDbService();
 
 // TODO: change these to get the user id from a verified JWT token once we implement logging in functionality
-
 router.use(AuthModule.verifyUser);
 
+/**
+ * get all letters for requestor along with num recipients for each letter
+ */
 router.post("/requested", async (req, res, next) => {
   // TODO: check JWT
   // console.log(req.body["auth"]);
@@ -74,6 +76,9 @@ router.post("/requested", async (req, res, next) => {
   }
 });
 
+/**
+ * get all letters for writer along with num sent and unsent recipients for each letter
+ */
 router.post("/written", async (req, res, next) => {
   // console.log("get letters for writer");
   const letterModels: Letter[] = await letterDbService.selectAllLettersByAddressAndRole(
@@ -119,6 +124,9 @@ router.post("/written", async (req, res, next) => {
   }
 });
 
+/**
+ * get all letters for recipient
+ */
 router.post("/received", async (req, res, next) => {
   // console.log("get letter history for recipient");
   const letterHistoryModels: LetterHistory[] = await letterHistoryDbService.selectAllLetterHistoryByLetterRecipient(
@@ -144,6 +152,9 @@ router.post("/received", async (req, res, next) => {
   }
 });
 
+/**
+ * get all requestors who have sent atleast one letter to the indicated recipient
+ */
 router.post("/receivedRequestors", async (req, res, next) => {
   console.log(res.locals.jwtPayload.publicAddress);
   const requestors: User[] = await userDbService.selectAllLetterRequestorByLetterRecipient(
@@ -168,6 +179,9 @@ router.post("/receivedRequestors", async (req, res, next) => {
   }
 });
 
+/**
+ * get all letter history based on recipient's public address and requestor's public address since we group by requestor
+ */
 router.post("/received/:publicAddress", async (req, res, next) => {
   const letterRequestor = req.params.publicAddress;
   const letterHistoryModels: LetterHistory[] = await letterHistoryDbService.selectAllLetterHistoryByLetterRecipientAndLetterRequestor(
@@ -193,6 +207,9 @@ router.post("/received/:publicAddress", async (req, res, next) => {
   }
 });
 
+/**
+ * get all letter history for a given letter id (for requestor and writer pages)
+ */
 router.post("/:letterId/history", async (req, res, next) => {
   // console.log(req.params.letterId);
   // console.log("get letter history for given letter_id");
@@ -219,6 +236,9 @@ router.post("/:letterId/history", async (req, res, next) => {
   }
 });
 
+/**
+ * get all unsent letter history for a given letter id
+ */
 router.post("/:letterId/unsent", async (req, res, next) => {
   // console.log(req.params.letterId);
   // console.log("get unsent letter history for given letter_id");
@@ -234,6 +254,9 @@ router.post("/:letterId/unsent", async (req, res, next) => {
   });
 });
 
+/**
+ * get all unsent letter recipients for a given letter id
+ */
 router.post("/:letterId/unsentRecipients", async (req, res, next) => {
   // TODO: check JWT
   // console.log(req.body["auth"]);
@@ -251,6 +274,9 @@ router.post("/:letterId/unsentRecipients", async (req, res, next) => {
   });
 });
 
+/**
+ * update the recipients for a given letter id with an updated recipients list
+ */
 router.post("/:letterId/updateRecipients", async (req, res, next) => {
   // console.log(req.params.letterId);
   // console.log("get unsent recipients for given letter_id");
@@ -281,6 +307,9 @@ router.post("/:letterId/updateRecipients", async (req, res, next) => {
   }
 });
 
+/**
+ * make a new request (for a letter) with indicated writer and recipients list (for requestor's page) 
+ */
 router.post("/create", async (req, res, next) => {
   // console.log("creating new letter based on letter details");
   const data = req.body["data"];
@@ -355,6 +384,9 @@ router.post("/create", async (req, res, next) => {
   }
 });
 
+/**
+ * retrieve the letter contents by letter id and writer id (for writer's page view functionality)
+ */
 router.post("/:letterId/contents/writer", async (req, res, next) => {
   // TODO: check JWT
 
@@ -376,6 +408,9 @@ router.post("/:letterId/contents/writer", async (req, res, next) => {
   }
 });
 
+/**
+ * retrieve the letter contents by letter id and recipient id (for recipient's page view functionality)
+ */
 router.post("/:letterId/contents/recipient", async (req, res, next) => {
   // TODO: check JWT
   console.log(req.body["auth"]);
@@ -395,6 +430,9 @@ router.post("/:letterId/contents/recipient", async (req, res, next) => {
   }
 });
 
+/**
+ * update the letter contents for given letter id and writer id after checking if not sent to any recipients
+ */
 router.post("/:letterId/contents/update", async (req, res, next) => {
   // TODO: check JWT
   console.log(req.body["auth"]);
@@ -405,6 +443,7 @@ router.post("/:letterId/contents/update", async (req, res, next) => {
     req.params.letterId
   );
 
+  // check if not sent to any recipients (not allowing changing of letter contents after atleast 1 sent)
   if (numRecipients === 0) {
     const success: boolean = await letterContentsDbService.updateLetterContentsByLetterIdAndWriterId(
       req.body["data"],
@@ -438,6 +477,9 @@ router.post("/:letterId/contents/update", async (req, res, next) => {
   }
 });
 
+/**
+ * retrieve all the unsent recipients with their public keys (userkey) for the indicated letter id
+ */
 router.post("/:letterId/unsentRecipientKeys", async (req, res, next) => {
   const userKeyModels: UserKey[] = await userKeyDbService.selectAllUnsentRecipientKeysByLetterId(
     req.params.letterId
@@ -451,19 +493,9 @@ router.post("/:letterId/unsentRecipientKeys", async (req, res, next) => {
   }
 });
 
-router.post("/:letterId/unsentRecipientKeys", async (req, res, next) => {
-  const userKeyModels: UserKey[] = await userKeyDbService.selectAllUnsentRecipientKeysByLetterId(
-    req.params.letterId
-  );
-  console.log(userKeyModels.length);
-  if (userKeyModels.length === 0) {
-    res.status(400);
-    res.json({ data: {} });
-  } else {
-    res.json({ data: { userKeys: userKeyModels } });
-  }
-});
-
+/**
+ * retrieve the encrypted contents, hash, and signature for a given letter_id and recipient id
+ */
 router.post("/:letterId/recipientContents", async (req, res, next) => {
   const letterRecipientContents: LetterRecipientContents[] = await letterRecipientContentsDbService.selectLetterContentsByLetterIdAndRecipientId(
     req.params.letterId,
@@ -478,11 +510,15 @@ router.post("/:letterId/recipientContents", async (req, res, next) => {
   }
 });
 
+/**
+ * update the encrypted contents, hash, and recipient for a given letter_id and recipient_id
+ */
 router.post("/:letterId/recipientContents/update", async (req, res, next) => {
   const data: {
-    letterContents: string;
-    letterHash: string;
-    letterSignature: string;
+    letterContents: string,
+    letterHash: string,
+    letterSignature: string,
+    letterRecipient: string,
   } = req.body["data"];
   const currentDate = Date();
   const success: boolean = await letterRecipientContentsDbService.updateLetterContentsByLetterIdAndRecipientId(
@@ -491,7 +527,7 @@ router.post("/:letterId/recipientContents/update", async (req, res, next) => {
     data.letterSignature,
     currentDate,
     req.params.letterId,
-    res.locals.jwtPayload.publicAddress
+    data.letterRecipient,
   );
 
   if (!success) {
