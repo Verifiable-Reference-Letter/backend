@@ -10,11 +10,17 @@ import { UserKeyDbService } from "../database/users/UserKey.dbservice";
 import { UserRole } from "../database/users/UserRole";
 import { LetterDbService } from "../database/letters/Letter.dbservice";
 import { AuthModule } from "../modules/Auth.module";
+import { LetterContentsDbService } from "../database/letter_contents/LetterContents.dbservice";
+import { LetterRecipientContentsDbService } from "../database/letter_recipient_contents/LetterRecipientContents.dbservice";
+import { UserDbService } from "../database/users/User.dbservice";
 const router = express.Router();
 
 const letterDbService: LetterDbService = new LetterDbService();
 const letterHistoryDbService: LetterHistoryDbService = new LetterHistoryDbService();
+const letterContentsDbService: LetterContentsDbService = new LetterContentsDbService();
+const letterRecipientContentsDbService: LetterRecipientContentsDbService = new LetterRecipientContentsDbService();
 const userKeyDbService: UserKeyDbService = new UserKeyDbService();
+const userDbService: UserDbService = new UserDbService();
 
 // TODO: change these to get the user id from a verified JWT token once we implement logging in functionality
 
@@ -139,7 +145,7 @@ router.post("/received", async (req, res, next) => {
 
 router.post("/receivedRequestors", async (req, res, next) => {
   console.log(res.locals.jwtPayload.publicAddress);
-  const requestors: User[] = await letterHistoryDbService.selectAllLetterRequestorByLetterRecipient(
+  const requestors: User[] = await userDbService.selectAllLetterRequestorByLetterRecipient(
     res.locals.jwtPayload.publicAddress
   );
 
@@ -232,7 +238,7 @@ router.post("/:letterId/unsentRecipients", async (req, res, next) => {
   // console.log(req.body["auth"]);
   // console.log(req.params.letterId);
   // console.log("get unsent recipients for given letter_id");
-  const userModels: User[] = await letterHistoryDbService.selectAllUnsentRecipientsByLetterId(
+  const userModels: User[] = await userDbService.selectAllUnsentRecipientsByLetterId(
     req.params.letterId
   );
   // console.log(userModels);
@@ -253,7 +259,7 @@ router.post("/:letterId/updateRecipients", async (req, res, next) => {
   );
 
   if (success) {
-    const userModels: User[] = await letterHistoryDbService.selectAllUnsentRecipientsByLetterId(
+    const userModels: User[] = await userDbService.selectAllUnsentRecipientsByLetterId(
       req.params.letterId
     );
     // console.log(userModels);
@@ -355,14 +361,14 @@ router.post("/:letterId/contents/writer", async (req, res, next) => {
   console.log(req.params.letterId);
   console.log("get letter contents for given letterId");
   // TODO: make sure below function checks that letterId is valid id for this user to update
-  const letterContents: LetterContents[] = await letterDbService.selectLetterContentsByLetterIdAndWriterId(
+  const letterContents: LetterContents[] = await letterContentsDbService.selectLetterContentsByLetterIdAndWriterId(
     req.params.letterId,
     req.body["auth"].publicAddress
   );
   console.log(letterContents.length);
   if (letterContents && letterContents.length > 0) {
-    console.log(letterContents[0].content?.length);
-    res.json({ data: letterContents[0].content });
+    console.log(letterContents[0].contents?.length);
+    res.json({ data: letterContents[0].contents });
   } else {
     res.status(400);
     res.json({ data: {} });
@@ -374,14 +380,14 @@ router.post("/:letterId/contents/recipient", async (req, res, next) => {
   console.log(req.body["auth"]);
   console.log(req.params.letterId);
   console.log("get letter contents for given letterId");
-  const letterContents: LetterContents[] = await letterHistoryDbService.selectLetterContentsByLetterIdAndRecipientId(
+  const letterContents: LetterContents[] = await letterContentsDbService.selectLetterContentsByLetterIdAndRecipientId(
     req.params.letterId,
     req.body["auth"].publicAddress
   );
   console.log(letterContents.length);
   if (letterContents && letterContents.length > 0) {
-    console.log(letterContents[0].content?.length);
-    res.json({ data: letterContents[0].content });
+    console.log(letterContents[0].contents?.length);
+    res.json({ data: letterContents[0].contents });
   } else {
     res.status(400);
     res.json({ data: {} });
@@ -399,7 +405,7 @@ router.post("/:letterId/contents/update", async (req, res, next) => {
   );
 
   if (numRecipients === 0) {
-    const success: boolean = await letterDbService.updateLetterContentsByLetterIdAndWriterId(
+    const success: boolean = await letterContentsDbService.updateLetterContentsByLetterIdAndWriterId(
       req.body["data"],
       currentDate,
       req.params.letterId,
@@ -432,7 +438,7 @@ router.post("/:letterId/contents/update", async (req, res, next) => {
 });
 
 router.post("/:letterId/unsentRecipientKeys", async (req, res, next) => {
-  const userKeyModels: UserKey[] = await letterHistoryDbService.selectAllUnsentRecipientKeysByLetterId(
+  const userKeyModels: UserKey[] = await userKeyDbService.selectAllUnsentRecipientKeysByLetterId(
     req.params.letterId
   );
   console.log(userKeyModels.length);

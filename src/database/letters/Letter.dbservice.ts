@@ -73,45 +73,6 @@ export class LetterDbService extends DatabaseService<Letter> {
   }
 
   /**
-   * retrieval of the letter contents
-   * select the letter contents by letter id and writer's public address
-   * @param letterId 
-   * @param letterWriter 
-   */
-  async selectLetterContentsByLetterIdAndWriterId(
-    letterId: string,
-    letterWriter: string
-  ): Promise<LetterContents[]> {
-    const queryText = this.selectLetterContentsByLetterIdAndWriterIdQuery;
-    const values = [letterId, letterWriter];
-    return super.runParameterizedQueryWithValuesArrayContents(
-      queryText,
-      values
-    );
-  }
-
-  /**
-   * update the letter contents as a buffer from utf8
-   * previously null if first upload
-   * @param letterContents in utf8
-   * @param currentDate 
-   * @param letterId 
-   * @param letterWriter 
-   */
-  async updateLetterContentsByLetterIdAndWriterId(
-    letterContents: string,
-    currentDate: string,
-    letterId: string,
-    letterWriter: string
-  ): Promise<boolean> {
-    console.log(letterContents.length);
-    const letterContentObj: Buffer = Buffer.from(letterContents, 'utf8');
-    const queryText = this.updateLetterContentsByLetterIdAndWriterIdQuery;
-    const values = [letterContentObj, currentDate.substring(0, 24),letterId, letterWriter];
-    return super.runParameterizedQueryWithValuesArrayUpdate(queryText, values);
-  }
-
-  /**
    * helper for the select all letter method
    * determine query based off user role
    * @param userRole requestor or writer
@@ -166,20 +127,6 @@ export class LetterDbService extends DatabaseService<Letter> {
       " as U on L.letter_requestor = U.public_address join " +
       userTableName +
       " as V on L.letter_writer = V.public_address where letter_id = $1 and letter_writer = $2;",
-  };
-
-  private selectLetterContentsByLetterIdAndWriterIdQuery = {
-    text:
-      "select letter_contents from " +
-      letterTableName +
-      " where letter_id = $1 and letter_writer = $2",
-  };
-
-  private updateLetterContentsByLetterIdAndWriterIdQuery = {
-    text:
-      "update " +
-      letterTableName +
-      " set letter_contents = $1, uploaded_at = $2 where letter_id = $3 and letter_writer = $4;",
   };
 
   private insertLetterByAddressAndLetterDetailsQuery = {

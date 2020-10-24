@@ -1,8 +1,6 @@
 import { DatabaseService } from "../dbservice";
 import { LetterHistory } from "./LetterHistory.dbmodel";
-import { LetterContents } from "../letter_contents/LetterContents.dbmodel";
 import { User } from "../users/User.dbmodel";
-import { UserKey } from "../users/UserKey.dbmodel";
 
 const sentLetterTableName = "sent_letters";
 const letterTableName = "letters";
@@ -66,32 +64,6 @@ export class LetterHistoryDbService extends DatabaseService<LetterHistory> {
     const queryText = this.selectAllUnsentLetterHistoryByLetterIdQuery;
     const values = [letterId];
     return super.runParameterizedQueryWithValuesArray(queryText, values);
-  }
-
-  /**
-   * unsent recipients
-   * retrieval of all unsent letter recipients (Users) rather than full letter history
-   * for a given letter id (for either requestor or writer)
-   * @param letterId
-   */
-  async selectAllUnsentRecipientsByLetterId(letterId: string): Promise<User[]> {
-    const queryText = this.selectAllUnsentRecipientsByLetterIdQuery;
-    const values = [letterId];
-    return super.runParameterizedQueryWithValuesArrayUser(queryText, values);
-  }
-
-  /**
-   * unsent recipient keys
-   * retrieval of all unsent letter recipients keys (UserKeys) rather than full letter history
-   * for a given letter id (for either requestor or writer)
-   * @param letterId
-   */
-  async selectAllUnsentRecipientKeysByLetterId(
-    letterId: string
-  ): Promise<UserKey[]> {
-    const queryText = this.selectAllUnsentRecipientKeyByLetterIdQuery;
-    const values = [letterId];
-    return super.runParameterizedQueryWithValuesArrayUserKey(queryText, values);
   }
 
   /**
@@ -184,23 +156,6 @@ export class LetterHistoryDbService extends DatabaseService<LetterHistory> {
   }
 
   /**
-   * retrieve letter contents by letter id and recipient id
-   * @param letterId
-   * @param letterRecipient
-   */
-  async selectLetterContentsByLetterIdAndRecipientId(
-    letterId: string,
-    letterRecipient: string
-  ): Promise<LetterContents[]> {
-    const queryText = this.selectLetterContentsByLetterIdAndRecipientIdQuery;
-    const values = [letterId, letterRecipient];
-    return super.runParameterizedQueryWithValuesArrayContents(
-      queryText,
-      values
-    );
-  }
-
-  /**
    * update letter contents by letter id and recipient id
    * not needed under current requirements
    */
@@ -210,14 +165,11 @@ export class LetterHistoryDbService extends DatabaseService<LetterHistory> {
   //   return super.runParameterizedQueryWithValuesArrayUpdate(queryText, values);
   // }
 
-  async selectAllLetterRequestorByLetterRecipient(
-    publicAddress: string
-  ): Promise<User[]> {
-    const queryText = this.selectAllLetterRequestorByLetterRecipientQuery;
-    const values = [publicAddress];
-    return super.runParameterizedQueryWithValuesArrayUser(queryText, values);
-  }
-
+  /**
+   * retrieve all letter history who have given recipient and requestor
+   * @param letterRecipient
+   * @param letterRequestor
+   */
   async selectAllLetterHistoryByLetterRecipientAndLetterRequestor(
     letterRecipient: string,
     letterRequestor: string
@@ -256,21 +208,6 @@ export class LetterHistoryDbService extends DatabaseService<LetterHistory> {
       " as V on L.letter_writer = V.public_address join " +
       userTableName +
       " as W on S.letter_recipient = W.public_address where S.letter_recipient = $1 and L.letter_requestor = $2 order by S.sent_at DESC;",
-  };
-
-  private selectAllLetterRequestorByLetterRecipientQuery = {
-    text:
-      "select distinct on (letter_requestor) letter_requestor as public_address, letter_requestor_name as name from (select distinct L.letter_requestor, U.name as letter_requestor_name, S.sent_at from " +
-      letterTableName +
-      " as L inner join " +
-      sentLetterTableName +
-      " as S on L.letter_id = S.letter_id join " +
-      userTableName +
-      " as U on L.letter_requestor = U.public_address join " +
-      userTableName +
-      " as V on L.letter_writer = V.public_address join " +
-      userTableName +
-      " as W on S.letter_recipient = W.public_address where S.letter_recipient = $1 order by S.sent_at DESC ) subquery;",
   };
 
   // private selectAllLetterHistoryByLetterIdQuery = {
@@ -318,28 +255,6 @@ export class LetterHistoryDbService extends DatabaseService<LetterHistory> {
       " as W on S.letter_recipient = W.public_address where L.letter_id = $1 and S.sent_at is NULL order by S.letter_recipient ASC;",
   };
 
-  private selectAllUnsentRecipientsByLetterIdQuery = {
-    text:
-      "select distinct W.public_address, W.name from " +
-      letterTableName +
-      " as L inner join " +
-      sentLetterTableName +
-      " as S on L.letter_id = S.letter_id join " +
-      userTableName +
-      " as W on S.letter_recipient = W.public_address where L.letter_id = $1 and S.sent_at is NULL order by W.public_address ASC;",
-  };
-
-  private selectAllUnsentRecipientKeyByLetterIdQuery = {
-    text:
-      "select distinct W.public_address, W.name, W.public_key from " +
-      letterTableName +
-      " as L inner join " +
-      sentLetterTableName +
-      " as S on L.letter_id = S.letter_id join " +
-      userTableName +
-      " as W on S.letter_recipient = W.public_address where L.letter_id = $1 and S.sent_at is NULL order by W.public_address ASC;",
-  };
-
   private countSentRecipientsByLetterIdQuery = {
     text:
       "select * from " +
@@ -373,15 +288,6 @@ export class LetterHistoryDbService extends DatabaseService<LetterHistory> {
       "insert into " +
       sentLetterTableName +
       "(letter_recipient, letter_id, sent_at) values($1, $2, NULL);",
-  };
-
-  private selectLetterContentsByLetterIdAndRecipientIdQuery = {
-    text:
-      "select distinct letter_contents from " +
-      letterTableName +
-      " as L join " +
-      sentLetterTableName +
-      " as S on L.letter_id = S.letter_id where L.letter_id = $1 and S.letter_recipient = $2;",
   };
 
   // private updateLetterContentsByRecipientIdAndLetterIdQuery = {
