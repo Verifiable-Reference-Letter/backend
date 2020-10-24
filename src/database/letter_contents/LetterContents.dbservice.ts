@@ -1,7 +1,5 @@
 import { DatabaseService } from "../dbservice";
 import { LetterContents } from "./LetterContents.dbmodel";
-import { User } from "../users/User.dbmodel";
-import { UserKey } from "../users/UserKey.dbmodel";
 
 const sentLetterTableName = "sent_letters";
 const letterTableName = "letters";

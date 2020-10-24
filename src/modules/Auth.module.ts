@@ -1,10 +1,10 @@
 import { UserAuthDbService } from "../database/users/UserAuth.dbservice";
-import { Keccak } from "sha3";
-import { KJUR, utf8tohex } from "jsrsasign";
+// import { Keccak } from "sha3";
+import { utf8tohex } from "jsrsasign";
 // import * as E from "cryptojs"
 //import  * as jwt from "jsonwebtoken";
 import * as EthUtil from "ethereumjs-util";
-import * as EthTx from "ethereumjs-tx";
+// import * as EthTx from "ethereumjs-tx";
 import { Request, Response, NextFunction } from "express";
 import * as jwt from "jsonwebtoken";
 import { UserKey } from "../database/users/UserKey.dbmodel";

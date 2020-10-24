@@ -13,6 +13,7 @@ import { AuthModule } from "../modules/Auth.module";
 import { LetterContentsDbService } from "../database/letter_contents/LetterContents.dbservice";
 import { LetterRecipientContentsDbService } from "../database/letter_recipient_contents/LetterRecipientContents.dbservice";
 import { UserDbService } from "../database/users/User.dbservice";
+import { LetterRecipientContents } from "src/database/letter_recipient_contents/LetterRecipientContents.dbmodel";
 const router = express.Router();
 
 const letterDbService: LetterDbService = new LetterDbService();
@@ -448,31 +449,94 @@ router.post("/:letterId/unsentRecipientKeys", async (req, res, next) => {
   } else {
     res.json({ data: { userKeys: userKeyModels } });
   }
+});
 
-  // const userModels: User[] = await letterHistoryDbService.selectAllUnsentRecipientsByLetterId(
-  //   req.params.letterId
-  // );
-  // console.log(userModels.length);
+router.post("/:letterId/unsentRecipientKeys", async (req, res, next) => {
+  const userKeyModels: UserKey[] = await userKeyDbService.selectAllUnsentRecipientKeysByLetterId(
+    req.params.letterId
+  );
+  console.log(userKeyModels.length);
+  if (userKeyModels.length === 0) {
+    res.status(400);
+    res.json({ data: {} });
+  } else {
+    res.json({ data: { userKeys: userKeyModels } });
+  }
+});
 
-  // let userKeys: UserKey[] = [];
-  // for (let i = 0; i < userModels.length; i++) {
-  //   const publicAddress = userModels[i].publicAddress;
-  //   const userKey: UserKey = await userKeyDbService.selectUserKey(
-  //     publicAddress
-  //   );
-  //   if (userKey) {
-  //     userKeys.push(userKey);
-  //   } else {
-  //     console.log("userKey not found for", publicAddress);
-  //   }
-  // }
-  // console.log(userKeys.length);
-  // if (userKeys.length === 0) {
-  //   res.status(400);
-  //   res.json({ data: {} });
-  // } else {
-  //   res.json({ data: { userKeys: userKeys } });
-  // }
+router.post("/:letterId/recipientContents", async (req, res, next) => {
+  const letterRecipientContents: LetterRecipientContents[] = await letterRecipientContentsDbService.selectLetterContentsByLetterIdAndRecipientId(
+    req.params.letterId,
+    res.locals.jwtPayload.publicAddress
+  );
+  console.log(letterRecipientContents.length);
+  if (letterRecipientContents.length === 0) {
+    res.status(400);
+    res.json({ data: {} });
+  } else {
+    res.json({ data: { letterRecipientContents: letterRecipientContents } });
+  }
+});
+
+router.post("/:letterId/recipientContents/update", async (req, res, next) => {
+  const data: {
+    letterContents: string;
+    letterHash: string;
+    letterSignature: string;
+  } = req.body["data"];
+  const currentDate = Date();
+  const success: boolean = await letterRecipientContentsDbService.updateLetterContentsByLetterIdAndRecipientId(
+    data.letterContents,
+    data.letterHash,
+    data.letterSignature,
+    currentDate,
+    req.params.letterId,
+    res.locals.jwtPayload.publicAddress
+  );
+
+  if (!success) {
+    res.status(400);
+    res.json({ data: {} });
+  } else {
+    const letterModels: Letter[] = await letterDbService.selectAllLettersByAddressAndRole(
+      res.locals.jwtPayload.publicAddress,
+      UserRole.Writer
+    );
+    let numRecipients: Number[] = [];
+    let numUnsentRecipients: Number[] = [];
+    for (let i = 0; i < letterModels.length; i++) {
+      const l = letterModels[i];
+      const num: Number = await letterHistoryDbService.countSentRecipientsByLetterId(
+        l.letterId
+      );
+      const numUnsent: Number = await letterHistoryDbService.countUnsentRecipientsByLetterId(
+        l.letterId
+      );
+      numRecipients.push(num);
+      numUnsentRecipients.push(numUnsent);
+    }
+
+    if (letterModels.length !== 0) {
+      res.json({
+        auth: {
+          jwtToken: res.locals.newJwtToken,
+        },
+        data: {
+          letters: letterModels,
+          numRecipients: numRecipients,
+          numUnsentRecipients: numUnsentRecipients,
+        },
+      });
+    } else {
+      res.status(400);
+      res.json({
+        auth: {
+          jwtToken: res.locals.newJwtToken,
+        },
+        data: {},
+      });
+    }
+  }
 });
 
 export { router };
