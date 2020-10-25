@@ -1,11 +1,11 @@
 export class LetterRecipientContents {
   letterContents: string | null;
-  letterHash: string | null;
+  // letterHash: string | null;
   letterSignature: string | null;
 
   constructor(
     letterContents: Buffer | null,
-    letterHash: string | null,
+    // letterHash: string | null,
     letterSignature: string | null,
   ) {
     if (letterContents !== null) {
@@ -13,8 +13,7 @@ export class LetterRecipientContents {
     } else {
       this.letterContents = null;
     }
-
-    this.letterHash = letterHash;
+    // this.letterHash = letterHash;
     this.letterSignature = letterSignature;
   }
 
@@ -22,9 +21,9 @@ export class LetterRecipientContents {
     return this.letterContents;
   }
 
-  get hash(): string | null {
-    return this.letterHash;
-  }
+  // get hash(): string | null {
+  //   return this.letterHash;
+  // }
 
   get sig(): string | null {
     return this.letterSignature;
@@ -32,7 +31,7 @@ export class LetterRecipientContents {
 
   static dbRowToDbModel(dbRow: any) {
     // console.log("dbRowLength", dbRow.letter_contents.toString('utf8').length);
-    const newDbModel = new LetterRecipientContents(dbRow.letter_contents, dbRow.letter_hash, dbRow.letter_signature);
+    const newDbModel = new LetterRecipientContents(dbRow.letter_contents, dbRow.letter_signature);
     return newDbModel;
   }
 }

@@ -7,6 +7,7 @@ import { User } from "../database/users/User.dbmodel";
 import { LetterHistoryDbService } from "../database/letter_history/LetterHistory.dbservice";
 import { UserKey } from "../database/users/UserKey.dbmodel";
 import { UserKeyDbService } from "../database/users/UserKey.dbservice";
+import { UserAuthDbService } from "../database/users/UserAuth.dbservice";
 import { UserRole } from "../database/users/UserRole";
 import { LetterDbService } from "../database/letters/Letter.dbservice";
 import { AuthModule } from "../modules/Auth.module";
@@ -22,6 +23,8 @@ const letterContentsDbService: LetterContentsDbService = new LetterContentsDbSer
 const letterRecipientContentsDbService: LetterRecipientContentsDbService = new LetterRecipientContentsDbService();
 const userKeyDbService: UserKeyDbService = new UserKeyDbService();
 const userDbService: UserDbService = new UserDbService();
+const authModule: AuthModule = new AuthModule();
+const userAuthDbService: UserAuthDbService = new UserAuthDbService();
 
 // TODO: change these to get the user id from a verified JWT token once we implement logging in functionality
 router.use(AuthModule.verifyUser);
@@ -308,7 +311,7 @@ router.post("/:letterId/updateRecipients", async (req, res, next) => {
 });
 
 /**
- * make a new request (for a letter) with indicated writer and recipients list (for requestor's page) 
+ * make a new request (for a letter) with indicated writer and recipients list (for requestor's page)
  */
 router.post("/create", async (req, res, next) => {
   // console.log("creating new letter based on letter details");
@@ -408,27 +411,27 @@ router.post("/:letterId/contents/writer", async (req, res, next) => {
   }
 });
 
-/**
- * retrieve the letter contents by letter id and recipient id (for recipient's page view functionality)
- */
-router.post("/:letterId/contents/recipient", async (req, res, next) => {
-  // TODO: check JWT
-  console.log(req.body["auth"]);
-  console.log(req.params.letterId);
-  console.log("get letter contents for given letterId");
-  const letterContents: LetterContents[] = await letterContentsDbService.selectLetterContentsByLetterIdAndRecipientId(
-    req.params.letterId,
-    req.body["auth"].publicAddress
-  );
-  console.log(letterContents.length);
-  if (letterContents && letterContents.length > 0) {
-    console.log(letterContents[0].contents?.length);
-    res.json({ data: letterContents[0].contents });
-  } else {
-    res.status(400);
-    res.json({ data: {} });
-  }
-});
+// /**
+//  * retrieve the letter contents by letter id and recipient id (for recipient's page view functionality)
+//  */
+// router.post("/:letterId/contents/recipient", async (req, res, next) => {
+//   // TODO: check JWT
+//   console.log(req.body["auth"]);
+//   console.log(req.params.letterId);
+//   console.log("get letter contents for given letterId");
+//   const letterContents: LetterContents[] = await letterContentsDbService.selectLetterContentsByLetterIdAndRecipientId(
+//     req.params.letterId,
+//     req.body["auth"].publicAddress
+//   );
+
+//   if (letterContents && letterContents.length > 0) {
+//     console.log(letterContents[0].contents?.length);
+//     res.json({ data: letterContents[0].contents });
+//   } else {
+//     res.status(400);
+//     res.json({ data: {} });
+//   }
+// });
 
 /**
  * update the letter contents for given letter id and writer id after checking if not sent to any recipients
@@ -501,12 +504,25 @@ router.post("/:letterId/recipientContents", async (req, res, next) => {
     req.params.letterId,
     res.locals.jwtPayload.publicAddress
   );
-  console.log(letterRecipientContents.length);
-  if (letterRecipientContents.length === 0) {
+  // console.log(letterRecipientContents);
+
+  if (letterRecipientContents.length === 0 || letterRecipientContents[0].letterContents === null || letterRecipientContents[0].letterSignature === null) {
     res.status(400);
     res.json({ data: {} });
   } else {
-    res.json({ data: { letterRecipientContents: letterRecipientContents } });
+    const verifySuccess: boolean = await authModule.verifySignature(
+      letterRecipientContents[0].letterContents,
+      letterRecipientContents[0].letterSignature,
+      res.locals.jwtPayload.publicAddress
+    );
+
+    if (verifySuccess) {
+      res.json({ data: { letterRecipientContents: letterRecipientContents } });
+    } else {
+      console.log(verifySuccess, "something went wrong with verification");
+      res.status(500);
+      res.json({ data: {} });
+    }
   }
 });
 
@@ -515,63 +531,80 @@ router.post("/:letterId/recipientContents", async (req, res, next) => {
  */
 router.post("/:letterId/recipientContents/update", async (req, res, next) => {
   const data: {
-    letterContents: string,
-    letterHash: string,
-    letterSignature: string,
-    letterRecipient: string,
+    letterContents: string;
+    // letterHash: string,
+    letterSignature: string;
+    letterRecipient: string;
   } = req.body["data"];
-  const currentDate = Date();
-  const success: boolean = await letterRecipientContentsDbService.updateLetterContentsByLetterIdAndRecipientId(
+
+  const verifySuccess: boolean = await authModule.verifySignature(
     data.letterContents,
-    data.letterHash,
     data.letterSignature,
-    currentDate,
-    req.params.letterId,
-    data.letterRecipient,
+    res.locals.jwtPayload.publicAddress
   );
 
-  if (!success) {
-    res.status(400);
-    res.json({ data: {} });
-  } else {
-    const letterModels: Letter[] = await letterDbService.selectAllLettersByAddressAndRole(
-      res.locals.jwtPayload.publicAddress,
-      UserRole.Writer
+  if (verifySuccess) {
+    const currentDate = Date();
+    const success: boolean = await letterRecipientContentsDbService.updateLetterContentsByLetterIdAndRecipientId(
+      data.letterContents,
+      // data.letterHash,
+      data.letterSignature,
+      currentDate,
+      req.params.letterId,
+      data.letterRecipient
     );
-    let numRecipients: Number[] = [];
-    let numUnsentRecipients: Number[] = [];
-    for (let i = 0; i < letterModels.length; i++) {
-      const l = letterModels[i];
-      const num: Number = await letterHistoryDbService.countSentRecipientsByLetterId(
-        l.letterId
-      );
-      const numUnsent: Number = await letterHistoryDbService.countUnsentRecipientsByLetterId(
-        l.letterId
-      );
-      numRecipients.push(num);
-      numUnsentRecipients.push(numUnsent);
-    }
 
-    if (letterModels.length !== 0) {
-      res.json({
-        auth: {
-          jwtToken: res.locals.newJwtToken,
-        },
-        data: {
-          letters: letterModels,
-          numRecipients: numRecipients,
-          numUnsentRecipients: numUnsentRecipients,
-        },
-      });
-    } else {
+    if (!success) {
       res.status(400);
-      res.json({
-        auth: {
-          jwtToken: res.locals.newJwtToken,
-        },
-        data: {},
-      });
+      res.json({ data: {} });
+    } else {
+      const letterModels: Letter[] = await letterDbService.selectAllLettersByAddressAndRole(
+        res.locals.jwtPayload.publicAddress,
+        UserRole.Writer
+      );
+      let numRecipients: Number[] = [];
+      let numUnsentRecipients: Number[] = [];
+      for (let i = 0; i < letterModels.length; i++) {
+        const l = letterModels[i];
+        const num: Number = await letterHistoryDbService.countSentRecipientsByLetterId(
+          l.letterId
+        );
+        const numUnsent: Number = await letterHistoryDbService.countUnsentRecipientsByLetterId(
+          l.letterId
+        );
+        numRecipients.push(num);
+        numUnsentRecipients.push(numUnsent);
+      }
+
+      if (letterModels.length !== 0) {
+        res.json({
+          auth: {
+            jwtToken: res.locals.newJwtToken,
+          },
+          data: {
+            letters: letterModels,
+            numRecipients: numRecipients,
+            numUnsentRecipients: numUnsentRecipients,
+          },
+        });
+      } else {
+        res.status(400);
+        res.json({
+          auth: {
+            jwtToken: res.locals.newJwtToken,
+          },
+          data: {},
+        });
+      }
     }
+  } else {
+    res.status(400);
+    res.json({
+      auth: {
+        jwtToken: res.locals.newJwtToken,
+      },
+      data: {},
+    });
   }
 });
 

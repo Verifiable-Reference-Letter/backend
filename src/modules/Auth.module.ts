@@ -25,14 +25,19 @@ export class AuthModule {
     // this.sessionMap = new Map();
   }
 
-  async authorizeUser(
+  /**
+   * verify signature corresponds to message and public address by using ecrecover
+   * @param message 
+   * @param signature 
+   * @param publicAddress 
+   */
+  async verifySignature(
+    message: string,
     signature: string,
     publicAddress: string
   ): Promise<boolean> {
-    let userModel = await this.userAuthDbService.selectOneRowByPrimaryId(
-      publicAddress
-    );
-    const sig = signature.slice(2, signature.length);
+
+    // const sig = signature.slice(2, signature.length);
     // const offset = 2;
     // const r = signature.slice(0 + offset, 64 + offset);
     // const s = signature.slice(64 + offset, 128 + offset);
@@ -44,10 +49,8 @@ export class AuthModule {
     // console.log("signature", signature);
     // console.log("sig", sig);
 
-    const nonce = userModel.nonce;
     // const messageHash = new Keccak(256);
-    // messageHash.update(userModel.nonce);
-    const messageHash = EthUtil.hashPersonalMessage(Buffer.from(nonce));
+    const messageHash = EthUtil.hashPersonalMessage(Buffer.from(message));
 
     const hash = messageHash.toString("hex");
     const hash2 = utf8tohex(hash);
@@ -100,6 +103,12 @@ export class AuthModule {
     return false;
   }
 
+  /**
+   * verify user jwtToken
+   * @param req 
+   * @param res 
+   * @param next 
+   */
   static verifyUser(req: Request, res: Response, next: NextFunction) {
     const token = req.body.auth.jwtToken;
     let jwtPayload;

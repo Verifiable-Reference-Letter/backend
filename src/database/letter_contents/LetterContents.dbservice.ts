@@ -51,22 +51,22 @@ export class LetterContentsDbService extends DatabaseService<LetterContents> {
     return super.runParameterizedQueryWithValuesArrayUpdate(queryText, values);
   }
 
-  /**
-   * retrieve letter contents by letter id and recipient id
-   * @param letterId
-   * @param letterRecipient
-   */
-  async selectLetterContentsByLetterIdAndRecipientId(
-    letterId: string,
-    letterRecipient: string
-  ): Promise<LetterContents[]> {
-    const queryText = this.selectLetterContentsByLetterIdAndRecipientIdQuery;
-    const values = [letterId, letterRecipient];
-    return super.runParameterizedQueryWithValuesArray(
-      queryText,
-      values
-    );
-  }
+  // /**
+  //  * retrieve letter contents by letter id and recipient id
+  //  * @param letterId
+  //  * @param letterRecipient
+  //  */
+  // async selectLetterContentsByLetterIdAndRecipientId(
+  //   letterId: string,
+  //   letterRecipient: string
+  // ): Promise<LetterContents[]> {
+  //   const queryText = this.selectLetterContentsByLetterIdAndRecipientIdQuery;
+  //   const values = [letterId, letterRecipient];
+  //   return super.runParameterizedQueryWithValuesArray(
+  //     queryText,
+  //     values
+  //   );
+  // }
 
   private selectLetterContentsByLetterIdAndWriterIdQuery = {
     text:
@@ -82,14 +82,14 @@ export class LetterContentsDbService extends DatabaseService<LetterContents> {
       " set letter_contents = $1, uploaded_at = $2 where letter_id = $3 and letter_writer = $4;",
   };
 
-  private selectLetterContentsByLetterIdAndRecipientIdQuery = {
-    text:
-      "select distinct letter_contents from " +
-      letterTableName +
-      " as L join " +
-      sentLetterTableName +
-      " as S on L.letter_id = S.letter_id where L.letter_id = $1 and S.letter_recipient = $2;",
-  };
+  // private selectLetterContentsByLetterIdAndRecipientIdQuery = {
+  //   text:
+  //     "select distinct S.letter_contents from " +
+  //     letterTableName +
+  //     " as L join " +
+  //     sentLetterTableName +
+  //     " as S on L.letter_id = S.letter_id where L.letter_id = $1 and S.letter_recipient = $2;",
+  // };
 
   protected dbRowToDbModel(dbRow: any): LetterContents {
     return LetterContents.dbRowToDbModel(dbRow);
