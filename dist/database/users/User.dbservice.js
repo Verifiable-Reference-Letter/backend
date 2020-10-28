@@ -12,11 +12,17 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const dbservice_1 = require("../dbservice");
 const User_dbmodel_1 = require("./User.dbmodel");
 const userTableName = "users";
-class UsersDbService extends dbservice_1.DatabaseService {
+class UserDbService extends dbservice_1.DatabaseService {
     constructor() {
         super();
-        this.createUserQuery = {
-            text: 'insert into users values ($1, $2, current_timestamp, 0) returning *;'
+        this.selectUserByPublicAddressQuery = {
+            text: 'SELECT public_address, name from ' + userTableName + ' WHERE public_address = $1'
+        };
+        this.selectAllUsersQuery = {
+            text: 'SELECT public_address, name from ' + userTableName
+        };
+        this.selectAllUsersExceptSelfQuery = {
+            text: 'SELECT public_address, name from ' + userTableName + ' WHERE public_address != $1'
         };
         this.initializePreparedQueries();
     }
@@ -28,19 +34,39 @@ class UsersDbService extends dbservice_1.DatabaseService {
             text: 'SELECT * from ' + userTableName + ' WHERE public_address = $1'
         };
     }
-    dbRowToDbModel(dbRow) {
-        return User_dbmodel_1.User.dbRowToDbModel(dbRow);
-    }
-    createUser(address, name) {
+    selectUserByPublicAddress(publicAddress) {
         const _super = Object.create(null, {
             runParameterizedQueryWithValuesArray: { get: () => super.runParameterizedQueryWithValuesArray }
         });
         return __awaiter(this, void 0, void 0, function* () {
-            const values = [address, name];
-            let users = yield _super.runParameterizedQueryWithValuesArray.call(this, this.createUserQuery, values);
-            return users[0];
+            const queryText = this.selectUserByPublicAddressQuery;
+            const values = [publicAddress];
+            return _super.runParameterizedQueryWithValuesArray.call(this, queryText, values);
         });
     }
+    selectAllUsers() {
+        const _super = Object.create(null, {
+            runParameterizedQueryWithValuesArray: { get: () => super.runParameterizedQueryWithValuesArray }
+        });
+        return __awaiter(this, void 0, void 0, function* () {
+            const queryText = this.selectAllUsersQuery;
+            const values = [];
+            return _super.runParameterizedQueryWithValuesArray.call(this, queryText, values);
+        });
+    }
+    selectAllUsersExceptSelf(publicAddress) {
+        const _super = Object.create(null, {
+            runParameterizedQueryWithValuesArray: { get: () => super.runParameterizedQueryWithValuesArray }
+        });
+        return __awaiter(this, void 0, void 0, function* () {
+            const queryText = this.selectAllUsersExceptSelfQuery;
+            const values = [publicAddress];
+            return _super.runParameterizedQueryWithValuesArray.call(this, queryText, values);
+        });
+    }
+    dbRowToDbModel(dbRow) {
+        return User_dbmodel_1.User.dbRowToDbModel(dbRow);
+    }
 }
-exports.UsersDbService = UsersDbService;
+exports.UserDbService = UserDbService;
 //# sourceMappingURL=User.dbservice.js.map

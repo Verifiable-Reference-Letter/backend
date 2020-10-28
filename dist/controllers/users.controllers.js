@@ -14,23 +14,82 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const User_dbservice_1 = require("../database/users/User.dbservice");
+const UserProfile_dbservice_1 = require("../database/users/UserProfile.dbservice");
+const Auth_module_1 = require("../modules/Auth.module");
 const router = express_1.default.Router();
 exports.router = router;
-const usersDbService = new User_dbservice_1.UsersDbService();
-// Get all users
-router.get('/', (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    console.log("Getting all users");
-    const userModels = yield usersDbService.selectAll();
-    res.send(userModels);
+const userDbService = new User_dbservice_1.UserDbService();
+const userProfileDbService = new UserProfile_dbservice_1.UserProfileDbService();
+router.use(Auth_module_1.AuthModule.verifyUser);
+/**
+ * get all users (basic info)
+ */
+router.post("/", (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    console.log("getting all users except self");
+    const userModels = yield userDbService.selectAllUsersExceptSelf(res.locals.jwtPayload.publicAddress); // TODO: change to subtract user self
+    console.log(userModels);
+    res.json({
+        auth: {
+            jwtToken: res.locals.newJwtToken
+        },
+        data: userModels
+    });
 }));
-router.post('/create', (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    console.log("Creating user");
-    const userModel = yield usersDbService.createUser(req.body.public_address, req.body.name);
-    res.send([userModel]);
+/**
+ * get user (basic info) by publicAddress
+ */
+router.post("/:publicAddress", (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    console.log("Get the user profile by publicAddress");
+    const userModel = yield userDbService.selectUserByPublicAddress(req.params.publicAddress);
+    console.log(userModel);
+    if (userModel.length !== 0) {
+        res.json({
+            auth: {
+                jwtToken: res.locals.newJwtToken
+            },
+            data: userModel
+        });
+    }
+    else {
+        res.status(400);
+        res.json({
+            auth: {
+                jwtToken: res.locals.newJwtToken
+            },
+            data: []
+        });
+    }
 }));
-router.get('/:publicAddress', (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    console.log("Got into users GET for single address");
-    const userModel = yield usersDbService.selectOneRowByPrimaryId(req.params.publicAddress);
-    res.send([userModel]);
+/**
+ * get user profile by publicAddress
+ */
+router.post("/:publicAddress/profile", (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    console.log("Get the user profile by publicAddress");
+    const userProfileModel = yield userProfileDbService.selectUserByPublicAddress(req.params.publicAddress);
+    console.log(userProfileModel);
+    if (userProfileModel.length !== 0) {
+        res.json({
+            auth: {
+                jwtToken: res.locals.newJwtToken
+            },
+            data: userProfileModel
+        });
+    }
+    else {
+        res.status(400);
+        res.json({
+            auth: {
+                jwtToken: res.locals.newJwtToken
+            },
+            data: userProfileModel
+        });
+    }
+}));
+/**
+ * send email to publicAddress (req.param) from req.body.auth.publicAddress
+ * TODO: Not Yet Implemented
+ */
+router.post("/:publicAddress/sendEmail", (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    console.log("send email to publicAddress");
 }));
 //# sourceMappingURL=users.controllers.js.map

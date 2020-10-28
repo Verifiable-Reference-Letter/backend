@@ -1,12 +1,13 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 class SentLetter {
-    constructor(recipientAddress, letterId) {
+    constructor(recipientAddress, letterId, sentAt) {
         this.recipientAddress = recipientAddress;
         this.letterId = letterId;
+        this.sentAt = sentAt;
     }
     static dbRowToDbModel(dbRow) {
-        const newSentLetter = new SentLetter(dbRow.public_address, dbRow.letter_id);
+        const newSentLetter = new SentLetter(dbRow.public_address, dbRow.letter_id, dbRow.sentAt);
         console.dir(newSentLetter);
         return newSentLetter;
     }

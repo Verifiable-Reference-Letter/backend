@@ -6,14 +6,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const mail_1 = __importDefault(require("@sendgrid/mail"));
 class EmailsModule {
     constructor() {
-        mail_1.default.setApiKey("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");
+        mail_1.default.setApiKey(process.env.SENDGRID_API_KEY);
     }
-    //"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"
     sendMail() {
-        // using Twilio SendGrid's v3 Node.js Library
-        // https://github.com/sendgrid/sendgrid-nodejs
-        // sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-        //this.sgMail.setApiKey('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');
         const msg = {
             to: 'stevenshi1999@gmail.com',
             from: 'teamgas2020@gmail.com',

@@ -17,8 +17,11 @@ console.log("Port chosen: " + port);
 const testApi_1 = require("./routes/testApi");
 const users_controllers_1 = require("./controllers/users.controllers");
 const Letters_controllers_1 = require("./controllers/Letters.controllers");
-const Emails_controllers_1 = require("./controllers/Emails.controllers");
-app.use(body_parser_1.default.json());
+const Auth_controllers_1 = require("./controllers/Auth.controllers");
+// app.use(bodyParser.json());
+// fixes request payload too large error
+app.use(body_parser_1.default.json({ limit: "50mb" }));
+app.use(body_parser_1.default.urlencoded({ limit: "50mb", extended: true, parameterLimit: 50000 }));
 app.use(express_1.default.static(path_1.default.join(__dirname, '../build')));
 app.use(cors_1.default());
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
@@ -31,9 +34,14 @@ app.get("/bye", (req, res) => {
     res.send("Bye world!" + x);
 });
 app.use("/testAPI", testApi_1.router);
-app.use("/users", users_controllers_1.router);
-app.use("/letters", Letters_controllers_1.router);
-app.use("/emails", Emails_controllers_1.router);
+app.use("/auth", Auth_controllers_1.router);
+/*
+* Any your preceded by /api/v1 indicates an authenticated route
+* The controller for these routes should contain the line to work correctly
+* router.use(AuthModule.verifyUser);
+*/
+app.use("/api/v1/users", users_controllers_1.router);
+app.use("/api/v1/letters", Letters_controllers_1.router);
 // start the Express server
 app.listen(port, () => {
     console.log(`server listening on port:${port}`);
