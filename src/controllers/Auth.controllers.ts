@@ -56,6 +56,8 @@ router.post("/users/create", async (req, res, next) => {
   console.log("Creating user");
   console.log(req.body["publicAddress"]);
   console.log(req.body["name"]);
+  console.log(req.body["email"]);
+  console.log(req.body["publicKey"]);
   // check if the user is already created
   let userModel: User = await userAuthDbService.selectOneRowByPrimaryId(
     req.body.publicAddress
@@ -65,7 +67,9 @@ router.post("/users/create", async (req, res, next) => {
     console.log("user doesn't exist, creating user");
     userModel = await userAuthDbService.createUser(
       req.body.publicAddress,
-      req.body.name
+      req.body.name,
+      req.body.email,
+      req.body.publicKey,
     );
   }
   console.log("user exists, no need to create user"); // ADD SOME INDICATION IN RESPONSE

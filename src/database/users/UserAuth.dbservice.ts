@@ -27,12 +27,13 @@ export class UserAuthDbService extends DatabaseService<UserAuth> {
    * sign up to create new users
    * set random nonce
    * TODO: user should be created in the db with the public key also
-   * @param address 
+   * @param publicAddress 
    * @param name 
    */
-  async createUser(address: string, name: string): Promise<UserAuth> | null {
+  async createUser(publicAddress: string, name: string, email: string, publicKey: string): Promise<UserAuth> | null {
     let nonce = uuid();
-    const values = [address, name, nonce];
+    const currentDate = Date();
+    const values = [publicAddress, name, currentDate, nonce, email, publicKey];
     let users: UserAuth[] = await super.runParameterizedQueryWithValuesArray(
       this.createUserQuery,
       values
@@ -61,7 +62,7 @@ export class UserAuthDbService extends DatabaseService<UserAuth> {
 
   private createUserQuery = {
     text:
-      "insert into users values ($1, $2, current_timestamp, $3) returning *;",
+      "insert into users(public_address, name, created_at, nonce, email, profile_image, public_key) values ($1, $2, $3, $4, $5, null, $6) returning *;",
   };
 
   private getUserAuthQuery = {
