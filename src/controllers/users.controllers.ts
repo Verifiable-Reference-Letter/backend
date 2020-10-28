@@ -3,7 +3,7 @@ import { UserDbService } from "../database/users/User.dbservice";
 import { User } from "../database/users/User.dbmodel";
 import { UserProfile } from "../database/users/UserProfile.dbmodel";
 import { UserProfileDbService } from "../database/users/UserProfile.dbservice";
-import { AuthModule } from "../modules/Auth.module"; 
+import { AuthModule } from "../modules/Auth.module";
 
 const router = express.Router();
 const userDbService: UserDbService = new UserDbService();
@@ -20,13 +20,12 @@ router.post("/", async (req, res, next) => {
     res.locals.jwtPayload.publicAddress
   ); // TODO: change to subtract user self
   console.log(userModels);
-  res.json(
-    { 
-    auth: { 
-      jwtToken: res.locals.newJwtToken
-    }, 
-    data: userModels
-    });
+  res.json({
+    auth: {
+      jwtToken: res.locals.newJwtToken,
+    },
+    data: userModels,
+  });
 });
 
 /**
@@ -39,22 +38,20 @@ router.post("/:publicAddress", async (req, res, next) => {
   );
   console.log(userModel);
   if (userModel.length !== 0) {
-    res.json(
-      { 
-      auth: { 
-        jwtToken: res.locals.newJwtToken
-      }, 
-      data: userModel
-      });
+    res.json({
+      auth: {
+        jwtToken: res.locals.newJwtToken,
+      },
+      data: userModel,
+    });
   } else {
     res.status(400);
-    res.json(
-      { 
-      auth: { 
-        jwtToken: res.locals.newJwtToken
-      }, 
-      data: []
-      });
+    res.json({
+      auth: {
+        jwtToken: res.locals.newJwtToken,
+      },
+      data: [],
+    });
   }
 });
 
@@ -63,27 +60,25 @@ router.post("/:publicAddress", async (req, res, next) => {
  */
 router.post("/:publicAddress/profile", async (req, res, next) => {
   console.log("Get the user profile by publicAddress");
-  const userProfileModel: UserProfile[] = await userProfileDbService.selectUserByPublicAddress(
+  const userProfileModel: UserProfile[] = await userProfileDbService.selectUserProfileByPublicAddress(
     req.params.publicAddress
   );
   console.log(userProfileModel);
   if (userProfileModel.length !== 0) {
-    res.json(
-      { 
-      auth: { 
-        jwtToken: res.locals.newJwtToken
-      }, 
-      data: userProfileModel
-      });
+    res.json({
+      auth: {
+        jwtToken: res.locals.newJwtToken,
+      },
+      data: userProfileModel,
+    });
   } else {
     res.status(400);
-    res.json(
-      { 
-      auth: { 
-        jwtToken: res.locals.newJwtToken
-      }, 
-      data: userProfileModel
-      });
+    res.json({
+      auth: {
+        jwtToken: res.locals.newJwtToken,
+      },
+      data: userProfileModel,
+    });
   }
 });
 

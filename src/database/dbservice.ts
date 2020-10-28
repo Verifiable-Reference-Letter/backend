@@ -1,5 +1,6 @@
 import { Client } from "pg";
 import { User } from "./users/User.dbmodel";
+import { UserKey } from "./users/UserKey.dbmodel";
 import { LetterContents } from "./letter_contents/LetterContents.dbmodel";
 
 export abstract class DatabaseService<DatabaseModel> {
@@ -23,11 +24,11 @@ export abstract class DatabaseService<DatabaseModel> {
     client.connect();
     try {
       const res = await client.query(this.selectAllQuery);
-      let jsonRow;
+      // let jsonRow;
       for (const row of res.rows) {
-        jsonRow = JSON.stringify(row);
-        console.log("got to json row");
-        console.log(jsonRow);
+        // jsonRow = JSON.stringify(row);
+        // console.log("got to json row");
+        // console.log(jsonRow);
         this.dbModels.push(this.dbRowToDbModel(row));
       }
       this.dbModels.filter((value: any) => {
@@ -35,10 +36,10 @@ export abstract class DatabaseService<DatabaseModel> {
           Object.keys(value).length !== 0;
         }
       });
-      this.dbModels.map((value, index) => {
-        console.log("Db Model " + index + ": ");
-        console.dir(value);
-      });
+      // this.dbModels.map((value, index) => {
+      //   console.log("Db Model " + index + ": ");
+      //   console.dir(value);
+      // });
       return this.dbModels;
     } catch (err) {
       console.log(err.stack);
@@ -56,12 +57,12 @@ export abstract class DatabaseService<DatabaseModel> {
       if (res.rows.length === 0) {
         return null;
       }
-      let jsonRow;
-      jsonRow = JSON.stringify(res.rows[0]);
-      console.log(jsonRow);
+      // let jsonRow;
+      // jsonRow = JSON.stringify(res.rows[0]);
+      // console.log(jsonRow);
       const dbModel: DatabaseModel = this.dbRowToDbModel(res.rows[0]);
 
-      console.dir(dbModel);
+      // console.dir(dbModel);
       return dbModel;
     } catch (err) {
       console.log(err.stack);
@@ -79,10 +80,10 @@ export abstract class DatabaseService<DatabaseModel> {
     client.connect();
     try {
       const res = await client.query(queryText, values);
-      let jsonRow;
+      // let jsonRow;
       for (const row of res.rows) {
-        jsonRow = JSON.stringify(row);
-        console.log(jsonRow);
+        // jsonRow = JSON.stringify(row);
+        // console.log(jsonRow);
         dbModels.push(this.dbRowToDbModel(row));
       }
       dbModels.filter((value: any) => {
@@ -90,10 +91,10 @@ export abstract class DatabaseService<DatabaseModel> {
           Object.keys(value).length !== 0;
         }
       });
-      dbModels.map((value, index) => {
-        console.log("Db Model " + index + ": ");
-        console.dir(value);
-      });
+      // dbModels.map((value, index) => {
+      //   console.log("Db Model " + index + ": ");
+      //   console.dir(value);
+      // });
       return dbModels;
     } catch (err) {
       console.log(err.stack);
@@ -117,71 +118,6 @@ export abstract class DatabaseService<DatabaseModel> {
       client.end().then(() => console.log("client has disconnected"));
     }
   }
-
-  protected async runParameterizedQueryWithValuesArrayContents(
-    queryText: any,
-    values: any[]
-  ): Promise<LetterContents[]> {
-    const client = new Client(this.clientCredentials);
-    const models: LetterContents[] = [];
-    client.connect();
-    try {
-      const res = await client.query(queryText, values);
-      // let jsonRow;
-      for (const row of res.rows) {
-        // jsonRow = JSON.stringify(row);
-        // console.log(jsonRow);
-        models.push(LetterContents.dbRowToDbModel(row));
-      }
-      models.filter((value: any) => {
-        if (value) {
-          Object.keys(value).length !== 0;
-        }
-      });
-      models.map((value, index) => {
-        console.log("Db Model " + index + ": ");
-        // console.dir(value);
-      });
-      return models;
-    } catch (err) {
-      console.log(err.stack);
-    } finally {
-      client.end().then(() => console.log("client has disconnected"));
-    }
-  }
-
-  protected async runParameterizedQueryWithValuesArrayUser(
-    queryText: any,
-    values: any[]
-  ): Promise<User[]> {
-    const client = new Client(this.clientCredentials);
-    const models: User[] = [];
-    client.connect();
-    try {
-      const res = await client.query(queryText, values);
-      let jsonRow;
-      for (const row of res.rows) {
-        jsonRow = JSON.stringify(row);
-        console.log(jsonRow);
-        models.push(User.dbRowToDbModel(row));
-      }
-      models.filter((value: any) => {
-        if (value) {
-          Object.keys(value).length !== 0;
-        }
-      });
-      models.map((value, index) => {
-        console.log("Db Model " + index + ": ");
-        console.dir(value);
-      });
-      return models;
-    } catch (err) {
-      console.log(err.stack);
-    } finally {
-      client.end().then(() => console.log("client has disconnected"));
-    }
-  }
-
 
   protected async runParameterizedQueryWithValuesArrayInsert(
     queryText: any,
