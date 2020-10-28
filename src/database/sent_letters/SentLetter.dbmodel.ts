@@ -1,24 +1,24 @@
 export class SentLetter {
 
-    recipientAddress: string;
+    letterRecipient: string;
     letterId: string;
     sentAt: Date | null;
 
     constructor(
-        recipientAddress: string,
+        letterRecipient: string,
         letterId: string,
         sentAt: Date | null,
     ) {
-        this.recipientAddress = recipientAddress;
+        this.letterRecipient = letterRecipient;
         this.letterId = letterId;
         this.sentAt = sentAt;
     }
 
     static dbRowToDbModel(dbRow: any): SentLetter {
         const newSentLetter = new SentLetter(
-            dbRow.public_address,
+            dbRow.letter_recipient,
             dbRow.letter_id,
-            dbRow.sentAt,
+            dbRow.sent_at,
         );
         console.dir(newSentLetter);
         return newSentLetter;

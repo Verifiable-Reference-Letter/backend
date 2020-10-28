@@ -1,16 +1,16 @@
 export class LetterContents {
-  letterContent: string | null;
+  letterContents: string | null;
 
-  constructor(letterContent: Buffer) {
-    if (letterContent !== null) {
-      this.letterContent = letterContent.toString('utf8');
+  constructor(letterContents: Buffer | null) {
+    if (letterContents !== null) {
+      this.letterContents = letterContents.toString('utf8');
     } else {
-      this.letterContent = null;
+      this.letterContents = null;
     }
   }
 
-  get content(): string {
-    return this.letterContent;
+  get contents(): string | null {
+    return this.letterContents;
   }
 
   static dbRowToDbModel(dbRow: any) {
