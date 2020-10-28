@@ -30,9 +30,9 @@ router.post("/", (req, res, next) => __awaiter(void 0, void 0, void 0, function*
     console.log(userModels);
     res.json({
         auth: {
-            jwtToken: res.locals.newJwtToken
+            jwtToken: res.locals.newJwtToken,
         },
-        data: userModels
+        data: userModels,
     });
 }));
 /**
@@ -45,18 +45,18 @@ router.post("/:publicAddress", (req, res, next) => __awaiter(void 0, void 0, voi
     if (userModel.length !== 0) {
         res.json({
             auth: {
-                jwtToken: res.locals.newJwtToken
+                jwtToken: res.locals.newJwtToken,
             },
-            data: userModel
+            data: userModel,
         });
     }
     else {
         res.status(400);
         res.json({
             auth: {
-                jwtToken: res.locals.newJwtToken
+                jwtToken: res.locals.newJwtToken,
             },
-            data: []
+            data: [],
         });
     }
 }));
@@ -65,23 +65,23 @@ router.post("/:publicAddress", (req, res, next) => __awaiter(void 0, void 0, voi
  */
 router.post("/:publicAddress/profile", (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     console.log("Get the user profile by publicAddress");
-    const userProfileModel = yield userProfileDbService.selectUserByPublicAddress(req.params.publicAddress);
+    const userProfileModel = yield userProfileDbService.selectUserProfileByPublicAddress(req.params.publicAddress);
     console.log(userProfileModel);
     if (userProfileModel.length !== 0) {
         res.json({
             auth: {
-                jwtToken: res.locals.newJwtToken
+                jwtToken: res.locals.newJwtToken,
             },
-            data: userProfileModel
+            data: userProfileModel,
         });
     }
     else {
         res.status(400);
         res.json({
             auth: {
-                jwtToken: res.locals.newJwtToken
+                jwtToken: res.locals.newJwtToken,
             },
-            data: userProfileModel
+            data: userProfileModel,
         });
     }
 }));

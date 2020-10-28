@@ -31,6 +31,10 @@ class SentLetterDbService extends dbservice_1.DatabaseService {
             text: 'SELECT * from ' + sentLetterTableName + ' WHERE public_address = $1'
         };
     }
+    /**
+     * select all sent letter rows by recipient's address
+     * @param id
+     */
     selectAllSentLettersByRecipientAddress(id) {
         const _super = Object.create(null, {
             runParameterizedQueryWithValuesArray: { get: () => super.runParameterizedQueryWithValuesArray }
@@ -40,6 +44,10 @@ class SentLetterDbService extends dbservice_1.DatabaseService {
             return _super.runParameterizedQueryWithValuesArray.call(this, this.selectAllSentLettersByRecipientQuery, values);
         });
     }
+    /**
+     * select all sent letter rows by letter id
+     * @param id
+     */
     selectAllSentLettersByLetterId(id) {
         const _super = Object.create(null, {
             runParameterizedQueryWithValuesArray: { get: () => super.runParameterizedQueryWithValuesArray }
