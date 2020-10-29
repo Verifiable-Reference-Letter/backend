@@ -33,7 +33,7 @@ export class UserAuthDbService extends DatabaseService<UserAuth> {
   async createUser(publicAddress: string, name: string, email: string, publicKey: string): Promise<UserAuth> | null {
     let nonce = uuid();
     const currentDate = Date();
-    const values = [publicAddress, name, currentDate, nonce, email, publicKey];
+    const values = [publicAddress, name, currentDate.substring(0, 24), nonce, email, publicKey];
     let users: UserAuth[] = await super.runParameterizedQueryWithValuesArray(
       this.createUserQuery,
       values

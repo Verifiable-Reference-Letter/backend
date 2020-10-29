@@ -177,7 +177,7 @@ router.post("/receivedRequestors", async (req, res, next) => {
       auth: {
         jwtToken: res.locals.newJwtToken,
       },
-      data: {},
+      data: [],
     });
   }
 });
@@ -191,6 +191,7 @@ router.post("/received/:publicAddress", async (req, res, next) => {
     res.locals.jwtPayload.publicAddress,
     letterRequestor
   );
+  console.log(letterHistoryModels);
 
   if (letterHistoryModels.length !== 0) {
     res.json({
@@ -504,7 +505,6 @@ router.post("/:letterId/recipientContents", async (req, res, next) => {
     req.params.letterId,
     res.locals.jwtPayload.publicAddress
   );
-  // console.log(letterRecipientContents);
 
   if (
     letterRecipientContents.length === 0 ||
@@ -523,7 +523,7 @@ router.post("/:letterId/recipientContents", async (req, res, next) => {
     const verifySuccess = true;
 
     if (verifySuccess) {
-      res.json({ data: { letterRecipientContents: letterRecipientContents } });
+      res.json({ data: { letterRecipientContents: letterRecipientContents[0] } });
     } else {
       console.log(verifySuccess, "something went wrong with verification");
       res.status(500);
