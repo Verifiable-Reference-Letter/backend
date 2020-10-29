@@ -317,6 +317,7 @@ router.post("/:letterId/updateRecipients", async (req, res, next) => {
 router.post("/create", async (req, res, next) => {
   // console.log("creating new letter based on letter details");
   const data = req.body["data"];
+  console.log(data.customMessage);
   // console.log(data);
 
   // const letterId = Math.random().toString(36);
@@ -442,15 +443,19 @@ router.post("/:letterId/contents/update", async (req, res, next) => {
   console.log(req.body["auth"]);
   console.log(req.params.letterId);
   console.log("update letter contents for given letterId");
+
+  const data: { encryptedFile: string; customMessage: string } =
+    req.body["data"];
   const currentDate = Date();
   const numRecipients: Number = await letterHistoryDbService.countSentRecipientsByLetterId(
     req.params.letterId
   );
+  console.log(data.customMessage);
 
   // check if not sent to any recipients (not allowing changing of letter contents after atleast 1 sent)
   if (numRecipients === 0) {
     const success: boolean = await letterContentsDbService.updateLetterContentsByLetterIdAndWriterId(
-      req.body["data"],
+      data.encryptedFile,
       currentDate,
       req.params.letterId,
       req.body["auth"].publicAddress
@@ -523,7 +528,9 @@ router.post("/:letterId/recipientContents", async (req, res, next) => {
     const verifySuccess = true;
 
     if (verifySuccess) {
-      res.json({ data: { letterRecipientContents: letterRecipientContents[0] } });
+      res.json({
+        data: { letterRecipientContents: letterRecipientContents[0] },
+      });
     } else {
       console.log(verifySuccess, "something went wrong with verification");
       res.status(500);
