@@ -192,7 +192,7 @@ export class LetterHistoryDbService extends DatabaseService<LetterHistory> {
       userTableName +
       " as V on L.letter_writer = V.public_address join " +
       userTableName +
-      " as W on S.letter_recipient = W.public_address where S.letter_recipient = $1 order by letter_requestor_name ASC, S.sent_at DESC;",
+      " as W on S.letter_recipient = W.public_address where S.letter_recipient = $1 and S.sent_at is not null order by letter_requestor_name ASC, S.sent_at DESC;",
   };
 
   private selectAllLetterHistoryByLetterRecipientAndLetterRequestorQuery = {
@@ -207,7 +207,7 @@ export class LetterHistoryDbService extends DatabaseService<LetterHistory> {
       userTableName +
       " as V on L.letter_writer = V.public_address join " +
       userTableName +
-      " as W on S.letter_recipient = W.public_address where S.letter_recipient = $1 and L.letter_requestor = $2 order by S.sent_at DESC;",
+      " as W on S.letter_recipient = W.public_address where S.letter_recipient = $1 and L.letter_requestor = $2 and S.sent_at is not null order by S.sent_at DESC;",
   };
 
   // private selectAllLetterHistoryByLetterIdQuery = {

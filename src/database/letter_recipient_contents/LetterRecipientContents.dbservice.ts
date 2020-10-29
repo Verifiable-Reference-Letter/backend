@@ -62,7 +62,7 @@ export class LetterRecipientContentsDbService extends DatabaseService<
     text:
       "select letter_contents, letter_signature from " +
       sentLetterTableName +
-      " where letter_id = $1 and letter_recipient = $2",
+      " where letter_id = $1 and letter_recipient = $2 and sent_at is not null;",
   };
 
   private updateLetterContentsByLetterIdAndRecipientIdQuery = {
