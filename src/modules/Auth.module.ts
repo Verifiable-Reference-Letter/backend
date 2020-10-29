@@ -27,16 +27,15 @@ export class AuthModule {
 
   /**
    * verify signature corresponds to message and public address by using ecrecover
-   * @param message 
-   * @param signature 
-   * @param publicAddress 
+   * @param message
+   * @param signature
+   * @param publicAddress
    */
   async verifySignature(
     message: string,
     signature: string,
     publicAddress: string
   ): Promise<boolean> {
-
     // const sig = signature.slice(2, signature.length);
     // const offset = 2;
     // const r = signature.slice(0 + offset, 64 + offset);
@@ -81,33 +80,39 @@ export class AuthModule {
     // console.log("sg.s", sg.s.toString("hex"));
     // console.log("publicKey", "0x" + publicKey.toString("hex"));
     // console.log("pubAddress", pubAddress);
-    if (
+
+    return (
       EthUtil.toChecksumAddress(pubAddress) ===
       EthUtil.toChecksumAddress(publicAddress)
-    ) {
-      // TODO: differentiate between failed verification and failed update of public key
-      const userKey: UserKey = await this.userKeyDbService.selectUserKey(
-        publicAddress
-      );
-      if (!userKey || userKey.publicKey === null) {
-        const successfulUpdate = await this.userKeyDbService.updateUserKey(
-          publicAddress,
-          "0x" + publicKey.toString("hex")
-        );
-        // console.log(successfulUpdate, "update of public key");
-        return successfulUpdate;
-      }
-      // console.log("public key already exists");
-      return true;
-    }
-    return false;
+    );
+
+    // if (
+    //   EthUtil.toChecksumAddress(pubAddress) ===
+    //   EthUtil.toChecksumAddress(publicAddress)
+    // ) {
+    //   // TODO: differentiate between failed verification and failed update of public key
+    //   const userKey: UserKey = await this.userKeyDbService.selectUserKey(
+    //     publicAddress
+    //   );
+    //   if (!userKey || userKey.publicKey === null) {
+    //     const successfulUpdate = await this.userKeyDbService.updateUserKey(
+    //       publicAddress,
+    //       "0x" + publicKey.toString("hex")
+    //     );
+    //     // console.log(successfulUpdate, "update of public key");
+    //     return successfulUpdate;
+    //   }
+    //   // console.log("public key already exists");
+    //   return true;
+    // }
+    // return false;
   }
 
   /**
    * verify user jwtToken
-   * @param req 
-   * @param res 
-   * @param next 
+   * @param req
+   * @param res
+   * @param next
    */
   static verifyUser(req: Request, res: Response, next: NextFunction) {
     const token = req.body.auth.jwtToken;
