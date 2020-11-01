@@ -1,7 +1,7 @@
 import { v4 as uuid } from "uuid";
 import { DatabaseService } from "../dbservice";
 import { UserAuth } from "./UserAuth.dbmodel";
-import { UserEmail } from "./UserEmail.dbmoderl";
+import { UserEmail } from "./UserEmail.dbmodel";
 
 const userTableName: string = "users";
 

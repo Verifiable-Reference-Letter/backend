@@ -81,4 +81,24 @@ router.get("/users/:publicAddress", async (req, res, next) => {
   res.send([userModel]);
 });
 
+/**
+ * Verify the email of a user by verifying the jwt token sent to their inbox
+ */
+router.post("/verifyEmail/:jwtToken", async (req, res, next) => {
+
+  let jwtPayload;
+  // Attempt to validate the token and get public address
+  try {
+     jwtPayload = jwt.verify(req.params.jwtToken, jwtKey);
+     res.locals.jwtPayload = jwtPayload;
+  } catch (e) {
+    if (e instanceof jwt.JsonWebTokenError) {
+    // JWT is unauthorized
+    return res.status(401).end();
+    }
+    // Bad request errror
+    return res.status(400).end();
+  }
+});
+
 export { router };

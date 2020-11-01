@@ -1,9 +1,9 @@
 import SendGrid from "@sendgrid/mail";
 import { request } from "http";
-import { User } from "../database/users/User.dbmodel";
-import { UserDbService } from "../database/users/User.dbservice";
+import { UserEmail } from "../database/users/UserEmail.dbmodel";
+import { UserEmailDbService } from "../database/users/UserEmail.dbservice";
 
-const userDbService = new UserDbService();
+const userEmailDbService = new UserEmailDbService();
 
 export class EmailsModule {
 
@@ -13,8 +13,8 @@ export class EmailsModule {
     }
 
     async sendEmailToWriter(requestorAddress: string, writerAddress: string) {
-      const requestor: User = await userDbService.selectOneRowByPrimaryId(requestorAddress);
-      const writer: User = await userDbService.selectOneRowByPrimaryId(writerAddress);
+      const requestor: UserEmail = await userEmailDbService.selectOneRowByPrimaryId(requestorAddress);
+      const writer: UserEmail = await userEmailDbService.selectOneRowByPrimaryId(writerAddress);
 
       this.sendEmail(
         requestor.email,
@@ -25,8 +25,8 @@ export class EmailsModule {
     }
 
     async sendEmailToRequestor(requestorAddress: string, writerAddress: string) {
-      const requestor: User = await userDbService.selectOneRowByPrimaryId(requestorAddress);
-      const writer: User = await userDbService.selectOneRowByPrimaryId(writerAddress);
+      const requestor: UserEmail = await userEmailDbService.selectOneRowByPrimaryId(requestorAddress);
+      const writer: UserEmail = await userEmailDbService.selectOneRowByPrimaryId(writerAddress);
 
       this.sendEmail(
         requestor.email,
