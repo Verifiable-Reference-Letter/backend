@@ -3,18 +3,18 @@ export class UserEmail {
     publicAddress: string;
     name: string;
     email: string;
-    emailVerified: boolean;
+    isEmailVerified: boolean;
 
     constructor(
         publicAddress: string,
         name: string,
         email: string,
-        emailVerified: boolean
+        isEmailVerified: boolean
     ) {
             this.publicAddress = publicAddress;
             this.name = name;
-            this.email = name;
-            this.emailVerified = emailVerified;
+            this.email = email;
+            this.isEmailVerified = isEmailVerified;
     }
 
     static dbRowToDbModel(dbRow: any) {
@@ -22,7 +22,7 @@ export class UserEmail {
             dbRow.public_address,
             dbRow.name,
             dbRow.email,
-            dbRow.emailVerified
+            dbRow.is_email_verified
         );
         return newUser;
     }

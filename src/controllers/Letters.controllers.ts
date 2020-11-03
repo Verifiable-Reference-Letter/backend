@@ -325,7 +325,7 @@ router.post("/create", async (req, res, next) => {
   // // console.log(new Date(currentDate));
   // const letterId = (currentDate + Math.random()).substring(0, 36);
   const letterId = uuid();
-  // console.log(letterId);
+  console.log(letterId);
   const insertLetterSuccess: boolean = await letterDbService.insertLetterByAddressAndLetterDetails(
     letterId,
     res.locals.jwtPayload.publicAddress,
@@ -340,7 +340,9 @@ router.post("/create", async (req, res, next) => {
     );
     // console.log("insertSentLetterSuccess", insertSentLetterSuccess);
     if (insertSentLetterSuccess) {
+      console.log("about to send email after letter creation");
       await emailModule.sendEmailToWriter(res.locals.jwtPayload.publicAddress, data.letterWriter);
+      console.log("should have completed email send");
 
       const letterModels: Letter[] = await letterDbService.selectAllLettersByAddressAndRole(
         res.locals.jwtPayload.publicAddress,

@@ -32,6 +32,7 @@ class EmailsModule {
         return __awaiter(this, void 0, void 0, function* () {
             const requestor = yield userEmailDbService.selectOneRowByPrimaryId(requestorAddress);
             const writer = yield userEmailDbService.selectOneRowByPrimaryId(writerAddress);
+            console.log("about to send writer email");
             this.sendEmail(writer.email, 'verifiablereferenceletter@gmail.com', 'Letter Request', `${requestor.name} has requested a letter from you.`);
         });
     }

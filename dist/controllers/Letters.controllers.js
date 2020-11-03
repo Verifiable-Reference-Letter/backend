@@ -289,14 +289,16 @@ router.post("/create", (req, res, next) => __awaiter(void 0, void 0, void 0, fun
     // // console.log(new Date(currentDate));
     // const letterId = (currentDate + Math.random()).substring(0, 36);
     const letterId = uuid_1.v4();
-    // console.log(letterId);
+    console.log(letterId);
     const insertLetterSuccess = yield letterDbService.insertLetterByAddressAndLetterDetails(letterId, res.locals.jwtPayload.publicAddress, data.letterWriter, currentDate);
     // console.log("insertLetterSuccess", insertLetterSuccess);
     if (insertLetterSuccess) {
         const insertSentLetterSuccess = yield letterHistoryDbService.insertRecipientsByLetterId(letterId, data.selectedRecipients);
         // console.log("insertSentLetterSuccess", insertSentLetterSuccess);
         if (insertSentLetterSuccess) {
+            console.log("about to send email after letter creation");
             yield emailModule.sendEmailToWriter(res.locals.jwtPayload.publicAddress, data.letterWriter);
+            console.log("should have completed email send");
             const letterModels = yield letterDbService.selectAllLettersByAddressAndRole(res.locals.jwtPayload.publicAddress, UserRole_1.UserRole.Requestor);
             let numRecipients = [];
             // let numUnsentRecipients: Number[] = [];
