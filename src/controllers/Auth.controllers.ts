@@ -7,6 +7,7 @@ import { UserAuth } from "../database/users/UserAuth.dbmodel";
 
 import * as jwt from "jsonwebtoken";
 import { UserEmailDbService } from "../database/users/UserEmail.dbservice";
+import { EmailsModule } from "../modules/Emails.module";
 
 const router = express.Router();
 
@@ -17,6 +18,16 @@ const userEmailDbService: UserEmailDbService = new UserEmailDbService();
 
 // TODO: change this to be hidden
 const jwtKey: string = "my private key";
+
+const emailsModule: EmailsModule = new EmailsModule();
+
+router.get('/sendEmail', async (req, res, next) => {
+    console.log('sending email');
+    // console.log({ key: process.env.SENDGRID_API_KEY });
+    await emailsModule.sendEmailToWriter('0xc315345cAB7088e46304E02c097f0a922893302C', '0xc315345cAB7088e46304E02c097f0a922893302C');
+    res.send("hello");
+});
+
 
 router.post("/", async (req, res, next) => {
   console.log("Authenticating");

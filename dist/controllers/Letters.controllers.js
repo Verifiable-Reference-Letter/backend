@@ -355,11 +355,16 @@ router.post("/:letterId/contents/writer", (req, res, next) => __awaiter(void 0, 
     console.log(letterContents.length);
     if (letterContents && letterContents.length > 0) {
         console.log((_a = letterContents[0].contents) === null || _a === void 0 ? void 0 : _a.length);
-        res.json({ data: letterContents[0].contents });
+        res.json({
+            auth: {
+                jwtToken: res.locals.newJwtToken,
+            },
+            data: letterContents[0].contents,
+        });
     }
     else {
         res.status(400);
-        res.json({ data: {} });
+        res.json({ auth: { jwtToken: res.locals.newJwtToken }, data: {} });
     }
 }));
 // /**
@@ -394,15 +399,15 @@ router.post("/:letterId/contents/update", (req, res, next) => __awaiter(void 0, 
     const numRecipients = yield letterHistoryDbService.countSentRecipientsByLetterId(req.params.letterId);
     // check if not sent to any recipients (not allowing changing of letter contents after atleast 1 sent)
     if (numRecipients === 0) {
-        const success = yield letterContentsDbService.updateLetterContentsByLetterIdAndWriterId(req.body["data"], currentDate, req.params.letterId, req.body["auth"].publicAddress);
+        const success = yield letterContentsDbService.updateLetterContentsByLetterIdAndWriterId(req.body["data"], currentDate, req.params.letterId, res.locals.jwtPayload.publicAddress);
         console.log(success);
         if (!success) {
             res.status(400);
-            res.json({ data: {} });
+            res.json({ auth: { jwtToken: res.locals.newJwtToken }, data: {} });
         }
         else {
             // res.json({ data: {} });
-            const letters = yield letterDbService.selectAllLettersByAddressAndRole(req.body["auth"].publicAddress, UserRole_1.UserRole.Writer);
+            const letters = yield letterDbService.selectAllLettersByAddressAndRole(res.locals.jwtPayload.publicAddress, UserRole_1.UserRole.Writer);
             const letter = yield letterDbService.selectOneRowByPrimaryId(req.params.letterId);
             if (letters) {
                 yield emailModule.sendEmailToRequestor(letter.letterRequestor.publicAddress, res.locals.jwtPayload.publicAddress);
@@ -433,10 +438,10 @@ router.post("/:letterId/unsentRecipientKeys", (req, res, next) => __awaiter(void
     console.log(userKeyModels.length);
     if (userKeyModels.length === 0) {
         res.status(400);
-        res.json({ data: {} });
+        res.json({ auth: { jwtToken: res.locals.newJwtToken }, data: {} });
     }
     else {
-        res.json({ data: { userKeys: userKeyModels } });
+        res.json({ auth: { jwtToken: res.locals.newJwtToken }, data: { userKeys: userKeyModels } });
     }
 }));
 /**
@@ -447,17 +452,17 @@ router.post("/:letterId/recipientContents", (req, res, next) => __awaiter(void 0
     // console.log(letterRecipientContents);
     if (letterRecipientContents.length === 0 || letterRecipientContents[0].letterContents === null || letterRecipientContents[0].letterSignature === null) {
         res.status(400);
-        res.json({ data: {} });
+        res.json({ auth: { jwtToken: res.locals.newJwtToken }, data: {} });
     }
     else {
         const verifySuccess = yield authModule.verifySignature(letterRecipientContents[0].letterContents, letterRecipientContents[0].letterSignature, res.locals.jwtPayload.publicAddress);
         if (verifySuccess) {
-            yield res.json({ data: { letterRecipientContents: letterRecipientContents } });
+            res.json({ auth: { jwtToken: res.locals.newJwtToken }, data: { letterRecipientContents: letterRecipientContents } });
         }
         else {
             console.log(verifySuccess, "something went wrong with verification");
             res.status(500);
-            res.json({ data: {} });
+            res.json({ auth: { jwtToken: res.locals.newJwtToken }, data: {} });
         }
     }
 }));
@@ -474,7 +479,7 @@ router.post("/:letterId/recipientContents/update", (req, res, next) => __awaiter
         data.letterSignature, currentDate, req.params.letterId, data.letterRecipient);
         if (!success) {
             res.status(400);
-            res.json({ data: {} });
+            res.json({ auth: { jwtToken: res.locals.newJwtToken }, data: {} });
         }
         else {
             const letterModels = yield letterDbService.selectAllLettersByAddressAndRole(res.locals.jwtPayload.publicAddress, UserRole_1.UserRole.Writer);

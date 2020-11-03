@@ -15,31 +15,36 @@ export class EmailsModule {
     }
 
     async sendEmailToWriter(requestorAddress: string, writerAddress: string) {
-      const requestor: UserEmail = await userEmailDbService.selectOneRowByPrimaryId(requestorAddress);
-      const writer: UserEmail = await userEmailDbService.selectOneRowByPrimaryId(writerAddress);
-      console.log("about to send writer email");
-      this.sendEmail(
-        writer.email,
-        'verifiablereferenceletter@gmail.com',
-        'Letter Request',
-        `${requestor.name} has requested a letter from you.`
-      );
+      const requestor: UserEmail = await userEmailDbService.getUserEmail(requestorAddress);
+      const writer: UserEmail = await userEmailDbService.getUserEmail(writerAddress);
+      console.log(requestor);
+      console.log(writer);
+      if (requestor != null && writer != null) {
+        console.log("about to send writer email");
+        this.sendEmail(
+          writer.email,
+          'verifiablereferenceletter@gmail.com',
+          'Letter Request',
+          `${requestor.name} has requested a letter from you.`
+        );
+      }
     }
 
     async sendEmailToRequestor(requestorAddress: string, writerAddress: string) {
-      const requestor: UserEmail = await userEmailDbService.selectOneRowByPrimaryId(requestorAddress);
-      const writer: UserEmail = await userEmailDbService.selectOneRowByPrimaryId(writerAddress);
-
-      this.sendEmail(
-        requestor.email,
-        'verifiablereferenceletter@gmail.com',
-        'Your requested letter has been uploaded',
-        `${writer.name} has uploaded updates to your letter. You can start select recipients and send the letter securely and safely on the dApp now!`
-      );
+      const requestor: UserEmail = await userEmailDbService.getUserEmail(requestorAddress);
+      const writer: UserEmail = await userEmailDbService.getUserEmail(writerAddress);
+      if (requestor != null && writer != null) {
+        this.sendEmail(
+          requestor.email,
+          'verifiablereferenceletter@gmail.com',
+          'Your requested letter has been uploaded',
+          `${writer.name} has uploaded updates to your letter. You can start select recipients and send the letter securely and safely on the dApp now!`
+        );
+      }
     }
 
     async sendVerificationEmail(publicAddress: string) {
-      const user: UserEmail= await userEmailDbService.selectOneRowByPrimaryId(publicAddress);
+      const user: UserEmail = await userEmailDbService.selectOneRowByPrimaryId(publicAddress);
 
       const jwtToken = jwt.sign({ publicAddress }, jwtKey, {
         algorithm: "HS256",
@@ -53,7 +58,7 @@ export class EmailsModule {
       );
     }
 
-    async sendEmail(
+    private sendEmail(
       toEmail: string, 
       fromEmail: string, 
       subject: string, 

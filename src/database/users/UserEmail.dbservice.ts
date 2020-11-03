@@ -28,25 +28,32 @@ export class UserEmailDbService extends DatabaseService<UserEmail> {
    * Get a UserEmail object tying a user and an email together
    * @param address 
    */
-  async getUserEmail(address: string): Promise<UserEmail> | null {
+  async getUserEmail(address: string): Promise<UserEmail | null> {
     const values = [address];
     let users: UserEmail[] = await super.runParameterizedQueryWithValuesArray(
-      this.selectOneRowByIdQuery,
+      this.getUserEmailQuery,
       values
     );
-    if (users === []) {
+    if (users === undefined) {
       return null;
     }
     return users[0];
   }
 
-  async updateEmailVerificationStatus(address: string): Promise<boolean> | null {
+  async updateEmailVerificationStatus(address: string): Promise<boolean | null> {
     const values = [true, address];
     return super.runParameterizedQueryWithValuesArrayUpdate(this.updateEmailVerificationStatusQuery, values);
   }
 
   private updateEmailVerificationStatusQuery = {
     text: "update " + userTableName + " set is_email_verified = $1 where public_address = $2"
+  };
+
+  private getUserEmailQuery = {
+    text:
+      "select public_address, name, email, is_email_verified from " +
+      userTableName +
+      " where public_address = $1;",
   };
 
 }

@@ -30,17 +30,23 @@ class EmailsModule {
     }
     sendEmailToWriter(requestorAddress, writerAddress) {
         return __awaiter(this, void 0, void 0, function* () {
-            const requestor = yield userEmailDbService.selectOneRowByPrimaryId(requestorAddress);
-            const writer = yield userEmailDbService.selectOneRowByPrimaryId(writerAddress);
-            console.log("about to send writer email");
-            this.sendEmail(writer.email, 'verifiablereferenceletter@gmail.com', 'Letter Request', `${requestor.name} has requested a letter from you.`);
+            const requestor = yield userEmailDbService.getUserEmail(requestorAddress);
+            const writer = yield userEmailDbService.getUserEmail(writerAddress);
+            console.log(requestor);
+            console.log(writer);
+            if (requestor != null && writer != null) {
+                console.log("about to send writer email");
+                this.sendEmail(writer.email, 'verifiablereferenceletter@gmail.com', 'Letter Request', `${requestor.name} has requested a letter from you.`);
+            }
         });
     }
     sendEmailToRequestor(requestorAddress, writerAddress) {
         return __awaiter(this, void 0, void 0, function* () {
-            const requestor = yield userEmailDbService.selectOneRowByPrimaryId(requestorAddress);
-            const writer = yield userEmailDbService.selectOneRowByPrimaryId(writerAddress);
-            this.sendEmail(requestor.email, 'verifiablereferenceletter@gmail.com', 'Your requested letter has been uploaded', `${writer.name} has uploaded updates to your letter. You can start select recipients and send the letter securely and safely on the dApp now!`);
+            const requestor = yield userEmailDbService.getUserEmail(requestorAddress);
+            const writer = yield userEmailDbService.getUserEmail(writerAddress);
+            if (requestor != null && writer != null) {
+                this.sendEmail(requestor.email, 'verifiablereferenceletter@gmail.com', 'Your requested letter has been uploaded', `${writer.name} has uploaded updates to your letter. You can start select recipients and send the letter securely and safely on the dApp now!`);
+            }
         });
     }
     sendVerificationEmail(publicAddress) {
@@ -54,19 +60,17 @@ class EmailsModule {
         });
     }
     sendEmail(toEmail, fromEmail, subject, html) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const msg = {
-                to: toEmail,
-                from: fromEmail,
-                subject: subject,
-                html: html,
-            };
-            return mail_1.default.send(msg).then(() => {
-                console.log('Email sent');
-            })
-                .catch((error) => {
-                console.error(error);
-            });
+        const msg = {
+            to: toEmail,
+            from: fromEmail,
+            subject: subject,
+            html: html,
+        };
+        return mail_1.default.send(msg).then(() => {
+            console.log('Email sent');
+        })
+            .catch((error) => {
+            console.error(error);
         });
     }
 }

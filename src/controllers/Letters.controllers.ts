@@ -409,10 +409,15 @@ router.post("/:letterId/contents/writer", async (req, res, next) => {
   console.log(letterContents.length);
   if (letterContents && letterContents.length > 0) {
     console.log(letterContents[0].contents?.length);
-    res.json({ data: letterContents[0].contents });
+    res.json({
+      auth: {
+        jwtToken: res.locals.newJwtToken,
+      },
+      data: letterContents[0].contents,
+    });
   } else {
     res.status(400);
-    res.json({ data: {} });
+    res.json({ auth: { jwtToken: res.locals.newJwtToken }, data: {} });
   }
 });
 
@@ -457,16 +462,16 @@ router.post("/:letterId/contents/update", async (req, res, next) => {
       req.body["data"],
       currentDate,
       req.params.letterId,
-      req.body["auth"].publicAddress
+      res.locals.jwtPayload.publicAddress
     );
     console.log(success);
     if (!success) {
       res.status(400);
-      res.json({ data: {} });
+      res.json({ auth: { jwtToken: res.locals.newJwtToken }, data: {} });
     } else {
       // res.json({ data: {} });
       const letters: Letter[] = await letterDbService.selectAllLettersByAddressAndRole(
-        req.body["auth"].publicAddress,
+        res.locals.jwtPayload.publicAddress,
         UserRole.Writer
       );
       const letter = await letterDbService.selectOneRowByPrimaryId(req.params.letterId);
@@ -505,9 +510,9 @@ router.post("/:letterId/unsentRecipientKeys", async (req, res, next) => {
   console.log(userKeyModels.length);
   if (userKeyModels.length === 0) {
     res.status(400);
-    res.json({ data: {} });
+    res.json({ auth: { jwtToken: res.locals.newJwtToken }, data: {} });
   } else {
-    res.json({ data: { userKeys: userKeyModels } });
+    res.json({ auth: { jwtToken: res.locals.newJwtToken }, data: { userKeys: userKeyModels } });
   }
 });
 
@@ -523,7 +528,7 @@ router.post("/:letterId/recipientContents", async (req, res, next) => {
 
   if (letterRecipientContents.length === 0 || letterRecipientContents[0].letterContents === null || letterRecipientContents[0].letterSignature === null) {
     res.status(400);
-    res.json({ data: {} });
+    res.json({ auth: { jwtToken: res.locals.newJwtToken }, data: {} });
   } else {
     const verifySuccess: boolean = await authModule.verifySignature(
       letterRecipientContents[0].letterContents,
@@ -532,12 +537,11 @@ router.post("/:letterId/recipientContents", async (req, res, next) => {
     );
 
     if (verifySuccess) {
-      await 
-      res.json({ data: { letterRecipientContents: letterRecipientContents } });
+      res.json({ auth: { jwtToken: res.locals.newJwtToken }, data: { letterRecipientContents: letterRecipientContents } });
     } else {
       console.log(verifySuccess, "something went wrong with verification");
       res.status(500);
-      res.json({ data: {} });
+      res.json({ auth: { jwtToken: res.locals.newJwtToken }, data: {} });
     }
   }
 });
@@ -572,7 +576,7 @@ router.post("/:letterId/recipientContents/update", async (req, res, next) => {
 
     if (!success) {
       res.status(400);
-      res.json({ data: {} });
+      res.json({ auth: { jwtToken: res.locals.newJwtToken }, data: {} });
     } else {
       const letterModels: Letter[] = await letterDbService.selectAllLettersByAddressAndRole(
         res.locals.jwtPayload.publicAddress,
