@@ -30,6 +30,7 @@ export class UserEmailDbService extends DatabaseService<UserEmail> {
    */
   async getUserEmail(address: string): Promise<UserEmail | null> {
     const values = [address];
+    console.log(address);
     let users: UserEmail[] = await super.runParameterizedQueryWithValuesArray(
       this.getUserEmailQuery,
       values
@@ -46,7 +47,7 @@ export class UserEmailDbService extends DatabaseService<UserEmail> {
   }
 
   private updateEmailVerificationStatusQuery = {
-    text: "update " + userTableName + " set is_email_verified = $1 where public_address = $2"
+    text: "update " + userTableName + " set is_email_verified = $1 where public_address = $2;"
   };
 
   private getUserEmailQuery = {

@@ -11,10 +11,10 @@ export class UserEmail {
         email: string,
         isEmailVerified: boolean
     ) {
-            this.publicAddress = publicAddress;
-            this.name = name;
-            this.email = email;
-            this.isEmailVerified = isEmailVerified;
+        this.publicAddress = publicAddress;
+        this.name = name;
+        this.email = email;
+        this.isEmailVerified = isEmailVerified;
     }
 
     static dbRowToDbModel(dbRow: any) {
@@ -24,6 +24,7 @@ export class UserEmail {
             dbRow.email,
             dbRow.is_email_verified
         );
+        console.dir(newUser);
         return newUser;
     }
 }

@@ -20,7 +20,7 @@ const emailsModule = new Emails_module_1.EmailsModule();
 router.get('/sendEmail', (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     console.log('sending email');
     // console.log({ key: process.env.SENDGRID_API_KEY });
-    //await emailsModule.sendMail();
+    yield emailsModule.sendEmailToWriter('0xc315345cab7088e46304e02c097f0a922893302c', '0xc315345cab7088e46304e02c097f0a922893302c');
     res.send("hello");
 }));
 //# sourceMappingURL=Emails.controllers.js.map
