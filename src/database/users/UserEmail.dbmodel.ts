@@ -15,6 +15,7 @@ export class UserEmail {
             this.name = name;
             this.email = email;
             this.isEmailVerified = isEmailVerified;
+            console.log(this.isEmailVerified);
     }
 
     static dbRowToDbModel(dbRow: any) {
