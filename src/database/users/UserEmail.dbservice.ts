@@ -25,11 +25,8 @@ export class UserEmailDbService extends DatabaseService<UserEmail> {
   }
 
   /**
-   * sign up to create new users
-   * set random nonce
-   * TODO: user should be created in the db with the public key also
+   * Get a UserEmail object tying a user and an email together
    * @param address 
-   * @param name 
    */
   async getUserEmail(address: string): Promise<UserEmail> | null {
     const values = [address];
@@ -42,5 +39,14 @@ export class UserEmailDbService extends DatabaseService<UserEmail> {
     }
     return users[0];
   }
+
+  async updateEmailVerificationStatus(address: string): Promise<boolean> | null {
+    const values = [true, address];
+    return super.runParameterizedQueryWithValuesArrayUpdate(this.updateEmailVerificationStatusQuery, values);
+  }
+
+  private updateEmailVerificationStatusQuery = {
+    text: "update " + userTableName + " set is_email_verified = $1 where public_address = $2"
+  };
 
 }

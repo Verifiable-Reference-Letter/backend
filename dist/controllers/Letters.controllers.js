@@ -23,6 +23,7 @@ const Auth_module_1 = require("../modules/Auth.module");
 const LetterContents_dbservice_1 = require("../database/letter_contents/LetterContents.dbservice");
 const LetterRecipientContents_dbservice_1 = require("../database/letter_recipient_contents/LetterRecipientContents.dbservice");
 const User_dbservice_1 = require("../database/users/User.dbservice");
+const Emails_module_1 = require("../modules/Emails.module");
 const router = express_1.default.Router();
 exports.router = router;
 const letterDbService = new Letter_dbservice_1.LetterDbService();
@@ -33,6 +34,7 @@ const userKeyDbService = new UserKey_dbservice_1.UserKeyDbService();
 const userDbService = new User_dbservice_1.UserDbService();
 const authModule = new Auth_module_1.AuthModule();
 const userAuthDbService = new UserAuth_dbservice_1.UserAuthDbService();
+const emailModule = new Emails_module_1.EmailsModule();
 // TODO: change these to get the user id from a verified JWT token once we implement logging in functionality
 router.use(Auth_module_1.AuthModule.verifyUser);
 /**
@@ -294,6 +296,7 @@ router.post("/create", (req, res, next) => __awaiter(void 0, void 0, void 0, fun
         const insertSentLetterSuccess = yield letterHistoryDbService.insertRecipientsByLetterId(letterId, data.selectedRecipients);
         // console.log("insertSentLetterSuccess", insertSentLetterSuccess);
         if (insertSentLetterSuccess) {
+            yield emailModule.sendEmailToWriter(res.locals.jwtPayload.publicAddress, data.letterWriter);
             const letterModels = yield letterDbService.selectAllLettersByAddressAndRole(res.locals.jwtPayload.publicAddress, UserRole_1.UserRole.Requestor);
             let numRecipients = [];
             // let numUnsentRecipients: Number[] = [];
@@ -398,19 +401,26 @@ router.post("/:letterId/contents/update", (req, res, next) => __awaiter(void 0, 
         else {
             // res.json({ data: {} });
             const letters = yield letterDbService.selectAllLettersByAddressAndRole(req.body["auth"].publicAddress, UserRole_1.UserRole.Writer);
+            const letter = yield letterDbService.selectOneRowByPrimaryId(req.params.letterId);
             if (letters) {
-                res.json({ data: letters });
+                yield emailModule.sendEmailToRequestor(letter.letterRequestor.publicAddress, res.locals.jwtPayload.publicAddress);
+                res.json({
+                    auth: {
+                        jwtToken: res.locals.newJwtToken,
+                    },
+                    data: letters,
+                });
             }
             else {
                 res.status(400);
-                res.json({ data: {} });
+                res.json({ auth: { jwtToken: res.locals.newJwtToken }, data: {} });
             }
         }
     }
     else {
         console.log("invalid action: not allowed to update letter content of letter already sent to >= 1 recipient");
         res.status(400);
-        res.json({ data: {} });
+        res.json({ auth: { jwtToken: res.locals.newJwtToken }, data: {} });
     }
 }));
 /**
@@ -440,7 +450,7 @@ router.post("/:letterId/recipientContents", (req, res, next) => __awaiter(void 0
     else {
         const verifySuccess = yield authModule.verifySignature(letterRecipientContents[0].letterContents, letterRecipientContents[0].letterSignature, res.locals.jwtPayload.publicAddress);
         if (verifySuccess) {
-            res.json({ data: { letterRecipientContents: letterRecipientContents } });
+            yield res.json({ data: { letterRecipientContents: letterRecipientContents } });
         }
         else {
             console.log(verifySuccess, "something went wrong with verification");

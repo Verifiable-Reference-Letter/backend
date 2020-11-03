@@ -2,8 +2,10 @@ import SendGrid from "@sendgrid/mail";
 import { request } from "http";
 import { UserEmail } from "../database/users/UserEmail.dbmodel";
 import { UserEmailDbService } from "../database/users/UserEmail.dbservice";
+import * as jwt from "jsonwebtoken";
 
 const userEmailDbService = new UserEmailDbService();
+const jwtKey = "my private key";
 
 export class EmailsModule {
 
@@ -15,10 +17,10 @@ export class EmailsModule {
     async sendEmailToWriter(requestorAddress: string, writerAddress: string) {
       const requestor: UserEmail = await userEmailDbService.selectOneRowByPrimaryId(requestorAddress);
       const writer: UserEmail = await userEmailDbService.selectOneRowByPrimaryId(writerAddress);
-
+      console.log("about to send writer email");
       this.sendEmail(
-        requestor.email,
         writer.email,
+        'verifiablereferenceletter@gmail.com',
         'Letter Request',
         `${requestor.name} has requested a letter from you.`
       );
@@ -30,9 +32,24 @@ export class EmailsModule {
 
       this.sendEmail(
         requestor.email,
-        writer.email,
+        'verifiablereferenceletter@gmail.com',
         'Your requested letter has been uploaded',
-        `${writer.name} has uploaded your letter. You can start selecting recipients on the dApp now!`
+        `${writer.name} has uploaded updates to your letter. You can start select recipients and send the letter securely and safely on the dApp now!`
+      );
+    }
+
+    async sendVerificationEmail(publicAddress: string) {
+      const user: UserEmail= await userEmailDbService.selectOneRowByPrimaryId(publicAddress);
+
+      const jwtToken = jwt.sign({ publicAddress }, jwtKey, {
+        algorithm: "HS256",
+        expiresIn: "1h",
+      });
+      this.sendEmail(
+        user.email,
+        'verifiablereferenceletter@gmail.com',
+        'Please verify your email',
+        `Click this link to verify your email on the letter sending dApp: <a href="https://www.verifiable-reference-letter.herokuapp.com/auth/verifyEmail/${jwtToken}">`
       );
     }
 
@@ -40,14 +57,13 @@ export class EmailsModule {
       toEmail: string, 
       fromEmail: string, 
       subject: string, 
-      text: string
+      html: string
       ) {
         const msg = {
         to: toEmail,
         from: fromEmail,
         subject: subject,
-        text: text,
-        html: '<strong>and easy to do anywhere, even with Node.js</strong>',
+        html: html,
         };
 
         return SendGrid.send(msg).then(() => {

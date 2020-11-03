@@ -178,6 +178,22 @@ class DatabaseService {
             return true;
         });
     }
+    runParameterizedQueryReturningSingleRow(queryText, values) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const client = new pg_1.Client(this.clientCredentials);
+            client.connect();
+            try {
+                const res = yield client.query(queryText, values);
+                return res.rows[0];
+            }
+            catch (err) {
+                console.log(err.stack);
+            }
+            finally {
+                client.end().then(() => console.log("client has disconnected"));
+            }
+        });
+    }
 }
 exports.DatabaseService = DatabaseService;
 //# sourceMappingURL=dbservice.js.map

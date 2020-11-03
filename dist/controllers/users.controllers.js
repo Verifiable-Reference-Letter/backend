@@ -85,11 +85,4 @@ router.post("/:publicAddress/profile", (req, res, next) => __awaiter(void 0, voi
         });
     }
 }));
-/**
- * send email to publicAddress (req.param) from req.body.auth.publicAddress
- * TODO: Not Yet Implemented
- */
-router.post("/:publicAddress/sendEmail", (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    console.log("send email to publicAddress");
-}));
 //# sourceMappingURL=users.controllers.js.map

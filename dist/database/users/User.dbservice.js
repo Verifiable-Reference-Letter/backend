@@ -54,6 +54,11 @@ class UserDbService extends dbservice_1.DatabaseService {
                 userTableName +
                 " as W on S.letter_recipient = W.public_address where L.letter_id = $1 and S.sent_at is NULL order by W.public_address ASC;",
         };
+        this.selectUserEmailQuery = {
+            text: "select email from " +
+                userTableName +
+                "where public_address = $1"
+        };
         this.initializePreparedQueries();
     }
     initializePreparedQueries() {
@@ -135,6 +140,20 @@ class UserDbService extends dbservice_1.DatabaseService {
             const values = [letterId];
             return _super.runParameterizedQueryWithValuesArray.call(this, queryText, values);
         });
+    }
+    selectUserEmail(publicAddress) {
+        const _super = Object.create(null, {
+            runParameterizedQueryReturningSingleRow: { get: () => super.runParameterizedQueryReturningSingleRow }
+        });
+        return __awaiter(this, void 0, void 0, function* () {
+            const queryText = this.selectUserEmailQuery;
+            const values = [publicAddress];
+            const email = this.dbResultToEmail(_super.runParameterizedQueryReturningSingleRow.call(this, queryText, values));
+            return email;
+        });
+    }
+    dbResultToEmail(dbRow) {
+        return dbRow.email;
     }
     dbRowToDbModel(dbRow) {
         return User_dbmodel_1.User.dbRowToDbModel(dbRow);

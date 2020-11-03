@@ -6,12 +6,14 @@ import { User } from "../database/users/User.dbmodel";
 import { UserAuth } from "../database/users/UserAuth.dbmodel";
 
 import * as jwt from "jsonwebtoken";
+import { UserEmailDbService } from "../database/users/UserEmail.dbservice";
 
 const router = express.Router();
 
 const authModule: AuthModule = new AuthModule();
 // const usersDbService: UserDbService = new UserDbService();
 const userAuthDbService: UserAuthDbService = new UserAuthDbService();
+const userEmailDbService: UserEmailDbService = new UserEmailDbService();
 
 // TODO: change this to be hidden
 const jwtKey: string = "my private key";
@@ -90,14 +92,24 @@ router.post("/verifyEmail/:jwtToken", async (req, res, next) => {
   // Attempt to validate the token and get public address
   try {
      jwtPayload = jwt.verify(req.params.jwtToken, jwtKey);
-     res.locals.jwtPayload = jwtPayload;
+     res.locals.jwtPayload = jwtPayload
   } catch (e) {
     if (e instanceof jwt.JsonWebTokenError) {
-    // JWT is unauthorized
-    return res.status(401).end();
+      // JWT is unauthorized
+      return res.status(401).end();
     }
     // Bad request errror
     return res.status(400).end();
+  }
+
+  const updateStatus = await userEmailDbService.updateEmailVerificationStatus(res.locals.jwtPayload.publicAddress);
+  if (updateStatus) {
+    // Their email was verified and now we can send them to the homepage
+    return res.redirect('https://verifiable-reference-letter.herokuapp.com');
+  }
+  else {
+    // Otherwise our update failed 
+    return res.status(500).end();
   }
 });
 

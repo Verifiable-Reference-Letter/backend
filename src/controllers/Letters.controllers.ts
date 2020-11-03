@@ -15,6 +15,7 @@ import { LetterContentsDbService } from "../database/letter_contents/LetterConte
 import { LetterRecipientContentsDbService } from "../database/letter_recipient_contents/LetterRecipientContents.dbservice";
 import { UserDbService } from "../database/users/User.dbservice";
 import { LetterRecipientContents } from "../database/letter_recipient_contents/LetterRecipientContents.dbmodel";
+import { EmailsModule } from "../modules/Emails.module";
 const router = express.Router();
 
 const letterDbService: LetterDbService = new LetterDbService();
@@ -25,7 +26,7 @@ const userKeyDbService: UserKeyDbService = new UserKeyDbService();
 const userDbService: UserDbService = new UserDbService();
 const authModule: AuthModule = new AuthModule();
 const userAuthDbService: UserAuthDbService = new UserAuthDbService();
-
+const emailModule: EmailsModule = new EmailsModule();
 // TODO: change these to get the user id from a verified JWT token once we implement logging in functionality
 router.use(AuthModule.verifyUser);
 
@@ -339,6 +340,8 @@ router.post("/create", async (req, res, next) => {
     );
     // console.log("insertSentLetterSuccess", insertSentLetterSuccess);
     if (insertSentLetterSuccess) {
+      await emailModule.sendEmailToWriter(res.locals.jwtPayload.publicAddress, data.letterWriter);
+
       const letterModels: Letter[] = await letterDbService.selectAllLettersByAddressAndRole(
         res.locals.jwtPayload.publicAddress,
         UserRole.Requestor
@@ -464,11 +467,21 @@ router.post("/:letterId/contents/update", async (req, res, next) => {
         req.body["auth"].publicAddress,
         UserRole.Writer
       );
+      const letter = await letterDbService.selectOneRowByPrimaryId(req.params.letterId);
       if (letters) {
-        res.json({ data: letters });
+        await emailModule.sendEmailToRequestor(
+          letter.letterRequestor.publicAddress, 
+          res.locals.jwtPayload.publicAddress
+          );
+          res.json({
+            auth: {
+              jwtToken: res.locals.newJwtToken,
+            },
+            data: letters,
+          });
       } else {
         res.status(400);
-        res.json({ data: {} });
+        res.json({ auth: { jwtToken: res.locals.newJwtToken }, data: {} });
       }
     }
   } else {
@@ -476,7 +489,7 @@ router.post("/:letterId/contents/update", async (req, res, next) => {
       "invalid action: not allowed to update letter content of letter already sent to >= 1 recipient"
     );
     res.status(400);
-    res.json({ data: {} });
+    res.json({ auth: { jwtToken: res.locals.newJwtToken }, data: {} });
   }
 });
 
@@ -517,6 +530,7 @@ router.post("/:letterId/recipientContents", async (req, res, next) => {
     );
 
     if (verifySuccess) {
+      await 
       res.json({ data: { letterRecipientContents: letterRecipientContents } });
     } else {
       console.log(verifySuccess, "something went wrong with verification");
