@@ -11,10 +11,11 @@ export class UserEmail {
         email: string,
         isEmailVerified: boolean
     ) {
-        this.publicAddress = publicAddress;
-        this.name = name;
-        this.email = email;
-        this.isEmailVerified = isEmailVerified;
+            this.publicAddress = publicAddress;
+            this.name = name;
+            this.email = email;
+            this.isEmailVerified = isEmailVerified;
+            console.log(this.isEmailVerified);
     }
 
     static dbRowToDbModel(dbRow: any) {
