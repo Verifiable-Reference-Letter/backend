@@ -312,7 +312,7 @@ router.post("/:letterId/updateRecipients", async (req, res, next) => {
   // backend should also check that updated recipients list does not include recipients already sent to
   sentLetterDbService.selectAllSentLettersByLetterIdAndRecipient(
     req.params.letterId,
-    recipientsList[0],
+    recipientsList[0]
   );
 
   const success: boolean = await letterHistoryDbService.updateRecipientsByLetterId(
@@ -550,23 +550,9 @@ router.post("/:letterId/recipientContents", async (req, res, next) => {
     res.status(400);
     res.json({ data: {} });
   } else {
-    // TODO: doesn't work since different protocol
-    // const verifySuccess: boolean = await authModule.verifySignature(
-    //   letterRecipientContents[0].letterContents,
-    //   letterRecipientContents[0].letterSignature,
-    //   res.locals.jwtPayload.publicAddress
-    // );
-    const verifySuccess = true;
-
-    if (verifySuccess) {
-      res.json({
-        data: { letterRecipientContents: letterRecipientContents[0] },
-      });
-    } else {
-      console.log(verifySuccess, "something went wrong with verification");
-      res.status(500);
-      res.json({ data: {} });
-    }
+    res.json({
+      data: { letterRecipientContents: letterRecipientContents[0] },
+    });
   }
 });
 
@@ -582,14 +568,12 @@ router.post("/:letterId/recipientContents/update", async (req, res, next) => {
     letterRecipient: string;
   } = req.body["data"];
 
-  // TODO: doesn't work since different protocol
-  // const verifySuccess: boolean = await authModule.verifySignature(
-  //   data.letterContents,
-  //   data.letterSignature,
-  //   res.locals.jwtPayload.publicAddress
-  // );
-
-  const verifySuccess = true;
+  // this 'encrypted:' padding is necessary since without it the verification would not work properly (with the given message)
+  const verifySuccess: boolean = await authModule.verifySignature(
+    "encrypted:" + data.letterContents,
+    data.letterSignature,
+    res.locals.jwtPayload.publicAddress
+  );
 
   if (verifySuccess) {
     const currentDate = Date();

@@ -78,8 +78,10 @@ export class AuthModule {
     // console.log("sg.v", sg.v);
     // console.log("sg.r", sg.r.toString("hex"));
     // console.log("sg.s", sg.s.toString("hex"));
-    // console.log("publicKey", "0x" + publicKey.toString("hex"));
-    // console.log("pubAddress", pubAddress);
+    console.log("publicAddress", publicAddress);
+    console.log("signature", signature);
+    console.log("publicKey", "0x" + publicKey.toString("hex"));
+    console.log("pubAddress", pubAddress);
 
     return (
       EthUtil.toChecksumAddress(pubAddress) ===
