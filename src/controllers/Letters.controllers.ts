@@ -341,7 +341,12 @@ router.post("/create", async (req, res, next) => {
     // console.log("insertSentLetterSuccess", insertSentLetterSuccess);
     if (insertSentLetterSuccess) {
       console.log("about to send email after letter creation");
-      await emailModule.sendEmailToWriter(res.locals.jwtPayload.publicAddress, data.letterWriter);
+      console.log(data.customMessage);
+      await emailModule.sendEmailToWriter(
+        res.locals.jwtPayload.publicAddress, 
+        data.letterWriter,
+        data.customMessage 
+      );
       console.log("should have completed email send");
 
       const letterModels: Letter[] = await letterDbService.selectAllLettersByAddressAndRole(
@@ -459,7 +464,7 @@ router.post("/:letterId/contents/update", async (req, res, next) => {
   // check if not sent to any recipients (not allowing changing of letter contents after atleast 1 sent)
   if (numRecipients === 0) {
     const success: boolean = await letterContentsDbService.updateLetterContentsByLetterIdAndWriterId(
-      req.body["data"],
+      req.body["data"].encryptedFile,
       currentDate,
       req.params.letterId,
       res.locals.jwtPayload.publicAddress
@@ -474,11 +479,12 @@ router.post("/:letterId/contents/update", async (req, res, next) => {
         res.locals.jwtPayload.publicAddress,
         UserRole.Writer
       );
-      const letter = await letterDbService.selectOneRowByPrimaryId(req.params.letterId);
       if (letters) {
+        const letter = letters.find(elem => elem.letterId == req.params.letterId);
         await emailModule.sendEmailToRequestor(
           letter.letterRequestor.publicAddress, 
-          res.locals.jwtPayload.publicAddress
+          res.locals.jwtPayload.publicAddress,
+          req.body["data"].customMessage
           );
           res.json({
             auth: {

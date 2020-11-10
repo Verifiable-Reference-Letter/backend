@@ -24,7 +24,7 @@ const emailsModule: EmailsModule = new EmailsModule();
 router.get('/sendEmail', async (req, res, next) => {
     console.log('sending email');
     // console.log({ key: process.env.SENDGRID_API_KEY });
-    await emailsModule.sendEmailToWriter('0xc315345cab7088e46304e02c097f0a922893302c', '0xc315345cab7088e46304e02c097f0a922893302c');
+    await emailsModule.sendEmailToWriter('0xc315345cab7088e46304e02c097f0a922893302c', '0xc315345cab7088e46304e02c097f0a922893302c', 'johnny');
     res.send("hello");
 });
 
@@ -80,6 +80,7 @@ router.post("/users/create", async (req, res, next) => {
       req.body.publicAddress,
       req.body.name
     );
+    await emailsModule.sendVerificationEmail(req.body.publicAddress);
   }
   console.log("user exists, no need to create user"); // ADD SOME INDICATION IN RESPONSE
   console.log(userModel);

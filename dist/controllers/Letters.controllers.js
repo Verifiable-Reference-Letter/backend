@@ -297,7 +297,8 @@ router.post("/create", (req, res, next) => __awaiter(void 0, void 0, void 0, fun
         // console.log("insertSentLetterSuccess", insertSentLetterSuccess);
         if (insertSentLetterSuccess) {
             console.log("about to send email after letter creation");
-            yield emailModule.sendEmailToWriter(res.locals.jwtPayload.publicAddress, data.letterWriter);
+            console.log(data.customMessage);
+            yield emailModule.sendEmailToWriter(res.locals.jwtPayload.publicAddress, data.letterWriter, data.customMessage);
             console.log("should have completed email send");
             const letterModels = yield letterDbService.selectAllLettersByAddressAndRole(res.locals.jwtPayload.publicAddress, UserRole_1.UserRole.Requestor);
             let numRecipients = [];
@@ -399,7 +400,7 @@ router.post("/:letterId/contents/update", (req, res, next) => __awaiter(void 0, 
     const numRecipients = yield letterHistoryDbService.countSentRecipientsByLetterId(req.params.letterId);
     // check if not sent to any recipients (not allowing changing of letter contents after atleast 1 sent)
     if (numRecipients === 0) {
-        const success = yield letterContentsDbService.updateLetterContentsByLetterIdAndWriterId(req.body["data"], currentDate, req.params.letterId, res.locals.jwtPayload.publicAddress);
+        const success = yield letterContentsDbService.updateLetterContentsByLetterIdAndWriterId(req.body["data"].encryptedFile, currentDate, req.params.letterId, res.locals.jwtPayload.publicAddress);
         console.log(success);
         if (!success) {
             res.status(400);
@@ -408,9 +409,9 @@ router.post("/:letterId/contents/update", (req, res, next) => __awaiter(void 0, 
         else {
             // res.json({ data: {} });
             const letters = yield letterDbService.selectAllLettersByAddressAndRole(res.locals.jwtPayload.publicAddress, UserRole_1.UserRole.Writer);
-            const letter = yield letterDbService.selectOneRowByPrimaryId(req.params.letterId);
             if (letters) {
-                yield emailModule.sendEmailToRequestor(letter.letterRequestor.publicAddress, res.locals.jwtPayload.publicAddress);
+                const letter = letters.find(elem => elem.letterId == req.params.letterId);
+                yield emailModule.sendEmailToRequestor(letter.letterRequestor.publicAddress, res.locals.jwtPayload.publicAddress, req.body["data"].customMessage);
                 res.json({
                     auth: {
                         jwtToken: res.locals.newJwtToken,

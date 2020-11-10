@@ -28,7 +28,7 @@ class EmailsModule {
     constructor() {
         mail_1.default.setApiKey(process.env.SENDGRID_API_KEY);
     }
-    sendEmailToWriter(requestorAddress, writerAddress) {
+    sendEmailToWriter(requestorAddress, writerAddress, customMessage) {
         return __awaiter(this, void 0, void 0, function* () {
             const requestor = yield userEmailDbService.getUserEmail(requestorAddress);
             const writer = yield userEmailDbService.getUserEmail(writerAddress);
@@ -36,16 +36,18 @@ class EmailsModule {
             console.log(writer);
             if (requestor != null && writer != null) {
                 console.log("about to send writer email");
-                this.sendEmail(writer.email, 'verifiablereferenceletter@gmail.com', 'Letter Request', `${requestor.name} has requested a letter from you.`);
+                const message = customMessage != null ? customMessage : `${requestor.name} has requested a letter from you.`;
+                yield this.sendEmail(writer.email, 'verifiablereferenceletter@gmail.com', 'Letter Request', message);
             }
         });
     }
-    sendEmailToRequestor(requestorAddress, writerAddress) {
+    sendEmailToRequestor(requestorAddress, writerAddress, customMessage) {
         return __awaiter(this, void 0, void 0, function* () {
             const requestor = yield userEmailDbService.getUserEmail(requestorAddress);
             const writer = yield userEmailDbService.getUserEmail(writerAddress);
             if (requestor != null && writer != null) {
-                this.sendEmail(requestor.email, 'verifiablereferenceletter@gmail.com', 'Your requested letter has been uploaded', `${writer.name} has uploaded updates to your letter. You can start select recipients and send the letter securely and safely on the dApp now!`);
+                const message = customMessage != null ? customMessage : `${writer.name} has uploaded an updated letter for you. You can still select recipients for secure sending on <a href="https://verifiable-reference-letter.herokuapp.com/">here now!`;
+                yield this.sendEmail(requestor.email, 'verifiablereferenceletter@gmail.com', 'Your requested letter has been uploaded', message);
             }
         });
     }
@@ -56,21 +58,23 @@ class EmailsModule {
                 algorithm: "HS256",
                 expiresIn: "1h",
             });
-            this.sendEmail(user.email, 'verifiablereferenceletter@gmail.com', 'Please verify your email', `Click this link to verify your email on the letter sending dApp: <a href="https://www.verifiable-reference-letter.herokuapp.com/auth/verifyEmail/${jwtToken}">`);
+            yield this.sendEmail(user.email, 'verifiablereferenceletter@gmail.com', 'Please verify your email', `Click this link to verify your email on the letter sending dApp: <a href="https://www.verifiable-reference-letter.herokuapp.com/auth/verifyEmail/${jwtToken}">`);
         });
     }
     sendEmail(toEmail, fromEmail, subject, html) {
-        const msg = {
-            to: toEmail,
-            from: fromEmail,
-            subject: subject,
-            html: html,
-        };
-        return mail_1.default.send(msg).then(() => {
-            console.log('Email sent');
-        })
-            .catch((error) => {
-            console.error(error);
+        return __awaiter(this, void 0, void 0, function* () {
+            const msg = {
+                to: toEmail,
+                from: fromEmail,
+                subject: subject,
+                html: html,
+            };
+            return mail_1.default.send(msg).then(() => {
+                console.log('Email sent');
+            })
+                .catch((error) => {
+                console.error(error);
+            });
         });
     }
 }
