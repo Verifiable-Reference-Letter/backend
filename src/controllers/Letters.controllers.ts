@@ -15,6 +15,7 @@ import { LetterContentsDbService } from "../database/letter_contents/LetterConte
 import { LetterRecipientContentsDbService } from "../database/letter_recipient_contents/LetterRecipientContents.dbservice";
 import { UserDbService } from "../database/users/User.dbservice";
 import { LetterRecipientContents } from "../database/letter_recipient_contents/LetterRecipientContents.dbmodel";
+import { SentLetterDbService } from "../database/sent_letters/SentLetter.dbservice";
 const router = express.Router();
 
 const letterDbService: LetterDbService = new LetterDbService();
@@ -23,6 +24,7 @@ const letterContentsDbService: LetterContentsDbService = new LetterContentsDbSer
 const letterRecipientContentsDbService: LetterRecipientContentsDbService = new LetterRecipientContentsDbService();
 const userKeyDbService: UserKeyDbService = new UserKeyDbService();
 const userDbService: UserDbService = new UserDbService();
+const sentLetterDbService: SentLetterDbService = new SentLetterDbService();
 const authModule: AuthModule = new AuthModule();
 const userAuthDbService: UserAuthDbService = new UserAuthDbService();
 
@@ -279,14 +281,43 @@ router.post("/:letterId/unsentRecipients", async (req, res, next) => {
 });
 
 /**
+ * get all sent letter recipients for a given letter id
+ */
+router.post("/:letterId/sentRecipients", async (req, res, next) => {
+  // TODO: check JWT
+  // console.log(req.body["auth"]);
+  // console.log(req.params.letterId);
+  // console.log("get unsent recipients for given letter_id");
+  const userModels: User[] = await userDbService.selectAllSentRecipientsByLetterId(
+    req.params.letterId
+  );
+  // console.log(userModels);
+  res.json({
+    auth: {
+      jwtToken: res.locals.newJwtToken,
+    },
+    data: userModels,
+  });
+});
+
+/**
  * update the recipients for a given letter id with an updated recipients list
  */
 router.post("/:letterId/updateRecipients", async (req, res, next) => {
   // console.log(req.params.letterId);
   // console.log("get unsent recipients for given letter_id");
+
+  const recipientsList = req.body["data"];
+
+  // backend should also check that updated recipients list does not include recipients already sent to
+  sentLetterDbService.selectAllSentLettersByLetterIdAndRecipient(
+    req.params.letterId,
+    recipientsList[0]
+  );
+
   const success: boolean = await letterHistoryDbService.updateRecipientsByLetterId(
     req.params.letterId,
-    req.body["data"]
+    recipientsList
   );
 
   if (success) {
@@ -519,23 +550,9 @@ router.post("/:letterId/recipientContents", async (req, res, next) => {
     res.status(400);
     res.json({ data: {} });
   } else {
-    // TODO: doesn't work since different protocol
-    // const verifySuccess: boolean = await authModule.verifySignature(
-    //   letterRecipientContents[0].letterContents,
-    //   letterRecipientContents[0].letterSignature,
-    //   res.locals.jwtPayload.publicAddress
-    // );
-    const verifySuccess = true;
-
-    if (verifySuccess) {
-      res.json({
-        data: { letterRecipientContents: letterRecipientContents[0] },
-      });
-    } else {
-      console.log(verifySuccess, "something went wrong with verification");
-      res.status(500);
-      res.json({ data: {} });
-    }
+    res.json({
+      data: { letterRecipientContents: letterRecipientContents[0] },
+    });
   }
 });
 
@@ -551,14 +568,12 @@ router.post("/:letterId/recipientContents/update", async (req, res, next) => {
     letterRecipient: string;
   } = req.body["data"];
 
-  // TODO: doesn't work since different protocol
-  // const verifySuccess: boolean = await authModule.verifySignature(
-  //   data.letterContents,
-  //   data.letterSignature,
-  //   res.locals.jwtPayload.publicAddress
-  // );
-
-  const verifySuccess = true;
+  // this 'encrypted:' padding is necessary since without it the verification would not work properly (with the given message)
+  const verifySuccess: boolean = await authModule.verifySignature(
+    "encrypted:" + data.letterContents,
+    data.letterSignature,
+    res.locals.jwtPayload.publicAddress
+  );
 
   if (verifySuccess) {
     const currentDate = Date();

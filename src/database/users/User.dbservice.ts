@@ -74,6 +74,18 @@ export class UserDbService extends DatabaseService<User> {
     return super.runParameterizedQueryWithValuesArray(queryText, values);
   }
 
+  /**
+   * sent recipients
+   * retrieval of all unsent letter recipients (Users) rather than full letter history
+   * for a given letter id (for either requestor or writer)
+   * @param letterId
+   */
+  async selectAllSentRecipientsByLetterId(letterId: string): Promise<User[]> {
+    const queryText = this.selectAllSentRecipientsByLetterIdQuery;
+    const values = [letterId];
+    return super.runParameterizedQueryWithValuesArray(queryText, values);
+  }
+
   private selectUserByPublicAddressQuery = {
     text:
       "SELECT public_address, name from " +
@@ -120,6 +132,17 @@ export class UserDbService extends DatabaseService<User> {
       " as S on L.letter_id = S.letter_id join " +
       userTableName +
       " as W on S.letter_recipient = W.public_address where L.letter_id = $1 and S.sent_at is NULL order by W.public_address ASC;",
+  };
+
+  private selectAllSentRecipientsByLetterIdQuery = {
+    text:
+      "select distinct W.public_address, W.name from " +
+      letterTableName +
+      " as L inner join " +
+      sentLetterTableName +
+      " as S on L.letter_id = S.letter_id join " +
+      userTableName +
+      " as W on S.letter_recipient = W.public_address where L.letter_id = $1 and S.sent_at is not NULL order by W.public_address ASC;",
   };
 
   protected dbRowToDbModel(dbRow: any): User {
