@@ -480,10 +480,13 @@ router.post("/:letterId/recipientContents/update", (req, res, next) => __awaiter
         data.letterSignature, currentDate, req.params.letterId, data.letterRecipient);
         if (!success) {
             res.status(400);
-            res.json({ auth: { jwtToken: res.locals.newJwtToken }, data: {} });
+            res.json({ auth: { jwtToken: res.locals.newJwtToken }, data: { error: "Failed to update recipient contents for letter id sent" } });
         }
         else {
             const letterModels = yield letterDbService.selectAllLettersByAddressAndRole(res.locals.jwtPayload.publicAddress, UserRole_1.UserRole.Writer);
+            const updatedLetter = letterModels.filter(letter => letter.letterId == req.params.letterId)[0];
+            console.log(updatedLetter.letterId);
+            yield emailModule.sendEmailToRecipient(updatedLetter, data.letterRecipient);
             let numRecipients = [];
             let numUnsentRecipients = [];
             for (let i = 0; i < letterModels.length; i++) {
@@ -511,7 +514,7 @@ router.post("/:letterId/recipientContents/update", (req, res, next) => __awaiter
                     auth: {
                         jwtToken: res.locals.newJwtToken,
                     },
-                    data: {},
+                    data: { error: "Failed to select writer letters under writer role" },
                 });
             }
         }
@@ -522,7 +525,7 @@ router.post("/:letterId/recipientContents/update", (req, res, next) => __awaiter
             auth: {
                 jwtToken: res.locals.newJwtToken,
             },
-            data: {},
+            data: { error: "Failed to verify signature" },
         });
     }
 }));

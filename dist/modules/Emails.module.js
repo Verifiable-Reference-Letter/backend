@@ -46,8 +46,18 @@ class EmailsModule {
             const requestor = yield userEmailDbService.getUserEmail(requestorAddress);
             const writer = yield userEmailDbService.getUserEmail(writerAddress);
             if (requestor != null && writer != null) {
-                const message = customMessage != null ? customMessage : `${writer.name} has uploaded an updated letter for you. You can still select recipients for secure sending on <a href="https://verifiable-reference-letter.herokuapp.com/">here now!`;
+                const message = customMessage != null ? customMessage : `${writer.name} has uploaded an updated letter for you. You can still select recipients for secure sending on https://verifiable-reference-letter.herokuapp.com/ now!`;
                 yield this.sendEmail(requestor.email, 'verifiablereferenceletter@gmail.com', 'Your requested letter has been uploaded', message);
+            }
+        });
+    }
+    sendEmailToRecipient(letterSent, recipientAddress) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const requestor = yield userEmailDbService.getUserEmail(letterSent.letterRequestor.publicAddress);
+            const writer = yield userEmailDbService.getUserEmail(letterSent.letterWriter.publicAddress);
+            const recipient = yield userEmailDbService.getUserEmail(recipientAddress);
+            if (requestor != null && writer != null && recipient != null) {
+                yield this.sendEmail(recipient.email, 'verifiablereferenceletter@gmail.com', 'You have been sent a letter', `${writer.name} has sent you a letter on behalf of ${requestor.name} on https://verifiable-reference-letter.herokuapp.com/`);
             }
         });
     }

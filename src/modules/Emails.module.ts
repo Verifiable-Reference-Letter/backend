@@ -3,6 +3,7 @@ import { request } from "http";
 import { UserEmail } from "../database/users/UserEmail.dbmodel";
 import { UserEmailDbService } from "../database/users/UserEmail.dbservice";
 import * as jwt from "jsonwebtoken";
+import { Letter } from "../database/letters/Letter.dbmodel";
 
 const userEmailDbService = new UserEmailDbService();
 const jwtKey = "my private key";
@@ -44,13 +45,31 @@ export class EmailsModule {
       const requestor: UserEmail = await userEmailDbService.getUserEmail(requestorAddress);
       const writer: UserEmail = await userEmailDbService.getUserEmail(writerAddress);
       if (requestor != null && writer != null) {
-        const message = customMessage != null ? customMessage :  `${writer.name} has uploaded an updated letter for you. You can still select recipients for secure sending on <a href="https://verifiable-reference-letter.herokuapp.com/">here now!`
+        const message = customMessage != null ? customMessage :  `${writer.name} has uploaded an updated letter for you. You can still select recipients for secure sending on https://verifiable-reference-letter.herokuapp.com/ now!`
         await this.sendEmail(
           requestor.email,
           'verifiablereferenceletter@gmail.com',
           'Your requested letter has been uploaded',
           message
         );
+      }
+    }
+
+    async sendEmailToRecipient(
+      letterSent: Letter,
+      recipientAddress: string
+    ): Promise<void> {
+      const requestor: UserEmail = await userEmailDbService.getUserEmail(letterSent.letterRequestor.publicAddress);
+      const writer: UserEmail = await userEmailDbService.getUserEmail(letterSent.letterWriter.publicAddress);
+      const recipient: UserEmail = await userEmailDbService.getUserEmail(recipientAddress);
+
+      if (requestor != null && writer != null && recipient != null) {
+        await this.sendEmail(
+          recipient.email,
+          'verifiablereferenceletter@gmail.com',
+          'You have been sent a letter',
+          `${writer.name} has sent you a letter on behalf of ${requestor.name} on https://verifiable-reference-letter.herokuapp.com/`
+        )
       }
     }
 
