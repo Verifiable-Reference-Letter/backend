@@ -40,7 +40,7 @@ export class AuthModule {
     // const offset = 2;
     // const r = signature.slice(0 + offset, 64 + offset);
     // const s = signature.slice(64 + offset, 128 + offset);
-    // const v = parseInt(signature[128 + offset], 16) + parseInt(signature[129 + offset], 16); // incorrect
+    // const v = parseInt(signature[128 + offset], 16) * 16 + parseInt(signature[129 + offset], 16); // incorrect
     // const v = 28;
     // console.log("r", r);
     // console.log("s", s);
