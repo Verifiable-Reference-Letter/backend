@@ -71,10 +71,12 @@ router.post("/users/create", async (req, res, next) => {
       req.body.email,
       req.body.publicKey,
     );
+    console.log(userModel);
+    res.send([userModel]);
+  } else {
+    console.log("user exists, no need to create user"); // ADD SOME INDICATION IN RESPONSE
+    res.send([]);
   }
-  console.log("user exists, no need to create user"); // ADD SOME INDICATION IN RESPONSE
-  console.log(userModel);
-  res.send([userModel]);
 });
 
 router.get("/users/:publicAddress", async (req, res, next) => {

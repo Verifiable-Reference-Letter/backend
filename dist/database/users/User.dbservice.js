@@ -54,6 +54,15 @@ class UserDbService extends dbservice_1.DatabaseService {
                 userTableName +
                 " as W on S.letter_recipient = W.public_address where L.letter_id = $1 and S.sent_at is NULL order by W.public_address ASC;",
         };
+        this.selectAllSentRecipientsByLetterIdQuery = {
+            text: "select distinct W.public_address, W.name from " +
+                letterTableName +
+                " as L inner join " +
+                sentLetterTableName +
+                " as S on L.letter_id = S.letter_id join " +
+                userTableName +
+                " as W on S.letter_recipient = W.public_address where L.letter_id = $1 and S.sent_at is not NULL order by W.public_address ASC;",
+        };
         this.initializePreparedQueries();
     }
     initializePreparedQueries() {
@@ -132,6 +141,22 @@ class UserDbService extends dbservice_1.DatabaseService {
         });
         return __awaiter(this, void 0, void 0, function* () {
             const queryText = this.selectAllUnsentRecipientsByLetterIdQuery;
+            const values = [letterId];
+            return _super.runParameterizedQueryWithValuesArray.call(this, queryText, values);
+        });
+    }
+    /**
+     * sent recipients
+     * retrieval of all unsent letter recipients (Users) rather than full letter history
+     * for a given letter id (for either requestor or writer)
+     * @param letterId
+     */
+    selectAllSentRecipientsByLetterId(letterId) {
+        const _super = Object.create(null, {
+            runParameterizedQueryWithValuesArray: { get: () => super.runParameterizedQueryWithValuesArray }
+        });
+        return __awaiter(this, void 0, void 0, function* () {
+            const queryText = this.selectAllSentRecipientsByLetterIdQuery;
             const values = [letterId];
             return _super.runParameterizedQueryWithValuesArray.call(this, queryText, values);
         });
