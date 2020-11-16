@@ -24,6 +24,7 @@ const LetterContents_dbservice_1 = require("../database/letter_contents/LetterCo
 const LetterRecipientContents_dbservice_1 = require("../database/letter_recipient_contents/LetterRecipientContents.dbservice");
 const User_dbservice_1 = require("../database/users/User.dbservice");
 const Emails_module_1 = require("../modules/Emails.module");
+const SentLetter_dbservice_1 = require("../database/sent_letters/SentLetter.dbservice");
 const router = express_1.default.Router();
 exports.router = router;
 const letterDbService = new Letter_dbservice_1.LetterDbService();
@@ -32,6 +33,7 @@ const letterContentsDbService = new LetterContents_dbservice_1.LetterContentsDbS
 const letterRecipientContentsDbService = new LetterRecipientContents_dbservice_1.LetterRecipientContentsDbService();
 const userKeyDbService = new UserKey_dbservice_1.UserKeyDbService();
 const userDbService = new User_dbservice_1.UserDbService();
+const sentLetterDbService = new SentLetter_dbservice_1.SentLetterDbService();
 const authModule = new Auth_module_1.AuthModule();
 const userAuthDbService = new UserAuth_dbservice_1.UserAuthDbService();
 const emailModule = new Emails_module_1.EmailsModule();
@@ -163,7 +165,7 @@ router.post("/receivedRequestors", (req, res, next) => __awaiter(void 0, void 0,
             auth: {
                 jwtToken: res.locals.newJwtToken,
             },
-            data: {},
+            data: [],
         });
     }
 }));
@@ -173,6 +175,7 @@ router.post("/receivedRequestors", (req, res, next) => __awaiter(void 0, void 0,
 router.post("/received/:publicAddress", (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const letterRequestor = req.params.publicAddress;
     const letterHistoryModels = yield letterHistoryDbService.selectAllLetterHistoryByLetterRecipientAndLetterRequestor(res.locals.jwtPayload.publicAddress, letterRequestor);
+    console.log(letterHistoryModels);
     if (letterHistoryModels.length !== 0) {
         res.json({
             auth: {
@@ -250,12 +253,32 @@ router.post("/:letterId/unsentRecipients", (req, res, next) => __awaiter(void 0,
     });
 }));
 /**
+ * get all sent letter recipients for a given letter id
+ */
+router.post("/:letterId/sentRecipients", (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    // TODO: check JWT
+    // console.log(req.body["auth"]);
+    // console.log(req.params.letterId);
+    // console.log("get unsent recipients for given letter_id");
+    const userModels = yield userDbService.selectAllSentRecipientsByLetterId(req.params.letterId);
+    // console.log(userModels);
+    res.json({
+        auth: {
+            jwtToken: res.locals.newJwtToken,
+        },
+        data: userModels,
+    });
+}));
+/**
  * update the recipients for a given letter id with an updated recipients list
  */
 router.post("/:letterId/updateRecipients", (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     // console.log(req.params.letterId);
     // console.log("get unsent recipients for given letter_id");
-    const success = yield letterHistoryDbService.updateRecipientsByLetterId(req.params.letterId, req.body["data"]);
+    const recipientsList = req.body["data"];
+    // backend should also check that updated recipients list does not include recipients already sent to
+    sentLetterDbService.selectAllSentLettersByLetterIdAndRecipient(req.params.letterId, recipientsList[0]);
+    const success = yield letterHistoryDbService.updateRecipientsByLetterId(req.params.letterId, recipientsList);
     if (success) {
         const userModels = yield userDbService.selectAllUnsentRecipientsByLetterId(req.params.letterId);
         // console.log(userModels);
@@ -282,6 +305,7 @@ router.post("/:letterId/updateRecipients", (req, res, next) => __awaiter(void 0,
 router.post("/create", (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     // console.log("creating new letter based on letter details");
     const data = req.body["data"];
+    console.log(data.customMessage);
     // console.log(data);
     // const letterId = Math.random().toString(36);
     const currentDate = Date();
@@ -396,11 +420,13 @@ router.post("/:letterId/contents/update", (req, res, next) => __awaiter(void 0, 
     console.log(req.body["auth"]);
     console.log(req.params.letterId);
     console.log("update letter contents for given letterId");
+    const data = req.body["data"];
     const currentDate = Date();
     const numRecipients = yield letterHistoryDbService.countSentRecipientsByLetterId(req.params.letterId);
+    console.log(data.customMessage);
     // check if not sent to any recipients (not allowing changing of letter contents after atleast 1 sent)
     if (numRecipients === 0) {
-        const success = yield letterContentsDbService.updateLetterContentsByLetterIdAndWriterId(req.body["data"].encryptedFile, currentDate, req.params.letterId, res.locals.jwtPayload.publicAddress);
+        const success = yield letterContentsDbService.updateLetterContentsByLetterIdAndWriterId(data.encryptedFile, currentDate, req.params.letterId, res.locals.jwtPayload.publicAddress);
         console.log(success);
         if (!success) {
             res.status(400);
@@ -450,29 +476,26 @@ router.post("/:letterId/unsentRecipientKeys", (req, res, next) => __awaiter(void
  */
 router.post("/:letterId/recipientContents", (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const letterRecipientContents = yield letterRecipientContentsDbService.selectLetterContentsByLetterIdAndRecipientId(req.params.letterId, res.locals.jwtPayload.publicAddress);
-    // console.log(letterRecipientContents);
-    if (letterRecipientContents.length === 0 || letterRecipientContents[0].letterContents === null || letterRecipientContents[0].letterSignature === null) {
+    if (letterRecipientContents.length === 0 ||
+        letterRecipientContents[0].letterContents === null ||
+        letterRecipientContents[0].letterSignature === null) {
         res.status(400);
         res.json({ auth: { jwtToken: res.locals.newJwtToken }, data: {} });
     }
     else {
-        const verifySuccess = yield authModule.verifySignature(letterRecipientContents[0].letterContents, letterRecipientContents[0].letterSignature, res.locals.jwtPayload.publicAddress);
-        if (verifySuccess) {
-            res.json({ auth: { jwtToken: res.locals.newJwtToken }, data: { letterRecipientContents: letterRecipientContents } });
-        }
-        else {
-            console.log(verifySuccess, "something went wrong with verification");
-            res.status(500);
-            res.json({ auth: { jwtToken: res.locals.newJwtToken }, data: {} });
-        }
+        res.json({
+            data: { auth: { jwtToken: res.locals.newJwtToken }, letterRecipientContents: letterRecipientContents[0] },
+        });
     }
 }));
 /**
  * update the encrypted contents, hash, and recipient for a given letter_id and recipient_id
  */
 router.post("/:letterId/recipientContents/update", (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    console.log("/:letterId/recipientContents/update");
     const data = req.body["data"];
-    const verifySuccess = yield authModule.verifySignature(data.letterContents, data.letterSignature, res.locals.jwtPayload.publicAddress);
+    // this 'encrypted:' padding is necessary since without it the verification would not work properly (with the given message)
+    const verifySuccess = yield authModule.verifySignature("encrypted:" + data.letterContents, data.letterSignature, res.locals.jwtPayload.publicAddress);
     if (verifySuccess) {
         const currentDate = Date();
         const success = yield letterRecipientContentsDbService.updateLetterContentsByLetterIdAndRecipientId(data.letterContents, 

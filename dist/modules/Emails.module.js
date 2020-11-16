@@ -68,7 +68,17 @@ class EmailsModule {
                 algorithm: "HS256",
                 expiresIn: "1h",
             });
-            yield this.sendEmail(user.email, 'verifiablereferenceletter@gmail.com', 'Please verify your email', `Click this link to verify your email on the letter sending dApp: <a href="https://www.verifiable-reference-letter.herokuapp.com/auth/verifyEmail/${jwtToken}">`);
+            yield this.sendEmail(user.email, 'verifiablereferenceletter@gmail.com', 'Please verify your email', `Verify your email on the letter sending dApp: http://localhost:8080/auth/verifyEmail/${jwtToken}`
+            // `
+            // Verify your email on the letter sending dApp:
+            // <form method="post" action="http://localhost:8080/auth/verifyEmail/${jwtToken}" class="inline">
+            //   <input type="hidden" name="extra_submit_param" value="extra_submit_value">
+            //   <button type="submit" name="submit_param" value="submit_value" class="link-button">
+            //      Click here to verify!
+            //   </button>
+            // </form>
+            // `
+            );
         });
     }
     sendEmail(toEmail, fromEmail, subject, html) {

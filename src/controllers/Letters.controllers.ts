@@ -576,19 +576,9 @@ router.post("/:letterId/recipientContents", async (req, res, next) => {
     res.status(400);
     res.json({ auth: { jwtToken: res.locals.newJwtToken }, data: {} });
   } else {
-    const verifySuccess: boolean = await authModule.verifySignature(
-      letterRecipientContents[0].letterContents,
-      letterRecipientContents[0].letterSignature,
-      res.locals.jwtPayload.publicAddress
-    );
-
-    if (verifySuccess) {
-      res.json({ auth: { jwtToken: res.locals.newJwtToken }, data: { letterRecipientContents: letterRecipientContents } });
-    } else {
-      console.log(verifySuccess, "something went wrong with verification");
-      res.status(500);
-      res.json({ auth: { jwtToken: res.locals.newJwtToken }, data: {} });
-    }
+    res.json({
+      data: { auth: { jwtToken: res.locals.newJwtToken }, letterRecipientContents: letterRecipientContents[0] },
+    });
   }
 });
 

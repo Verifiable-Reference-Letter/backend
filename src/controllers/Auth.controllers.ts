@@ -101,8 +101,9 @@ router.get("/users/:publicAddress", async (req, res, next) => {
 
 /**
  * Verify the email of a user by verifying the jwt token sent to their inbox
+ * This route is designated as a get because it is sent as a link in html in a verification email
  */
-router.post("/verifyEmail/:jwtToken", async (req, res, next) => {
+router.get("/verifyEmail/:jwtToken", async (req, res, next) => {
 
   let jwtPayload;
   // Attempt to validate the token and get public address
