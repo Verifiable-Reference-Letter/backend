@@ -8,6 +8,7 @@ import { UserAuth } from "../database/users/UserAuth.dbmodel";
 import * as jwt from "jsonwebtoken";
 import { UserEmailDbService } from "../database/users/UserEmail.dbservice";
 import { EmailsModule } from "../modules/Emails.module";
+import { UserEmail } from "../database/users/UserEmail.dbmodel";
 
 const router = express.Router();
 
@@ -35,6 +36,14 @@ router.post("/", async (req, res, next) => {
   let userModel = await userAuthDbService.selectOneRowByPrimaryId(
     publicAddress
   );
+  const userEmail: UserEmail = await userEmailDbService.getUserEmail(publicAddress);
+  if (userEmail.isEmailVerified == false) {
+    res.status(400);
+    res.json({
+      data: { error: "Account does not have their email verified" },
+    });
+  }
+
   const verifySuccess: boolean = await authModule.verifySignature(
     userModel.nonce,
     req.body.signature,
@@ -57,11 +66,9 @@ router.post("/", async (req, res, next) => {
     );
   } else {
     console.log(verifySuccess, "something went wrong with verification");
-    res.send(
-      JSON.stringify({
-        data: {}
-      })
-    );
+    res.json({
+        data: { error: "Failed to verify signature" }
+    });
   }
 });
 
