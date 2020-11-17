@@ -626,7 +626,7 @@ router.post("/:letterId/recipientContents/update", async (req, res, next) => {
       await emailModule.sendEmailToRecipient(
         updatedLetter,
         data.letterRecipient
-      )
+      );
 
       let numRecipients: Number[] = [];
       let numUnsentRecipients: Number[] = [];
