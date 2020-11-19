@@ -111,7 +111,7 @@ export class EmailsModule {
         subject: subject,
         html: html,
         };
-
+        
         return SendGrid.send(msg).then(() => {
             console.log('Email sent')
           })
