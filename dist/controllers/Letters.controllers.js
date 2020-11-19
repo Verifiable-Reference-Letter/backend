@@ -190,7 +190,7 @@ router.post("/received/:publicAddress", (req, res, next) => __awaiter(void 0, vo
             auth: {
                 jwtToken: res.locals.newJwtToken,
             },
-            data: {},
+            data: [],
         });
     }
 }));
@@ -216,7 +216,7 @@ router.post("/:letterId/history", (req, res, next) => __awaiter(void 0, void 0, 
             auth: {
                 jwtToken: res.locals.newJwtToken,
             },
-            data: letterHistoryModels,
+            data: [],
         });
     }
 }));
@@ -295,7 +295,7 @@ router.post("/:letterId/updateRecipients", (req, res, next) => __awaiter(void 0,
             auth: {
                 jwtToken: res.locals.newJwtToken,
             },
-            data: {},
+            data: [],
         });
     }
 }));
@@ -430,7 +430,7 @@ router.post("/:letterId/contents/update", (req, res, next) => __awaiter(void 0, 
         console.log(success);
         if (!success) {
             res.status(400);
-            res.json({ auth: { jwtToken: res.locals.newJwtToken }, data: {} });
+            res.json({ auth: { jwtToken: res.locals.newJwtToken }, data: [] });
         }
         else {
             // res.json({ data: {} });
@@ -447,14 +447,14 @@ router.post("/:letterId/contents/update", (req, res, next) => __awaiter(void 0, 
             }
             else {
                 res.status(400);
-                res.json({ auth: { jwtToken: res.locals.newJwtToken }, data: {} });
+                res.json({ auth: { jwtToken: res.locals.newJwtToken }, data: [] });
             }
         }
     }
     else {
         console.log("invalid action: not allowed to update letter content of letter already sent to >= 1 recipient");
         res.status(400);
-        res.json({ auth: { jwtToken: res.locals.newJwtToken }, data: {} });
+        res.json({ auth: { jwtToken: res.locals.newJwtToken }, data: [] });
     }
 }));
 /**
@@ -468,7 +468,10 @@ router.post("/:letterId/unsentRecipientKeys", (req, res, next) => __awaiter(void
         res.json({ auth: { jwtToken: res.locals.newJwtToken }, data: {} });
     }
     else {
-        res.json({ auth: { jwtToken: res.locals.newJwtToken }, data: { userKeys: userKeyModels } });
+        res.json({
+            auth: { jwtToken: res.locals.newJwtToken },
+            data: { userKeys: userKeyModels },
+        });
     }
 }));
 /**

@@ -68,7 +68,7 @@ class EmailsModule {
                 algorithm: "HS256",
                 expiresIn: "1h",
             });
-            yield this.sendEmail(user.email, 'verifiablereferenceletter@gmail.com', 'Please verify your email', `Verify your email on the letter sending dApp: http://localhost:8080/auth/verifyEmail/${jwtToken}`
+            return yield this.sendEmail(user.email, 'verifiablereferenceletter@gmail.com', 'Please verify your email', `Verify your email on the letter sending dApp: http://localhost:8080/auth/verifyEmail/${jwtToken}`
             // `
             // Verify your email on the letter sending dApp:
             // <form method="post" action="http://localhost:8080/auth/verifyEmail/${jwtToken}" class="inline">
@@ -89,11 +89,13 @@ class EmailsModule {
                 subject: subject,
                 html: html,
             };
-            return mail_1.default.send(msg).then(() => {
+            return yield mail_1.default.send(msg).then(() => {
                 console.log('Email sent');
+                return true;
             })
                 .catch((error) => {
                 console.error(error);
+                return false;
             });
         });
     }
