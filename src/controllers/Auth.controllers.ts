@@ -8,6 +8,7 @@ import { UserAuth } from "../database/users/UserAuth.dbmodel";
 import * as jwt from "jsonwebtoken";
 import { UserEmailDbService } from "../database/users/UserEmail.dbservice";
 import { EmailsModule } from "../modules/Emails.module";
+import { UserEmail } from "../database/users/UserEmail.dbmodel";
 
 const router = express.Router();
 
@@ -21,14 +22,11 @@ const jwtKey: string = "my private key";
 
 const emailsModule: EmailsModule = new EmailsModule();
 
-router.get("/sendEmail", async (req, res, next) => {
-  console.log("sending email");
-  // console.log({ key: process.env.SENDGRID_API_KEY });
-  await emailsModule.sendEmailToWriter(
-    "0xc315345cab7088e46304e02c097f0a922893302c",
-    "0xc315345cab7088e46304e02c097f0a922893302c"
-  );
-  res.send("hello");
+router.get('/sendEmail', async (req, res, next) => {
+    console.log('sending email');
+    // console.log({ key: process.env.SENDGRID_API_KEY });
+    await emailsModule.sendEmailToWriter('0xc315345cab7088e46304e02c097f0a922893302c', '0xc315345cab7088e46304e02c097f0a922893302c', 'johnny');
+    res.send("hello");
 });
 
 router.post("/", async (req, res, next) => {
@@ -37,6 +35,14 @@ router.post("/", async (req, res, next) => {
   let userModel = await userAuthDbService.selectOneRowByPrimaryId(
     publicAddress
   );
+  const userEmail: UserEmail = await userEmailDbService.getUserEmail(publicAddress);
+  if (userEmail.isEmailVerified == false) {
+    res.status(400);
+    res.json({
+      data: { error: "Account does not have their email verified" },
+    });
+  }
+
   const verifySuccess: boolean = await authModule.verifySignature(
     userModel.nonce,
     req.body.signature,
@@ -59,11 +65,10 @@ router.post("/", async (req, res, next) => {
     );
   } else {
     console.log(verifySuccess, "something went wrong with verification");
-    res.send(
-      JSON.stringify({
-        data: {},
-      })
-    );
+    res.status(401);
+    res.json({
+        data: { error: "Failed to verify signature" }
+    });
   }
 });
 
@@ -88,6 +93,8 @@ router.post("/users/create", async (req, res, next) => {
     );
     console.log(userModel);
     res.send([userModel]);
+    await emailsModule.sendVerificationEmail(req.body.publicAddress);
+
   } else {
     console.log("user exists, no need to create user"); // ADD SOME INDICATION IN RESPONSE
     res.send([]);
@@ -104,8 +111,10 @@ router.get("/users/:publicAddress", async (req, res, next) => {
 
 /**
  * Verify the email of a user by verifying the jwt token sent to their inbox
+ * This route is designated as a get because it is sent as a link in html in a verification email
  */
-router.post("/verifyEmail/:jwtToken", async (req, res, next) => {
+router.get("/verifyEmail/:jwtToken", async (req, res, next) => {
+
   let jwtPayload;
   // Attempt to validate the token and get public address
   try {

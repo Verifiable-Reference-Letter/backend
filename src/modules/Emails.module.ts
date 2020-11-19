@@ -3,6 +3,7 @@ import { request } from "http";
 import { UserEmail } from "../database/users/UserEmail.dbmodel";
 import { UserEmailDbService } from "../database/users/UserEmail.dbservice";
 import * as jwt from "jsonwebtoken";
+import { Letter } from "../database/letters/Letter.dbmodel";
 
 const userEmailDbService = new UserEmailDbService();
 const jwtKey = "my private key";
@@ -14,56 +15,96 @@ export class EmailsModule {
             );
     }
 
-    async sendEmailToWriter(requestorAddress: string, writerAddress: string) {
+    async sendEmailToWriter(
+      requestorAddress: string,
+      writerAddress: string,
+      customMessage: string
+    ): Promise<void> {
       const requestor: UserEmail = await userEmailDbService.getUserEmail(requestorAddress);
       const writer: UserEmail = await userEmailDbService.getUserEmail(writerAddress);
       console.log(requestor);
       console.log(writer);
       if (requestor != null && writer != null) {
         console.log("about to send writer email");
-        this.sendEmail(
+        const message = customMessage != null ? customMessage : `${requestor.name} has requested a letter from you.`
+
+        await this.sendEmail(
           writer.email,
           'verifiablereferenceletter@gmail.com',
           'Letter Request',
-          `${requestor.name} has requested a letter from you.`
+          message,
         );
       }
     }
 
-    async sendEmailToRequestor(requestorAddress: string, writerAddress: string) {
+    async sendEmailToRequestor(
+      requestorAddress: string, 
+      writerAddress: string,
+      customMessage: string
+      ): Promise<void> {
       const requestor: UserEmail = await userEmailDbService.getUserEmail(requestorAddress);
       const writer: UserEmail = await userEmailDbService.getUserEmail(writerAddress);
       if (requestor != null && writer != null) {
-        this.sendEmail(
+        const message = customMessage != null ? customMessage :  `${writer.name} has uploaded an updated letter for you. You can still select recipients for secure sending on https://verifiable-reference-letter.herokuapp.com/ now!`
+        await this.sendEmail(
           requestor.email,
           'verifiablereferenceletter@gmail.com',
           'Your requested letter has been uploaded',
-          `${writer.name} has uploaded updates to your letter. You can start select recipients and send the letter securely and safely on the dApp now!`
+          message
         );
       }
     }
 
-    async sendVerificationEmail(publicAddress: string) {
+    async sendEmailToRecipient(
+      letterSent: Letter,
+      recipientAddress: string
+    ): Promise<void> {
+      const requestor: UserEmail = await userEmailDbService.getUserEmail(letterSent.letterRequestor.publicAddress);
+      const writer: UserEmail = await userEmailDbService.getUserEmail(letterSent.letterWriter.publicAddress);
+      const recipient: UserEmail = await userEmailDbService.getUserEmail(recipientAddress);
+
+      if (requestor != null && writer != null && recipient != null) {
+        await this.sendEmail(
+          recipient.email,
+          'verifiablereferenceletter@gmail.com',
+          'You have been sent a letter',
+          `${writer.name} has sent you a letter on behalf of ${requestor.name} on https://verifiable-reference-letter.herokuapp.com/`
+        )
+      }
+    }
+
+    async sendVerificationEmail(publicAddress: string): Promise<void> {
       const user: UserEmail = await userEmailDbService.selectOneRowByPrimaryId(publicAddress);
 
       const jwtToken = jwt.sign({ publicAddress }, jwtKey, {
         algorithm: "HS256",
         expiresIn: "1h",
       });
-      this.sendEmail(
+      await this.sendEmail(
         user.email,
         'verifiablereferenceletter@gmail.com',
         'Please verify your email',
-        `Click this link to verify your email on the letter sending dApp: <a href="https://www.verifiable-reference-letter.herokuapp.com/auth/verifyEmail/${jwtToken}">`
+        `Verify your email on the letter sending dApp: http://localhost:8080/auth/verifyEmail/${jwtToken}`
+        // `
+        // Verify your email on the letter sending dApp:
+
+        // <form method="post" action="http://localhost:8080/auth/verifyEmail/${jwtToken}" class="inline">
+        //   <input type="hidden" name="extra_submit_param" value="extra_submit_value">
+        //   <button type="submit" name="submit_param" value="submit_value" class="link-button">
+        //      Click here to verify!
+        //   </button>
+        // </form>
+
+        // `
       );
     }
 
-    private sendEmail(
+    async sendEmail(
       toEmail: string, 
       fromEmail: string, 
       subject: string, 
       html: string
-      ) {
+      ): Promise<void> {
         const msg = {
         to: toEmail,
         from: fromEmail,
