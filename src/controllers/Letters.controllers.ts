@@ -178,7 +178,7 @@ router.post("/receivedRequestors", async (req, res, next) => {
       auth: {
         jwtToken: res.locals.newJwtToken,
       },
-      data: {},
+      data: [],
     });
   }
 });
@@ -206,7 +206,7 @@ router.post("/received/:publicAddress", async (req, res, next) => {
       auth: {
         jwtToken: res.locals.newJwtToken,
       },
-      data: {},
+      data: [],
     });
   }
 });
@@ -235,7 +235,7 @@ router.post("/:letterId/history", async (req, res, next) => {
       auth: {
         jwtToken: res.locals.newJwtToken,
       },
-      data: letterHistoryModels,
+      data: [],
     });
   }
 });
@@ -306,7 +306,7 @@ router.post("/:letterId/updateRecipients", async (req, res, next) => {
       auth: {
         jwtToken: res.locals.newJwtToken,
       },
-      data: {},
+      data: [],
     });
   }
 });
@@ -341,7 +341,10 @@ router.post("/create", async (req, res, next) => {
     // console.log("insertSentLetterSuccess", insertSentLetterSuccess);
     if (insertSentLetterSuccess) {
       console.log("about to send email after letter creation");
-      await emailModule.sendEmailToWriter(res.locals.jwtPayload.publicAddress, data.letterWriter);
+      await emailModule.sendEmailToWriter(
+        res.locals.jwtPayload.publicAddress,
+        data.letterWriter
+      );
       console.log("should have completed email send");
 
       const letterModels: Letter[] = await letterDbService.selectAllLettersByAddressAndRole(
@@ -467,28 +470,30 @@ router.post("/:letterId/contents/update", async (req, res, next) => {
     console.log(success);
     if (!success) {
       res.status(400);
-      res.json({ auth: { jwtToken: res.locals.newJwtToken }, data: {} });
+      res.json({ auth: { jwtToken: res.locals.newJwtToken }, data: [] });
     } else {
       // res.json({ data: {} });
       const letters: Letter[] = await letterDbService.selectAllLettersByAddressAndRole(
         res.locals.jwtPayload.publicAddress,
         UserRole.Writer
       );
-      const letter = await letterDbService.selectOneRowByPrimaryId(req.params.letterId);
+      const letter = await letterDbService.selectOneRowByPrimaryId(
+        req.params.letterId
+      );
       if (letters) {
         await emailModule.sendEmailToRequestor(
-          letter.letterRequestor.publicAddress, 
+          letter.letterRequestor.publicAddress,
           res.locals.jwtPayload.publicAddress
-          );
-          res.json({
-            auth: {
-              jwtToken: res.locals.newJwtToken,
-            },
-            data: letters,
-          });
+        );
+        res.json({
+          auth: {
+            jwtToken: res.locals.newJwtToken,
+          },
+          data: letters,
+        });
       } else {
         res.status(400);
-        res.json({ auth: { jwtToken: res.locals.newJwtToken }, data: {} });
+        res.json({ auth: { jwtToken: res.locals.newJwtToken }, data: [] });
       }
     }
   } else {
@@ -496,7 +501,7 @@ router.post("/:letterId/contents/update", async (req, res, next) => {
       "invalid action: not allowed to update letter content of letter already sent to >= 1 recipient"
     );
     res.status(400);
-    res.json({ auth: { jwtToken: res.locals.newJwtToken }, data: {} });
+    res.json({ auth: { jwtToken: res.locals.newJwtToken }, data: [] });
   }
 });
 
@@ -512,7 +517,10 @@ router.post("/:letterId/unsentRecipientKeys", async (req, res, next) => {
     res.status(400);
     res.json({ auth: { jwtToken: res.locals.newJwtToken }, data: {} });
   } else {
-    res.json({ auth: { jwtToken: res.locals.newJwtToken }, data: { userKeys: userKeyModels } });
+    res.json({
+      auth: { jwtToken: res.locals.newJwtToken },
+      data: { userKeys: userKeyModels },
+    });
   }
 });
 
@@ -526,7 +534,11 @@ router.post("/:letterId/recipientContents", async (req, res, next) => {
   );
   // console.log(letterRecipientContents);
 
-  if (letterRecipientContents.length === 0 || letterRecipientContents[0].letterContents === null || letterRecipientContents[0].letterSignature === null) {
+  if (
+    letterRecipientContents.length === 0 ||
+    letterRecipientContents[0].letterContents === null ||
+    letterRecipientContents[0].letterSignature === null
+  ) {
     res.status(400);
     res.json({ auth: { jwtToken: res.locals.newJwtToken }, data: {} });
   } else {
@@ -537,7 +549,10 @@ router.post("/:letterId/recipientContents", async (req, res, next) => {
     );
 
     if (verifySuccess) {
-      res.json({ auth: { jwtToken: res.locals.newJwtToken }, data: { letterRecipientContents: letterRecipientContents } });
+      res.json({
+        auth: { jwtToken: res.locals.newJwtToken },
+        data: { letterRecipientContents: letterRecipientContents },
+      });
     } else {
       console.log(verifySuccess, "something went wrong with verification");
       res.status(500);

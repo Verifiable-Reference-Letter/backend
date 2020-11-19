@@ -21,13 +21,15 @@ const jwtKey: string = "my private key";
 
 const emailsModule: EmailsModule = new EmailsModule();
 
-router.get('/sendEmail', async (req, res, next) => {
-    console.log('sending email');
-    // console.log({ key: process.env.SENDGRID_API_KEY });
-    await emailsModule.sendEmailToWriter('0xc315345cab7088e46304e02c097f0a922893302c', '0xc315345cab7088e46304e02c097f0a922893302c');
-    res.send("hello");
+router.get("/sendEmail", async (req, res, next) => {
+  console.log("sending email");
+  // console.log({ key: process.env.SENDGRID_API_KEY });
+  await emailsModule.sendEmailToWriter(
+    "0xc315345cab7088e46304e02c097f0a922893302c",
+    "0xc315345cab7088e46304e02c097f0a922893302c"
+  );
+  res.send("hello");
 });
-
 
 router.post("/", async (req, res, next) => {
   console.log("Authenticating");
@@ -59,7 +61,7 @@ router.post("/", async (req, res, next) => {
     console.log(verifySuccess, "something went wrong with verification");
     res.send(
       JSON.stringify({
-        data: {}
+        data: {},
       })
     );
   }
@@ -69,8 +71,10 @@ router.post("/users/create", async (req, res, next) => {
   console.log("Creating user");
   console.log(req.body["publicAddress"]);
   console.log(req.body["name"]);
+  console.log(req.body["email"]);
+  console.log(req.body["publicKey"]);
   // check if the user is already created
-  let userModel: UserAuth = await userAuthDbService.selectOneRowByPrimaryId(
+  let userModel: User = await userAuthDbService.selectOneRowByPrimaryId(
     req.body.publicAddress
   );
   if (userModel == null) {
@@ -78,12 +82,16 @@ router.post("/users/create", async (req, res, next) => {
     console.log("user doesn't exist, creating user");
     userModel = await userAuthDbService.createUser(
       req.body.publicAddress,
-      req.body.name
+      req.body.name,
+      req.body.email,
+      req.body.publicKey
     );
+    console.log(userModel);
+    res.send([userModel]);
+  } else {
+    console.log("user exists, no need to create user"); // ADD SOME INDICATION IN RESPONSE
+    res.send([]);
   }
-  console.log("user exists, no need to create user"); // ADD SOME INDICATION IN RESPONSE
-  console.log(userModel);
-  res.send([userModel]);
 });
 
 router.get("/users/:publicAddress", async (req, res, next) => {
@@ -98,12 +106,11 @@ router.get("/users/:publicAddress", async (req, res, next) => {
  * Verify the email of a user by verifying the jwt token sent to their inbox
  */
 router.post("/verifyEmail/:jwtToken", async (req, res, next) => {
-
   let jwtPayload;
   // Attempt to validate the token and get public address
   try {
-     jwtPayload = jwt.verify(req.params.jwtToken, jwtKey);
-     res.locals.jwtPayload = jwtPayload
+    jwtPayload = jwt.verify(req.params.jwtToken, jwtKey);
+    res.locals.jwtPayload = jwtPayload;
   } catch (e) {
     if (e instanceof jwt.JsonWebTokenError) {
       // JWT is unauthorized
@@ -113,13 +120,14 @@ router.post("/verifyEmail/:jwtToken", async (req, res, next) => {
     return res.status(400).end();
   }
 
-  const updateStatus = await userEmailDbService.updateEmailVerificationStatus(res.locals.jwtPayload.publicAddress);
+  const updateStatus = await userEmailDbService.updateEmailVerificationStatus(
+    res.locals.jwtPayload.publicAddress
+  );
   if (updateStatus) {
     // Their email was verified and now we can send them to the homepage
-    return res.redirect('https://verifiable-reference-letter.herokuapp.com');
-  }
-  else {
-    // Otherwise our update failed 
+    return res.redirect("https://verifiable-reference-letter.herokuapp.com");
+  } else {
+    // Otherwise our update failed
     return res.status(500).end();
   }
 });
