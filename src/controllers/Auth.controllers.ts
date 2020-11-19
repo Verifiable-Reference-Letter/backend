@@ -105,7 +105,8 @@ router.post("/users/create", async (req, res, next) => {
       res.send([userModel]);
     } else {
       res.status(501);
-      res.send([]);
+      res.send([userModel]);
+      // res.send([]); // should be this
     }
   } else {
     console.log("user exists, no need to create user"); // ADD SOME INDICATION IN RESPONSE
