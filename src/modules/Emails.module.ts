@@ -84,7 +84,7 @@ export class EmailsModule {
         user.email,
         'verifiablereferenceletter@gmail.com',
         'Please verify your email',
-        `Verify your email on the letter sending dApp: http://localhost:8080/auth/verifyEmail/${jwtToken}`
+        `Verify your email on the letter sending dApp: https://verifiable-reference-letter.herokuapp.com/auth/verifyEmail/${jwtToken}`
         // `
         // Verify your email on the letter sending dApp:
 

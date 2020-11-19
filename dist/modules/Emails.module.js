@@ -68,7 +68,7 @@ class EmailsModule {
                 algorithm: "HS256",
                 expiresIn: "1h",
             });
-            return yield this.sendEmail(user.email, 'verifiablereferenceletter@gmail.com', 'Please verify your email', `Verify your email on the letter sending dApp: http://localhost:8080/auth/verifyEmail/${jwtToken}`
+            return yield this.sendEmail(user.email, 'verifiablereferenceletter@gmail.com', 'Please verify your email', `Verify your email on the letter sending dApp: https://verifiable-reference-letter.herokuapp.com/auth/verifyEmail/${jwtToken}`
             // `
             // Verify your email on the letter sending dApp:
             // <form method="post" action="http://localhost:8080/auth/verifyEmail/${jwtToken}" class="inline">
