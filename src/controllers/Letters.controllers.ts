@@ -209,7 +209,7 @@ router.post("/received/:publicAddress", async (req, res, next) => {
       auth: {
         jwtToken: res.locals.newJwtToken,
       },
-      data: {},
+      data: [],
     });
   }
 });
@@ -238,7 +238,7 @@ router.post("/:letterId/history", async (req, res, next) => {
       auth: {
         jwtToken: res.locals.newJwtToken,
       },
-      data: letterHistoryModels,
+      data: [],
     });
   }
 });
@@ -338,7 +338,7 @@ router.post("/:letterId/updateRecipients", async (req, res, next) => {
       auth: {
         jwtToken: res.locals.newJwtToken,
       },
-      data: {},
+      data: [],
     });
   }
 });
@@ -509,7 +509,7 @@ router.post("/:letterId/contents/update", async (req, res, next) => {
     console.log(success);
     if (!success) {
       res.status(400);
-      res.json({ auth: { jwtToken: res.locals.newJwtToken }, data: {} });
+      res.json({ auth: { jwtToken: res.locals.newJwtToken }, data: [] });
     } else {
       // res.json({ data: {} });
       const letters: Letter[] = await letterDbService.selectAllLettersByAddressAndRole(
@@ -531,7 +531,7 @@ router.post("/:letterId/contents/update", async (req, res, next) => {
           });
       } else {
         res.status(400);
-        res.json({ auth: { jwtToken: res.locals.newJwtToken }, data: {} });
+        res.json({ auth: { jwtToken: res.locals.newJwtToken }, data: [] });
       }
     }
   } else {
@@ -539,7 +539,7 @@ router.post("/:letterId/contents/update", async (req, res, next) => {
       "invalid action: not allowed to update letter content of letter already sent to >= 1 recipient"
     );
     res.status(400);
-    res.json({ auth: { jwtToken: res.locals.newJwtToken }, data: {} });
+    res.json({ auth: { jwtToken: res.locals.newJwtToken }, data: [] });
   }
 });
 
@@ -555,7 +555,10 @@ router.post("/:letterId/unsentRecipientKeys", async (req, res, next) => {
     res.status(400);
     res.json({ auth: { jwtToken: res.locals.newJwtToken }, data: {} });
   } else {
-    res.json({ auth: { jwtToken: res.locals.newJwtToken }, data: { userKeys: userKeyModels } });
+    res.json({
+      auth: { jwtToken: res.locals.newJwtToken },
+      data: { userKeys: userKeyModels },
+    });
   }
 });
 

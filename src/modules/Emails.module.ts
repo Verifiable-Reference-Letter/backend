@@ -73,14 +73,14 @@ export class EmailsModule {
       }
     }
 
-    async sendVerificationEmail(publicAddress: string): Promise<void> {
+    async sendVerificationEmail(publicAddress: string): Promise<boolean> {
       const user: UserEmail = await userEmailDbService.selectOneRowByPrimaryId(publicAddress);
 
       const jwtToken = jwt.sign({ publicAddress }, jwtKey, {
         algorithm: "HS256",
         expiresIn: "1h",
       });
-      await this.sendEmail(
+      return await this.sendEmail(
         user.email,
         'verifiablereferenceletter@gmail.com',
         'Please verify your email',
@@ -104,19 +104,21 @@ export class EmailsModule {
       fromEmail: string, 
       subject: string, 
       html: string
-      ): Promise<void> {
+      ): Promise<boolean> {
         const msg = {
         to: toEmail,
         from: fromEmail,
         subject: subject,
         html: html,
         };
-        
-        return SendGrid.send(msg).then(() => {
+
+        return await SendGrid.send(msg).then(() => {
             console.log('Email sent')
+            return true;
           })
           .catch((error) => {
             console.error(error)
+            return false;
           });
     }
 }
