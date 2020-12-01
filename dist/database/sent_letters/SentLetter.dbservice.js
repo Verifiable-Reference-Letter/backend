@@ -15,11 +15,14 @@ const sentLetterTableName = "sent_letters";
 class SentLetterDbService extends dbservice_1.DatabaseService {
     constructor() {
         super();
-        this.selectAllSentLettersByLetterIdQuery = {
-            text: 'SELECT * from ' + sentLetterTableName + ' WHERE letter_id = $1'
-        };
         this.selectAllSentLettersByRecipientQuery = {
-            text: 'SELECT * from ' + sentLetterTableName + ' WHERE public_address = $1'
+            text: 'SELECT * from ' + sentLetterTableName + ' WHERE letter_recipient = $1;'
+        };
+        this.selectAllSentLettersByLetterIdQuery = {
+            text: 'SELECT * from ' + sentLetterTableName + ' WHERE letter_id = $1;'
+        };
+        this.selectAllSentLettersByLetterIdAndRecipientQuery = {
+            text: 'SELECT * from ' + sentLetterTableName + ' WHERE letter_id = $1 and letter_recipient = $2;'
         };
         this.initializePreparedQueries();
     }
@@ -35,12 +38,12 @@ class SentLetterDbService extends dbservice_1.DatabaseService {
      * select all sent letter rows by recipient's address
      * @param id
      */
-    selectAllSentLettersByRecipientAddress(id) {
+    selectAllSentLettersByRecipientAddress(publicAddress) {
         const _super = Object.create(null, {
             runParameterizedQueryWithValuesArray: { get: () => super.runParameterizedQueryWithValuesArray }
         });
         return __awaiter(this, void 0, void 0, function* () {
-            const values = [id];
+            const values = [publicAddress];
             return _super.runParameterizedQueryWithValuesArray.call(this, this.selectAllSentLettersByRecipientQuery, values);
         });
     }
@@ -48,13 +51,26 @@ class SentLetterDbService extends dbservice_1.DatabaseService {
      * select all sent letter rows by letter id
      * @param id
      */
-    selectAllSentLettersByLetterId(id) {
+    selectAllSentLettersByLetterId(letterId) {
         const _super = Object.create(null, {
             runParameterizedQueryWithValuesArray: { get: () => super.runParameterizedQueryWithValuesArray }
         });
         return __awaiter(this, void 0, void 0, function* () {
-            const values = [id];
+            const values = [letterId];
             return _super.runParameterizedQueryWithValuesArray.call(this, this.selectAllSentLettersByLetterIdQuery, values);
+        });
+    }
+    /**
+     * select all sent letter rows by letter id
+     * @param id
+     */
+    selectAllSentLettersByLetterIdAndRecipient(letterId, publicAddress) {
+        const _super = Object.create(null, {
+            runParameterizedQueryWithValuesArray: { get: () => super.runParameterizedQueryWithValuesArray }
+        });
+        return __awaiter(this, void 0, void 0, function* () {
+            const values = [letterId, publicAddress];
+            return _super.runParameterizedQueryWithValuesArray.call(this, this.selectAllSentLettersByLetterIdAndRecipientQuery, values);
         });
     }
     dbRowToDbModel(dbRow) {

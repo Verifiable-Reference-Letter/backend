@@ -10,6 +10,15 @@ export class LetterDbService extends DatabaseService<Letter> {
     super();
   }
 
+  async selectLetterById(
+    letterId: string
+  ): Promise<Letter | null> {
+    const queryText = this.selectLetterByIdQuery
+    const values = [letterId];
+    const letters: Letter[] = await super.runParameterizedQueryWithValuesArray(queryText, values);
+    return letters[0];
+  }
+
   /**
    * select all letters for either requestor or writer by public address
    * @param publicAddress 
@@ -134,6 +143,13 @@ export class LetterDbService extends DatabaseService<Letter> {
       letterTableName +
       "(letter_id, letter_requestor, letter_writer, requested_at, uploaded_at) values($1, $2, $3, $4, $5);",
   };
+
+  private selectLetterByIdQuery = {
+    text:
+    "select letter_id, letter_requestor, U.name as letter_requestor_name, letter_writer, name as letter_writer_name, L.requested_at, L.uploaded_at from " +
+    letterTableName +
+    " where letter_id = $1;"
+  }
 
   protected dbRowToDbModel(dbRow: any): Letter {
     return Letter.dbRowToDbModel(dbRow);

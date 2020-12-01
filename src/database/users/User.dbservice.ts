@@ -73,6 +73,13 @@ export class UserDbService extends DatabaseService<User> {
     const values = [letterId];
     return super.runParameterizedQueryWithValuesArray(queryText, values);
   }
+  
+  async selectUserEmail(publicAddress: string): Promise<string> {
+    const queryText = this.selectUserEmailQuery;
+    const values = [publicAddress];
+    const email = this.dbResultToEmail(super.runParameterizedQueryReturningSingleRow(queryText, values));
+    return email;
+  }
 
   /**
    * sent recipients
@@ -133,6 +140,17 @@ export class UserDbService extends DatabaseService<User> {
       userTableName +
       " as W on S.letter_recipient = W.public_address where L.letter_id = $1 and S.sent_at is NULL order by W.public_address ASC;",
   };
+
+  private selectUserEmailQuery = {
+    text:
+      "select email from " +
+      userTableName +
+      "where public_address = $1"
+  };
+
+  protected dbResultToEmail(dbRow: any): string {
+    return dbRow.email;
+  }
 
   private selectAllSentRecipientsByLetterIdQuery = {
     text:

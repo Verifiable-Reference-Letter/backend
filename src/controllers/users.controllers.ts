@@ -82,12 +82,4 @@ router.post("/:publicAddress/profile", async (req, res, next) => {
   }
 });
 
-/**
- * send email to publicAddress (req.param) from req.body.auth.publicAddress
- * TODO: Not Yet Implemented
- */
-router.post("/:publicAddress/sendEmail", async (req, res, next) => {
-  console.log("send email to publicAddress");
-});
-
 export { router };
