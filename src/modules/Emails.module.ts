@@ -26,9 +26,10 @@ export class EmailsModule {
       console.log(writer);
       if (requestor != null && writer != null) {
         console.log("about to send writer email");
-        let message = `${requestor.name} has requested a letter from you.\n`;
+        let message: string = `${requestor.name} has requested a letter from you.\n`;
+        let finalMessage: string;
         if (customMessage) {
-          message.concat(customMessage);
+          finalMessage = message.concat(customMessage);
         }
         console.log(message);
         await this.sendEmail(
@@ -48,16 +49,17 @@ export class EmailsModule {
       const requestor: UserEmail = await userEmailDbService.getUserEmail(requestorAddress);
       const writer: UserEmail = await userEmailDbService.getUserEmail(writerAddress);
       if (requestor != null && writer != null) {
-        let message = `${writer.name} has uploaded an updated letter for you. You can still select recipients for secure sending on https://verifiable-reference-letter.herokuapp.com/ now!\n`
+        let message: string = `${writer.name} has uploaded an updated letter for you. You can still select recipients for secure sending on https://verifiable-reference-letter.herokuapp.com/ now!\n`
+        let finalMessage: string;
         if (customMessage) {
-          message = message.concat(customMessage);
+          finalMessage = message.concat(customMessage);
         }
         console.log(message);
         await this.sendEmail(
           requestor.email,
           'verifiablereferenceletter@gmail.com',
           'Your requested letter has been uploaded',
-          message
+          finalMessage
         );
       }
     }
