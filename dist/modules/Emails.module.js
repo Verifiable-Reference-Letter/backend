@@ -36,7 +36,11 @@ class EmailsModule {
             console.log(writer);
             if (requestor != null && writer != null) {
                 console.log("about to send writer email");
-                const message = customMessage != null ? customMessage : `${requestor.name} has requested a letter from you.`;
+                let message = `${requestor.name} has requested a letter from you.\n`;
+                if (customMessage) {
+                    message.concat(customMessage);
+                }
+                console.log(message);
                 yield this.sendEmail(writer.email, 'verifiablereferenceletter@gmail.com', 'Letter Request', message);
             }
         });
@@ -46,7 +50,11 @@ class EmailsModule {
             const requestor = yield userEmailDbService.getUserEmail(requestorAddress);
             const writer = yield userEmailDbService.getUserEmail(writerAddress);
             if (requestor != null && writer != null) {
-                const message = customMessage != null ? customMessage : `${writer.name} has uploaded an updated letter for you. You can still select recipients for secure sending on https://verifiable-reference-letter.herokuapp.com/ now!`;
+                let message = `${writer.name} has uploaded an updated letter for you. You can still select recipients for secure sending on https://verifiable-reference-letter.herokuapp.com/ now!\n`;
+                if (customMessage) {
+                    message = message.concat(customMessage);
+                }
+                console.log(message);
                 yield this.sendEmail(requestor.email, 'verifiablereferenceletter@gmail.com', 'Your requested letter has been uploaded', message);
             }
         });
