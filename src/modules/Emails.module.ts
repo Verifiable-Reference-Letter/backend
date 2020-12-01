@@ -36,7 +36,7 @@ export class EmailsModule {
           writer.email,
           'verifiablereferenceletter@gmail.com',
           'Letter Request',
-          message,
+          finalMessage,
         );
       }
     }
