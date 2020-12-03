@@ -1,26 +1,31 @@
 {
   "files": {
-    "main.css": "/static/css/main.5bc77b8b.chunk.css",
-    "main.js": "/static/js/main.c657c4d9.chunk.js",
-    "main.js.map": "/static/js/main.c657c4d9.chunk.js.map",
+    "main.css": "/static/css/main.648e8738.chunk.css",
+    "main.js": "/static/js/main.7c707d27.chunk.js",
+    "main.js.map": "/static/js/main.7c707d27.chunk.js.map",
     "runtime-main.js": "/static/js/runtime-main.3f5e60e9.js",
     "runtime-main.js.map": "/static/js/runtime-main.3f5e60e9.js.map",
     "static/css/2.47e06e2e.chunk.css": "/static/css/2.47e06e2e.chunk.css",
-    "static/js/2.c4e4b0d0.chunk.js": "/static/js/2.c4e4b0d0.chunk.js",
-    "static/js/2.c4e4b0d0.chunk.js.map": "/static/js/2.c4e4b0d0.chunk.js.map",
+    "static/js/2.3237ef9a.chunk.js": "/static/js/2.3237ef9a.chunk.js",
+    "static/js/2.3237ef9a.chunk.js.map": "/static/js/2.3237ef9a.chunk.js.map",
     "index.html": "/index.html",
-    "precache-manifest.8db361f03480d11da4fa85327e5028bf.js": "/precache-manifest.8db361f03480d11da4fa85327e5028bf.js",
+    "precache-manifest.0e553eb0453724988ab49cef24e611d6.js": "/precache-manifest.0e553eb0453724988ab49cef24e611d6.js",
     "service-worker.js": "/service-worker.js",
     "static/css/2.47e06e2e.chunk.css.map": "/static/css/2.47e06e2e.chunk.css.map",
-    "static/css/main.5bc77b8b.chunk.css.map": "/static/css/main.5bc77b8b.chunk.css.map",
-    "static/js/2.c4e4b0d0.chunk.js.LICENSE.txt": "/static/js/2.c4e4b0d0.chunk.js.LICENSE.txt",
-    "static/media/app.scss": "/static/media/socicon.fcfa47b3.eot"
+    "static/css/main.648e8738.chunk.css.map": "/static/css/main.648e8738.chunk.css.map",
+    "static/js/2.3237ef9a.chunk.js.LICENSE.txt": "/static/js/2.3237ef9a.chunk.js.LICENSE.txt",
+    "static/media/app.scss": "/static/media/socicon.fcfa47b3.eot",
+    "static/media/loginTutorial.mp4": "/static/media/loginTutorial.e2545632.mp4",
+    "static/media/metamask.png": "/static/media/metamask.e9ada72b.png",
+    "static/media/recipientTutorial.mp4": "/static/media/recipientTutorial.e61c8b0f.mp4",
+    "static/media/requestorTutorial.mp4": "/static/media/requestorTutorial.8a62d19c.mp4",
+    "static/media/writerTutorial.mp4": "/static/media/writerTutorial.22f3b1d4.mp4"
   },
   "entrypoints": [
     "static/js/runtime-main.3f5e60e9.js",
     "static/css/2.47e06e2e.chunk.css",
-    "static/js/2.c4e4b0d0.chunk.js",
-    "static/css/main.5bc77b8b.chunk.css",
-    "static/js/main.c657c4d9.chunk.js"
+    "static/js/2.3237ef9a.chunk.js",
+    "static/css/main.648e8738.chunk.css",
+    "static/js/main.7c707d27.chunk.js"
   ]
 }
