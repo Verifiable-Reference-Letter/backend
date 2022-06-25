@@ -25,7 +25,7 @@
     "express": "~4.16.1",
     "http-errors": "^1.6.3",
     "jsonwebtoken": "^8.5.1",
-    "jsrsasign": "^9.1.9",
+    "jsrsasign": "^10.5.25",
     "morgan": "~1.9.1",
     "pg": "^8.0.3",
     "sendgrid": "^5.2.3",
